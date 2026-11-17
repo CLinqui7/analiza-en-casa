@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { buildShiftSeries, endForPreset, type ShiftPreset } from '@/lib/agenda-series';
+import { careSettingLabels, type CareSetting } from '@/lib/care-settings';
 
 function durationLabel(startDate: string, endDate?: string) {
   if (!endDate) return 'En curso';
@@ -94,6 +95,7 @@ export default function ClinicalHospitalizationsPage() {
   } = useWorkspace();
   const { can } = useAuth();
   const [query, setQuery] = useState('');
+  const [careSetting, setCareSetting] = useState<CareSetting | ''>('');
   const [columnFilters, setColumnFilters] =
     useState<Record<ClinicalColumn, string>>(emptyColumnFilters);
   const [careCaseId, setCareCaseId] = useState<string | null>(null);
@@ -233,6 +235,7 @@ export default function ClinicalHospitalizationsPage() {
 
   const entries = hospitalizations.filter(
     (hospitalization) =>
+      (!careSetting || (hospitalization.careSetting ?? 'HOSPITALIZATION') === careSetting) &&
       (!query.trim() ||
         patientIds.has(hospitalization.patientId) ||
         hospitalization.id
@@ -245,7 +248,8 @@ export default function ClinicalHospitalizationsPage() {
   const activeCount = hospitalizations.filter((item) => !item.endDate).length;
   const completedCount = hospitalizations.length - activeCount;
   const filtersActive =
-    Boolean(query.trim()) || Object.values(columnFilters).some((value) => Boolean(value.trim()));
+    Boolean(careSetting || query.trim()) ||
+    Object.values(columnFilters).some((value) => Boolean(value.trim()));
 
   return (
     <div className="page-stack clinical-hospitalizations-page">
@@ -281,6 +285,21 @@ export default function ClinicalHospitalizationsPage() {
 
       <Panel className="clinical-search-panel">
         <div className="clinical-search-row">
+          <label>
+            Tipo de ingreso
+            <select
+              data-action-id="CLINICAL-CARE-SETTING-FILTER"
+              value={careSetting}
+              onChange={(event) => setCareSetting(event.target.value as CareSetting | '')}
+            >
+              <option value="">Todos</option>
+              {Object.entries(careSettingLabels).map(([value, label]) => (
+                <option value={value} key={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="clinical-primary-search" htmlFor="clinical-case-search">
             <span aria-hidden="true">⌕</span>
             <span className="sr-only">Buscar hospitalización o paciente</span>
@@ -298,6 +317,7 @@ export default function ClinicalHospitalizationsPage() {
               className="button-secondary clinical-clear-filters"
               onClick={() => {
                 setQuery('');
+                setCareSetting('');
                 setColumnFilters(emptyColumnFilters);
               }}
               type="button"
@@ -419,6 +439,9 @@ export default function ClinicalHospitalizationsPage() {
                       <td>{patient?.documentId ?? 'No documentado'}</td>
                       <td>
                         <code className="clinical-case-code">{hospitalization.id}</code>
+                        <small className="care-setting-label">
+                          {careSettingLabels[hospitalization.careSetting ?? 'HOSPITALIZATION']}
+                        </small>
                       </td>
                       <td>
                         <StatusTag tone={patient?.triageStatus ? 'warning' : 'neutral'}>

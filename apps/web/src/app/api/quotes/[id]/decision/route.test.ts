@@ -60,58 +60,71 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('quote approval boundary', () => {
-  it('approves a hospitalized quote once, locks its version, and creates one audited admission', async () => {
-    const queries: Array<{ sql: string; params?: unknown[] }> = [];
-    const query = vi.fn(async (sql: string, params?: unknown[]) => {
-      queries.push({ sql, params });
-      if (sql.includes('SELECT body,record_version,root_quote_id'))
-        return rows([{ body: quote, record_version: 1, root_quote_id: quote.id }]);
-      if (sql.includes('SELECT id FROM analiza.quotes')) return rows([{ id: quote.id }]);
-      if (sql.includes('SELECT 1 FROM analiza.doctors')) return rows([{ '?column?': 1 }]);
-      if (sql.includes('SELECT id FROM analiza.hospitalizations')) return rows([]);
-      if (sql.includes('INSERT INTO analiza.quote_decisions'))
-        return rows([
-          {
-            id: decisionId,
-            quote_id: quote.id,
-            decision: 'APPROVED',
-            reason: null,
-            created_at: new Date('2026-10-29T10:00:00.000Z'),
-          },
-        ]);
-      if (sql.includes('SELECT') && sql.includes('quote_decisions')) return rows([]);
-      if (sql.includes('UPDATE analiza.quotes')) return { rows: [], rowCount: 1 };
-      return rows([]);
-    });
-    vi.mocked(transaction).mockImplementation(async (_pool, _actor, operation) =>
-      operation({ query } as never),
-    );
-    const response = await POST(
-      request({ id: decisionId, decision: 'APPROVED', reason: null }),
-      context,
-    );
-    expect(response.status).toBe(201);
-    expect(queries.some(({ sql }) => sql.includes('INSERT INTO analiza.hospitalizations'))).toBe(
-      true,
-    );
-    expect(
-      queries.some(
-        ({ sql, params }) =>
-          sql.includes('UPDATE analiza.quotes') && String(params?.[3]).includes('"immutable":true'),
-      ),
-    ).toBe(true);
-    expect(
-      queries.filter(({ sql }) => sql.includes('INSERT INTO analiza.audit_events')).length,
-    ).toBe(3);
-    expect(queries.every(({ params }) => !params || params[0] === actor.organizationId)).toBe(true);
-  });
+  it.each(['HOSPITALIZATION', 'HOME_OUTPATIENT', 'CLINIC_OUTPATIENT'])(
+    'approves %s, locks its version, and creates one audited admission',
+    async (careSetting) => {
+      const queries: Array<{ sql: string; params?: unknown[] }> = [];
+      const query = vi.fn(async (sql: string, params?: unknown[]) => {
+        queries.push({ sql, params });
+        if (sql.includes('SELECT body,record_version,root_quote_id'))
+          return rows([
+            { body: { ...quote, careSetting }, record_version: 1, root_quote_id: quote.id },
+          ]);
+        if (sql.includes('SELECT id FROM analiza.quotes')) return rows([{ id: quote.id }]);
+        if (sql.includes('SELECT 1 FROM analiza.doctors')) return rows([{ '?column?': 1 }]);
+        if (sql.includes('SELECT id FROM analiza.hospitalizations')) return rows([]);
+        if (sql.includes('INSERT INTO analiza.quote_decisions'))
+          return rows([
+            {
+              id: decisionId,
+              quote_id: quote.id,
+              decision: 'APPROVED',
+              reason: null,
+              created_at: new Date('2026-10-29T10:00:00.000Z'),
+            },
+          ]);
+        if (sql.includes('SELECT') && sql.includes('quote_decisions')) return rows([]);
+        if (sql.includes('UPDATE analiza.quotes')) return { rows: [], rowCount: 1 };
+        return rows([]);
+      });
+      vi.mocked(transaction).mockImplementation(async (_pool, _actor, operation) =>
+        operation({ query } as never),
+      );
+      const response = await POST(
+        request({ id: decisionId, decision: 'APPROVED', reason: null }),
+        context,
+      );
+      expect(response.status).toBe(201);
+      expect(queries.some(({ sql }) => sql.includes('INSERT INTO analiza.hospitalizations'))).toBe(
+        true,
+      );
+      expect(
+        queries.some(
+          ({ sql, params }) =>
+            sql.includes('UPDATE analiza.quotes') &&
+            String(params?.[3]).includes('"immutable":true'),
+        ),
+      ).toBe(true);
+      expect(
+        queries.filter(({ sql }) => sql.includes('INSERT INTO analiza.audit_events')).length,
+      ).toBe(3);
+      expect(queries.every(({ params }) => !params || params[0] === actor.organizationId)).toBe(
+        true,
+      );
+      const admission = queries.find(({ sql }) =>
+        sql.includes('INSERT INTO analiza.hospitalizations'),
+      );
+      expect(JSON.parse(String(admission?.params?.[2])).careSetting).toBe(careSetting);
+    },
+  );
 
-  it('does not create an admission for outpatient approval and rejects missing hospital doctor', async () => {
+  it('creates an outpatient admission and rejects a missing principal doctor', async () => {
     const outpatient = { ...quote, careSetting: 'HOME_OUTPATIENT' };
     const query = vi.fn(async (sql: string) => {
       if (sql.includes('SELECT body,record_version,root_quote_id'))
         return rows([{ body: outpatient, record_version: 1, root_quote_id: quote.id }]);
       if (sql.includes('SELECT id FROM analiza.quotes')) return rows([{ id: quote.id }]);
+      if (sql.includes('SELECT 1 FROM analiza.doctors')) return rows([{ '?column?': 1 }]);
       if (sql.includes('INSERT INTO analiza.quote_decisions'))
         return rows([
           {
@@ -133,7 +146,7 @@ describe('quote approval boundary', () => {
     );
     expect(
       query.mock.calls.some(([sql]) => sql.includes('INSERT INTO analiza.hospitalizations')),
-    ).toBe(false);
+    ).toBe(true);
     query.mockClear();
     query.mockImplementation(async (sql: string) => {
       if (sql.includes('SELECT body,record_version,root_quote_id'))
@@ -156,6 +169,7 @@ describe('quote approval boundary', () => {
     const queries: Array<{ sql: string; params?: unknown[] }> = [];
     const query = vi.fn(async (sql: string, params?: unknown[]) => {
       queries.push({ sql, params });
+      if (sql.includes('SELECT id FROM analiza.quotes')) return rows([{ id: quote.id }]);
       if (sql.includes('SELECT body,record_version,root_quote_id'))
         return rows([{ body: quote, record_version: 1, root_quote_id: quote.id }]);
       if (sql.includes('SELECT') && sql.includes('quote_decisions')) return rows([]);

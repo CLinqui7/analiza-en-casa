@@ -14,6 +14,8 @@ export const fileMetadataSchema = z.object({
     .regex(/^[a-z0-9][a-z0-9!#$&^_.+-]*\/[a-z0-9][a-z0-9!#$&^_.+-]*$/i),
   size: z.number().int().nonnegative().max(MAX_PRIVATE_FILE_BYTES),
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
+  dependentId: z.uuid().optional(),
+  documentKind: z.enum(['BIRTH_CERTIFICATE', 'CONSENT']).optional(),
 });
 
 export type FileOwnerType = z.infer<typeof ownerTypeSchema>;
@@ -24,6 +26,8 @@ export type PrivateFileUpload = Readonly<{
   name: string;
   mimeType: string;
   bytes: Uint8Array;
+  dependentId?: string;
+  documentKind?: 'BIRTH_CERTIFICATE' | 'CONSENT';
 }>;
 /** The implementation is private object storage; no browser-visible URL or base64 representation. */
 export interface PrivateFileStorage {
@@ -42,7 +46,14 @@ export function parseUpload(input: PrivateFileUpload): PrivateFileUpload {
         .trim()
         .regex(/^[a-z0-9][a-z0-9!#$&^_.+-]*\/[a-z0-9][a-z0-9!#$&^_.+-]*$/i),
       bytes: z.instanceof(Uint8Array).refine((bytes) => bytes.byteLength <= MAX_PRIVATE_FILE_BYTES),
+      dependentId: z.uuid().optional(),
+      documentKind: z.enum(['BIRTH_CERTIFICATE', 'CONSENT']).optional(),
     })
+    .refine(
+      (value) =>
+        Boolean(value.dependentId) === Boolean(value.documentKind) &&
+        (!value.dependentId || value.ownerType === 'patient'),
+    )
     .safeParse(input);
   if (!parsed.success) throw new MongoInputError('El archivo privado no es válido.');
   return parsed.data;

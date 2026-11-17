@@ -8,6 +8,7 @@ import type { ServerActor } from '../validation/patients';
 import type { Persistence } from './contracts';
 import { transaction } from './postgres-pool';
 import { audit } from './postgres';
+import { lockQuoteRoot, requireOpenQuote, preserveDeliveredLines } from './quote-workflow';
 import {
   quoteCatalogPriceError,
   quoteDoctorIds,
@@ -51,6 +52,98 @@ async function requireCatalogPrices(
 }
 
 export function postgresQuotes(pool: Pool): Persistence['quotes'] {
+  async function create(actor: ServerActor, input: unknown, sourceId?: string): Promise<Quote> {
+    authorize(actor, 'quotes:write');
+    const quote = parseQuoteCreate(input);
+    try {
+      return await transaction(pool, actor, async (client) => {
+        const patient = await client.query(
+          'SELECT id FROM analiza.patients WHERE organization_id=$1 AND id=$2',
+          [actor.organizationId, quote.patientId],
+        );
+        if (!patient.rowCount) throw new MongoInputError('El paciente no está disponible.');
+        if (quote.caseId) {
+          const hospitalization = await client.query(
+            'SELECT id FROM analiza.hospitalizations WHERE organization_id=$1 AND id=$2 AND patient_id=$3',
+            [actor.organizationId, quote.caseId, quote.patientId],
+          );
+          if (!hospitalization.rowCount)
+            throw new MongoInputError('La hospitalización no está disponible.');
+        }
+
+        const rootId = quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
+        let previousQuote: Quote | null = null;
+        if (quote.version === 1) {
+          if (sourceId)
+            throw new MongoInputError('La edición debe continuar la cotización enviada.');
+          if (rootId !== quote.id)
+            throw new MongoInputError('La primera versión debe ser su raíz.');
+        } else {
+          await lockQuoteRoot(client, actor, rootId);
+          await requireOpenQuote(client, actor, rootId);
+          const previous = (
+            await client.query(
+              'SELECT body FROM analiza.quotes WHERE organization_id=$1 AND root_quote_id=$2 ORDER BY quote_version DESC LIMIT 1 FOR UPDATE',
+              [actor.organizationId, rootId],
+            )
+          ).rows[0];
+          previousQuote = previous ? quoteSchema.parse(previous.body) : null;
+          if (
+            !previousQuote ||
+            !previousQuote.immutable ||
+            (Boolean(sourceId) && previousQuote.id !== sourceId) ||
+            quote.version !== previousQuote.version + 1 ||
+            !quote.revisionReason?.trim()
+          )
+            throw new MongoInputError('La revisión no continúa una versión enviada válida.');
+          if (previousQuote.patientId !== quote.patientId || previousQuote.caseId !== quote.caseId)
+            throw new MongoInputError(
+              'Una revisión debe conservar el paciente y la hospitalización de la versión enviada.',
+            );
+        }
+
+        await requireCatalogPrices(client, actor, quote, previousQuote);
+        if (previousQuote) await preserveDeliveredLines(client, actor, quote, previousQuote);
+
+        const stored: Quote = {
+          ...quote,
+          rootQuoteId: rootId,
+          originalQuoteId: rootId,
+          ...(sourceId
+            ? { status: 'SENT' as const, immutable: true, sentAt: new Date().toISOString() }
+            : {}),
+        };
+        await client.query(
+          'INSERT INTO analiza.quotes(organization_id,id,case_id,patient_id,root_quote_id,quote_version,body) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb)',
+          [
+            actor.organizationId,
+            stored.id,
+            stored.caseId ?? null,
+            stored.patientId,
+            rootId,
+            stored.version,
+            JSON.stringify(stored),
+          ],
+        );
+        await audit(
+          client,
+          actor,
+          sourceId
+            ? 'QUOTE_EDITED_WITH_HISTORY'
+            : stored.version > 1
+              ? 'QUOTE_REVISION_CREATED'
+              : 'QUOTE_CREATED',
+          'quote',
+          stored.id,
+        );
+        return quoteSchema.parse(stored);
+      });
+    } catch (error) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
+        throw new MongoInputError('La cotización ya existe.');
+      throw error;
+    }
+  }
   return {
     async listWithVersions(actor) {
       authorize(actor, 'quotes:read');
@@ -80,94 +173,16 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
       });
     },
 
-    async create(actor, input) {
-      authorize(actor, 'quotes:write');
-      const quote = parseQuoteCreate(input);
-      try {
-        return await transaction(pool, actor, async (client) => {
-          const patient = await client.query(
-            'SELECT id FROM analiza.patients WHERE organization_id=$1 AND id=$2',
-            [actor.organizationId, quote.patientId],
-          );
-          if (!patient.rowCount) throw new MongoInputError('El paciente no está disponible.');
-          if (quote.caseId) {
-            const hospitalization = await client.query(
-              'SELECT id FROM analiza.hospitalizations WHERE organization_id=$1 AND id=$2 AND patient_id=$3',
-              [actor.organizationId, quote.caseId, quote.patientId],
-            );
-            if (!hospitalization.rowCount)
-              throw new MongoInputError('La hospitalización no está disponible.');
-          }
-
-          const rootId = quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
-          let previousQuote: Quote | null = null;
-          if (quote.version === 1) {
-            if (rootId !== quote.id)
-              throw new MongoInputError('La primera versión debe ser su raíz.');
-          } else {
-            const previous = (
-              await client.query(
-                'SELECT body FROM analiza.quotes WHERE organization_id=$1 AND root_quote_id=$2 ORDER BY quote_version DESC LIMIT 1 FOR UPDATE',
-                [actor.organizationId, rootId],
-              )
-            ).rows[0];
-            previousQuote = previous ? quoteSchema.parse(previous.body) : null;
-            if (
-              !previousQuote ||
-              !previousQuote.immutable ||
-              quote.version !== previousQuote.version + 1 ||
-              !quote.revisionReason?.trim()
-            )
-              throw new MongoInputError('La revisión no continúa una versión enviada válida.');
-            if (
-              previousQuote.patientId !== quote.patientId ||
-              previousQuote.caseId !== quote.caseId
-            )
-              throw new MongoInputError(
-                'Una revisión debe conservar el paciente y la hospitalización de la versión enviada.',
-              );
-          }
-
-          await requireCatalogPrices(client, actor, quote, previousQuote);
-
-          const stored: Quote = {
-            ...quote,
-            rootQuoteId: rootId,
-            originalQuoteId: rootId,
-          };
-          await client.query(
-            'INSERT INTO analiza.quotes(organization_id,id,case_id,patient_id,root_quote_id,quote_version,body) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb)',
-            [
-              actor.organizationId,
-              stored.id,
-              stored.caseId ?? null,
-              stored.patientId,
-              rootId,
-              stored.version,
-              JSON.stringify(stored),
-            ],
-          );
-          await audit(
-            client,
-            actor,
-            stored.version > 1 ? 'QUOTE_REVISION_CREATED' : 'QUOTE_CREATED',
-            'quote',
-            stored.id,
-          );
-          return quoteSchema.parse(stored);
-        });
-      } catch (error) {
-        if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
-          throw new MongoInputError('La cotización ya existe.');
-        throw error;
-      }
-    },
+    create: (actor, input) => create(actor, input),
+    reviseSent: (actor, id, input) => create(actor, input, id),
 
     async replace(actor, id, input) {
       authorize(actor, 'quotes:write');
       const { quote, expectedVersion } = parseQuoteReplace(input);
       if (quote.id !== id) throw new MongoInputError('El identificador de ruta no coincide.');
       return transaction(pool, actor, async (client) => {
+        const root = await lockQuoteRoot(client, actor, id);
+        if (root) await requireOpenQuote(client, actor, root);
         const current = (
           await client.query(
             'SELECT body FROM analiza.quotes WHERE organization_id=$1 AND id=$2 AND record_version=$3 FOR UPDATE',
@@ -181,6 +196,7 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
             'Conserve el paciente, la hospitalización, la versión y el origen del borrador. Cree una revisión para cambiar de versión.',
           );
         await requireCatalogPrices(client, actor, quote, currentQuote);
+        await preserveDeliveredLines(client, actor, quote, currentQuote);
         const updated = await client.query(
           "UPDATE analiza.quotes SET body=$4::jsonb,record_version=record_version+1,updated_at=now() WHERE organization_id=$1 AND id=$2 AND record_version=$3 AND body->>'status'='DRAFT' AND (body->>'immutable')::boolean=false RETURNING body",
           [actor.organizationId, id, expectedVersion, JSON.stringify(quote)],
@@ -195,6 +211,8 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
       authorize(actor, 'quotes:write');
       if (!Number.isInteger(expectedVersion) || expectedVersion < 1) throw new MongoInputError();
       return transaction(pool, actor, async (client) => {
+        const root = await lockQuoteRoot(client, actor, id);
+        if (root) await requireOpenQuote(client, actor, root);
         const current = (
           await client.query(
             'SELECT body FROM analiza.quotes WHERE organization_id=$1 AND id=$2 AND record_version=$3 FOR UPDATE',

@@ -52,6 +52,11 @@ function bodyObject(value: unknown): Record<string, unknown> {
 function parseQuote(value: unknown): Quote {
   try {
     const quote = quoteSchema.strict().parse(value);
+    if (
+      quote.items.some((item) => !item.id.trim()) ||
+      new Set(quote.items.map((item) => item.id)).size !== quote.items.length
+    )
+      throw new MongoInputError('Cada línea debe tener un identificador distinto.');
     const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
     return { ...quote, ...totals };
   } catch {

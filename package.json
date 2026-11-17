@@ -24,6 +24,7 @@
     "doctors:directory": "tsx --tsconfig apps/web/tsconfig.json scripts/import-doctor-directory.ts",
     "test:clinical:postgres": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-clinical-postgres.ts",
     "test:billing:postgres": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-billing-postgres.ts",
+    "test:nov17:postgres": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-nov17-postgres.ts",
     "test:billing:browser": "playwright test -c apps/web/playwright.billing.config.ts",
     "test:clinical:browser": "playwright test -c apps/web/playwright.clinical.config.ts",
     "test:core:mongo": "tsx --tsconfig apps/web/tsconfig.json apps/web/src/server/core-live-verification.ts",

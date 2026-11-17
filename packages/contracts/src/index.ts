@@ -37,6 +37,15 @@ export const patientAddressSchema = z.object({
   locationUrl: z.string().trim().optional(),
 });
 
+export const patientDependentSchema = z.object({
+  id: z.uuid(),
+  firstNames: z.string().trim().min(1).max(160),
+  lastNames: z.string().trim().min(1).max(160),
+  gender: z.enum(['M', 'F']),
+  birthDate: z.iso.date(),
+});
+export type PatientDependent = z.infer<typeof patientDependentSchema>;
+
 export const patientSchema = z.object({
   id: z.string(),
   fullName: z.string().trim().min(1),
@@ -46,6 +55,14 @@ export const patientSchema = z.object({
   insurer: z.string().trim().optional(),
   birthDate: z.string().optional(),
   sex: z.enum(['M', 'F']).optional(),
+  dependents: z
+    .array(patientDependentSchema)
+    .max(50)
+    .refine(
+      (items) => new Set(items.map((item) => item.id)).size === items.length,
+      'Cada dependiente debe tener un identificador distinto.',
+    )
+    .optional(),
   company: z.string().trim().optional(),
   /** Historical patients can lack this value; new registrations require an explicit choice. */
   referralOrigin: patientReferralOriginSchema.optional(),
@@ -224,6 +241,7 @@ export const shiftSchema = z.object({
 });
 
 export const hospitalizationSchema = z.object({
+  careSetting: z.enum(['HOSPITALIZATION', 'HOME_OUTPATIENT', 'CLINIC_OUTPATIENT']).optional(),
   id: z.string(),
   patientId: z.string(),
   startDate: z.string(),

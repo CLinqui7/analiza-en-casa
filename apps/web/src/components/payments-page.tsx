@@ -60,7 +60,9 @@ export function PaymentsPage() {
     label:
       (patients.find((patient) => patient.id === account.quote.patientId)?.fullName ?? 'Paciente') +
       ' · ' +
-      quoteDisplayCode(account.quote.id) +
+      quoteDisplayCode(
+        account.quote.rootQuoteId ?? account.quote.originalQuoteId ?? account.quote.id,
+      ) +
       ' · saldo ' +
       money(account.balance),
   }));
@@ -293,7 +295,12 @@ export function PaymentsPage() {
                 {statementAccounts.map((account) => (
                   <tr key={account.quote.id}>
                     <td>
-                      {quoteDisplayCode(account.quote.id)} · v{account.quote.version}
+                      {quoteDisplayCode(
+                        account.quote.rootQuoteId ??
+                          account.quote.originalQuoteId ??
+                          account.quote.id,
+                      )}{' '}
+                      · v{account.quote.version}
                     </td>
                     <td>{money(account.responsibility)}</td>
                     <td>{money(account.paid)}</td>
@@ -351,7 +358,13 @@ export function PaymentsPage() {
                 {accounts.map((account) => (
                   <tr key={account.quote.id}>
                     <td>
-                      <strong title={account.quote.id}>{quoteDisplayCode(account.quote.id)}</strong>
+                      <strong title={account.quote.id}>
+                        {quoteDisplayCode(
+                          account.quote.rootQuoteId ??
+                            account.quote.originalQuoteId ??
+                            account.quote.id,
+                        )}
+                      </strong>
                       <small style={{ display: 'block' }}>v{account.quote.version}</small>
                     </td>
                     <td>
@@ -428,7 +441,12 @@ export function PaymentsPage() {
                 {insurerAccounts.map((account) => (
                   <tr key={account.quote.id}>
                     <td>
-                      {quoteDisplayCode(account.quote.id)} · v{account.quote.version}
+                      {quoteDisplayCode(
+                        account.quote.rootQuoteId ??
+                          account.quote.originalQuoteId ??
+                          account.quote.id,
+                      )}{' '}
+                      · v{account.quote.version}
                     </td>
                     <td>{account.quote.insurer || 'Sin registrar'}</td>
                     <td>{money(account.quote.deductibleAmount ?? 0)}</td>
@@ -476,7 +494,12 @@ export function PaymentsPage() {
                 {payments.map((payment) => (
                   <tr key={payment.id}>
                     <td>{new Date(payment.createdAt).toLocaleString('es-SV')}</td>
-                    <td title={payment.quoteId}>{quoteDisplayCode(payment.quoteId)}</td>
+                    <td title={payment.quoteId}>
+                      {quoteDisplayCode(
+                        quotes.find((quote) => quote.id === payment.quoteId)?.rootQuoteId ??
+                          payment.quoteId,
+                      )}
+                    </td>
                     <td>{money(payment.amount)}</td>
                     <td>
                       {payment.paymentMethod

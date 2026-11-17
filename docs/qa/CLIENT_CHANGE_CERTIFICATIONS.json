@@ -1,11 +1,34 @@
 {
+  "nov17_part1_regression": {
+    "source": "docs/qa/sources/CLIENT_PART1_CHANGES_2026-11-17.txt",
+    "report": "docs/qa/CLIENT_PART1_IMPLEMENTATION_2026-11-17.md",
+    "status": "IMPLEMENTED_PENDING_INTEGRATION_QA",
+    "verification_sha": null,
+    "test_ids": [
+      "vitest:nov17-workflows",
+      "postgres:nov17-workflows"
+    ],
+    "requirements": [
+      "NOV17-01",
+      "NOV17-02",
+      "NOV17-03",
+      "NOV17-04",
+      "NOV17-05",
+      "NOV17-06"
+    ],
+    "confirmations": [
+      "Approval creates admission in all three care settings",
+      "Delivery records nurse receipt without inventory movement"
+    ],
+    "historical_certifications": "Prior certificates preserved; this batch is not certified until its focused and regression gates pass."
+  },
   "schema_version": 1,
   "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
   "certifications": {
     "CR-001": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "6b538d4850882cfc32c054f81f4b6b83013cb820127bf3a87cc656a25095357e",
+      "functional_fingerprint": "1489b27aa24bc31a1573271166264c5f7202b4665bb418205e8760a97e6956b8",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -96,7 +119,7 @@
     "CR-011": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "2bba1cb0c2ae50dde16130adc3e04139373ead0273f9a830862c0034fa1519d3",
+      "functional_fingerprint": "218e631f8361528d480a20fff964fce249987205543e15b51d014171a397c85c",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -107,7 +130,7 @@
     "CR-012": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "2773edd7e93f872edfadc9d4f60bdd1cc8de63dcfdaa1c80f1f2aab54305c3ba",
+      "functional_fingerprint": "b235809db0591614898d57849b2a293b939cc8cb0a7730518409da0bf92adb35",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"

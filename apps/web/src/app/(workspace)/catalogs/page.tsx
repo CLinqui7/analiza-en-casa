@@ -17,7 +17,6 @@ const categories = [
   ['MEDICATIONS', 'Medicamentos', 'MED'],
   ['SUPPLIES', 'Insumos', 'INS'],
   ['EQUIPMENT', 'Equipos', 'EQU'],
-  ['PROVIDERS', 'Proveedores', 'PRO'],
   ['INSURERS', 'Aseguradoras', 'ASE'],
 ] as const;
 type Category = (typeof categories)[number][0];
@@ -32,7 +31,6 @@ const itemSchema = z.object({
     'MEDICATIONS',
     'SUPPLIES',
     'EQUIPMENT',
-    'PROVIDERS',
     'INSURERS',
   ]),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
@@ -108,6 +106,7 @@ export default function CatalogsPage() {
   }
   async function save(values: ItemForm) {
     const item: CatalogItem = {
+      ...editing,
       id: editing?.id ?? crypto.randomUUID(),
       sku: editing?.sku ?? nextSku(values.category),
       name: values.name.trim(),

@@ -1,0 +1,65 @@
+import { z } from 'zod';
+export const assignSupplySchema = z
+  .object({
+    idempotencyKey: z.uuid(),
+    requestId: z.string().min(1),
+    quoteId: z.string().min(1),
+    expectedRecordVersion: z.number().int().positive(),
+    expectedUnitPrice: z.number().finite().nonnegative(),
+  })
+  .strict();
+export const deliverOrderSchema = z
+  .object({
+    idempotencyKey: z.uuid(),
+    quoteId: z.string().min(1),
+    lineId: z.string().min(1),
+    nursingResourceId: z.string().min(1),
+    quantity: z.number().finite().positive(),
+  })
+  .strict();
+export type PrequoteEntry = {
+  id: string;
+  createdAt: string;
+  patientId: string;
+  patientName: string;
+  itemName: string;
+  quantity: number;
+  note: string;
+  priority: string;
+  requestedBy: string;
+  unitPrice: number | null;
+  assignedQuoteId: string | null;
+  rootQuoteId: string | null;
+};
+export type PrequoteChoice = {
+  id: string;
+  rootId: string;
+  patientId: string;
+  status: 'DRAFT' | 'SENT';
+  total: number;
+  recordVersion: number;
+};
+export type PrequoteInbox = {
+  entries: PrequoteEntry[];
+  quotes: PrequoteChoice[];
+  page: number;
+  total: number;
+};
+export type ReceivedOrderEntry = {
+  quoteId: string;
+  rootId: string;
+  createdAt: string;
+  patientName: string;
+  lineId: string;
+  itemName: string;
+  quantity: number;
+  delivered: number;
+  status: string;
+  deliveries: { id: string; nurseName: string; quantity: number; createdAt: string }[];
+};
+export type ReceivedOrderInbox = {
+  entries: ReceivedOrderEntry[];
+  nurses: { id: string; name: string }[];
+  page: number;
+  total: number;
+};

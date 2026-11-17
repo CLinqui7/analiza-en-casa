@@ -187,6 +187,7 @@ export function isAdministrator(role: Role | undefined): boolean {
 }
 
 const routePermissions: Array<{ prefix: string; permission: Permission }> = [
+  { prefix: '/clinical/prequotes', permission: 'quotes:write' },
   { prefix: '/catalogs/clinical', permission: 'clinical-config:write' },
   { prefix: '/catalogs/discounts', permission: 'clinical-config:write' },
   { prefix: '/analytics/logins', permission: 'login-analytics:read' },

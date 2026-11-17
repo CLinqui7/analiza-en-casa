@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
+import { PatientDependentsSummary } from '@/components/patients/patient-dependents-summary';
 
 type OriginReview = {
   classification: 'PENDING' | 'REAL' | 'TEST';
@@ -119,6 +120,10 @@ export default function PatientDetailPage() {
           </Link>
         ) : null}
       </header>
+      <PatientDependentsSummary
+        patient={patient}
+        serverMode={session?.mode === 'postgresql' || session?.mode === 'mongodb'}
+      />
       <section className="two-column">
         <Panel>
           <h2>Identificación</h2>

@@ -95,6 +95,7 @@ export interface Persistence {
   hospitalizations: EntityRepository<Hospitalization, 'hospitalization'>;
   quotes: EntityRepository<Quote, 'quote'> & {
     send(actor: ServerActor, id: string, expectedVersion: number): Promise<Quote>;
+    reviseSent?(actor: ServerActor, id: string, input: unknown): Promise<Quote>;
   };
   shifts: {
     list(actor: ServerActor): Promise<Shift[]>;

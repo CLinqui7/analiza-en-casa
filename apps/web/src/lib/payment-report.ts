@@ -56,7 +56,9 @@ export function paymentReportRows(
         patientName: quote
           ? (patientById.get(quote.patientId)?.fullName ?? 'Paciente no disponible')
           : 'Paciente no disponible',
-        quoteCode: quoteDisplayCode(payment.quoteId),
+        quoteCode: quoteDisplayCode(
+          quote?.rootQuoteId ?? quote?.originalQuoteId ?? payment.quoteId,
+        ),
       };
     })
     .filter((row) => {

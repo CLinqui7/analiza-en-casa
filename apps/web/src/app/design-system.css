@@ -1,5 +1,146 @@
 /* Analiza design system: shared tokens and final interaction polish.
    This layer intentionally preserves the existing page layouts and behavior. */
+.dependent-section,
+.dependent-card,
+.supplier-card,
+.fulfillment-summary {
+  min-width: 0;
+}
+.dependent-section {
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+}
+.dependent-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: clamp(16px, 2vw, 24px);
+  background: var(--surface-soft, #f8fafc);
+}
+.dependent-card h3,
+.supplier-card h2 {
+  margin-top: 0;
+  overflow-wrap: anywhere;
+}
+.dependent-summary-grid,
+.supplier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 20px;
+}
+.supplier-card .definition-list dd {
+  overflow-wrap: anywhere;
+}
+.fulfillment-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: clamp(22px, 3vw, 36px);
+  background: linear-gradient(120deg, #fff 55%, #edf6f6);
+  box-shadow: var(--shadow);
+}
+.fulfillment-hero h1 {
+  margin: 8px 0 12px;
+}
+.fulfillment-hero p {
+  max-width: 65ch;
+}
+.fulfillment-count {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 6px;
+  padding: 16px 24px;
+  border-left: 3px solid var(--brand-500);
+}
+.fulfillment-count strong {
+  font-size: 2.25rem;
+  line-height: 1.1;
+}
+.fulfillment-count span,
+.cell-secondary,
+.care-setting-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.cell-secondary,
+.care-setting-label {
+  display: block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.fulfillment-summary {
+  padding: 20px;
+  border-radius: 18px;
+  background: #edf6f6;
+  border: 1px solid #d3e8e7;
+}
+.fulfillment-summary h3 {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.delivery-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.delivery-timeline li {
+  display: grid;
+  gap: 5px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--brand-500);
+  border-bottom: 1px solid var(--line);
+}
+.delivery-timeline span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.fulfillment-page .table-heading {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+@media (max-width: 700px) {
+  .fulfillment-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .fulfillment-count {
+    padding: 4px 16px;
+  }
+  .dependent-card .page-header-actions {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .fulfillment-page .table-wrap {
+    max-width: 100%;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dependent-card,
+  .supplier-card,
+  .fulfillment-summary {
+    animation: fulfillment-enter 0.22s ease-out both;
+  }
+  @keyframes fulfillment-enter {
+    from {
+      opacity: 0.6;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+@media print {
+  .dependent-card,
+  .supplier-card,
+  .fulfillment-summary {
+    animation: none !important;
+  }
+}
+
 :root {
   --brand-50: #fff1f2;
   --brand-100: #ffe1e4;

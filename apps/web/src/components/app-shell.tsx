@@ -120,6 +120,13 @@ const navigation: NavigationGroup[] = [
         actionId: 'QUOTE-NAVIGATE',
       },
       {
+        label: 'Precotización',
+        icon: 'supplyRequests',
+        href: '/clinical/prequotes',
+        permission: 'quotes:write',
+        actionId: 'PREQUOTES-NAVIGATE',
+      },
+      {
         label: 'Ingresos clínicos',
         icon: 'clinicalHospital',
         href: '/clinical/hospitalizations',
@@ -200,6 +207,13 @@ const navigation: NavigationGroup[] = [
         href: '/inventory',
         permission: 'inventory:read',
         actionId: 'INVENTORY-NAVIGATE',
+      },
+      {
+        label: 'Pedidos recibidos',
+        icon: 'supplyRequests',
+        href: '/inventory/received-orders',
+        permission: 'inventory:read',
+        actionId: 'RECEIVED-ORDERS-NAVIGATE',
       },
       {
         label: 'Movimientos',

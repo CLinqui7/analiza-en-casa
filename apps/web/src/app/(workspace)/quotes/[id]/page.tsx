@@ -35,6 +35,8 @@ export default function QuoteDetailPage() {
   const [creatingPortal, setCreatingPortal] = useState(false);
   const [decisions, setDecisions] = useState<QuoteDecision[]>([]);
   const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [decisionFor, setDecisionFor] = useState<string | null>(null);
+  const decisionReady = providerMode !== 'postgresql' || decisionFor === id;
   const quote = quotes.find((candidate) => candidate.id === id);
   const quoteExists = Boolean(quote);
   useEffect(() => {
@@ -44,8 +46,12 @@ export default function QuoteDetailPage() {
       .then(async (response) => {
         if (!response.ok) throw new Error();
         const payload = (await response.json()) as { decisions: unknown[] };
-        if (active)
-          setDecisions(payload.decisions.map((entry) => quoteDecisionSchema.parse(entry)));
+        const checked = payload.decisions.map((entry) => quoteDecisionSchema.parse(entry));
+        if (active) {
+          setDecisions(checked);
+          setDecisionFor(id);
+          setDecisionError(null);
+        }
       })
       .catch(() => {
         if (active) setDecisionError('No se pudo cargar el historial de decisiones.');
@@ -81,7 +87,8 @@ export default function QuoteDetailPage() {
     )
     .slice()
     .sort((a, b) => a.version - b.version);
-  const editable = can('quotes:write') && canEditQuote(currentQuote);
+  const openLatest = decisionReady && !decisions.length && history.at(-1)?.id === quote.id;
+  const editable = can('quotes:write') && canEditQuote(currentQuote) && openLatest;
   async function createPortalShare() {
     setCreatingPortal(true);
     setMessage(null);
@@ -154,7 +161,7 @@ export default function QuoteDetailPage() {
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Facturación</p>
-          <h1 title={quote.id}>{quoteDisplayCode(quote.id)}</h1>
+          <h1 title={historyRoot}>{quoteDisplayCode(historyRoot)}</h1>
           <p>
             Versión v{quote.version} ·{' '}
             {quote.immutable ? 'Enviada e inmutable' : 'Borrador editable'}
@@ -170,13 +177,13 @@ export default function QuoteDetailPage() {
               Editar borrador
             </Button>
           ) : null}
-          {quote.immutable && can('quotes:write') ? (
+          {quote.immutable && can('quotes:write') && openLatest ? (
             <Button
               data-action-id="QUOTE-REVISE"
               onClick={() => router.push(`/quotes?revise=${quote.id}`)}
               type="button"
             >
-              Revisar / nueva versión
+              Editar cotización
             </Button>
           ) : null}
           <Button
@@ -209,11 +216,10 @@ export default function QuoteDetailPage() {
           ) : null}
         </div>
       </header>
-      {quote.immutable && can('quotes:write') ? (
+      {quote.immutable && can('quotes:write') && openLatest ? (
         <p className="field-help no-print">
-          Para añadir o quitar ítems, o extender los días, use «Revisar / nueva versión». Se
-          copiarán los ítems a un borrador nuevo; esta versión enviada seguirá intacta. Al enviar la
-          revisión, la cuenta del paciente usará la última versión enviada de esta cotización.
+          Use «Editar cotización» para añadir o quitar productos. Al guardar se actualizará la misma
+          cotización y su cuenta por cobrar; la versión anterior quedará en el historial.
         </p>
       ) : null}
       {message ? (

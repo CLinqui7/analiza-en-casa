@@ -1,5 +1,11 @@
 # Analiza en Casa
 
+La solicitud `parte1ana_.docx` recibida el 17/11/2026 se sigue en
+[`docs/qa/CLIENT_PART1_IMPLEMENTATION_2026-11-17.md`](docs/qa/CLIENT_PART1_IMPLEMENTATION_2026-11-17.md).
+Su regresión se ejecuta con `npm run test:react` y `npm run test:nov17:postgres`;
+el segundo exige la base sintética aislada `analiza_qa`, transporte loopback
+y un rol runtime sin bypass de RLS.
+
 Aplicación para la gestión de atención domiciliar, con frontend y API integrados
 en Next.js. La entrega actual comprende los módulos Core y su persistencia en
 PostgreSQL 18, incluido registro individual y cuestionario. La aplicación

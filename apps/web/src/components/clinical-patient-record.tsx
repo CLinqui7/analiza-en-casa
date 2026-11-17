@@ -169,8 +169,8 @@ function PatientRecordContent() {
             {patientQuotes.map((quote) => (
               <article className="clinical-record-block" key={quote.id}>
                 <h3>
-                  {quoteDisplayCode(quote.id)} · Versión {quote.version} ·{' '}
-                  {quote.status === 'SENT' ? 'Enviada' : 'Borrador'}
+                  {quoteDisplayCode(quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id)} ·
+                  Versión {quote.version} · {quote.status === 'SENT' ? 'Enviada' : 'Borrador'}
                 </h3>
                 <p>{quote.diagnosisSummary}</p>
                 <div className="table-wrap">

@@ -25,6 +25,13 @@ import { quoteFormDraftSchema } from '@/lib/quote-form-draft';
 import { quoteDecisionSchema, type QuoteDecision } from '@/lib/quote-decision';
 import { useOperations } from '@/lib/use-operations';
 import { balanceForQuote, receivableAccounts } from '@/lib/receivables';
+import {
+  latestLogicalQuotes,
+  quoteRoot,
+  quoteWorkflowStatus,
+  quoteStatusLabels,
+  type QuoteWorkflowStatus,
+} from '@/lib/quote-workflow';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
@@ -174,10 +181,14 @@ function QuoteEditor({
     inventoryMovements,
     patients,
     refreshPatients,
+    refreshWorkspace,
+    providerMode,
     updateQuote,
   } = useWorkspace();
   const [draft, setDraft] = useState<QuoteDraft>(() =>
-    source ? cloneDraft(source) : emptyDraft(),
+    source
+      ? cloneDraft(source)
+      : { ...emptyDraft(), manager: session?.mode === 'mock' ? session.role : '' },
   );
   const doctorLabels = useMemo(() => doctorSelectionLabels(doctors), [doctors]);
   const primaryOptions = useMemo(
@@ -193,11 +204,30 @@ function QuoteEditor({
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<QuoteItemCategory>('SERVICES');
   const [processingItem, setProcessingItem] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [refreshingPatients, setRefreshingPatients] = useState(false);
   const [patientRefreshNotice, setPatientRefreshNotice] = useState<string | null>(null);
   const [draftReady, setDraftReady] = useState(false);
   const [draftRecovered, setDraftRecovered] = useState(false);
+  useEffect(() => {
+    if (mode !== 'create' || !draftReady || draftRecovered || !session || session.mode === 'mock')
+      return;
+    const controller = new AbortController();
+    void fetch('/api/profile', { cache: 'no-store', signal: controller.signal })
+      .then(async (response) =>
+        response.ok ? (response.json() as Promise<{ displayName: string }>) : null,
+      )
+      .then((profile) => {
+        if (profile?.displayName && !controller.signal.aborted)
+          setDraft((current) =>
+            current.manager ? current : { ...current, manager: profile.displayName },
+          );
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [mode, draftReady, draftRecovered, session]);
   const [autosaveError, setAutosaveError] = useState(false);
   const draftDiscarded = useRef(false);
   const saveChain = useRef<Promise<void>>(Promise.resolve());
@@ -452,7 +482,7 @@ function QuoteEditor({
     if (!selectedPatient) nextErrors.patientId = 'Seleccione un paciente válido.';
     if (draft.caseId && !selectedCase)
       nextErrors.caseId = 'La hospitalización seleccionada no corresponde al paciente.';
-    if (draft.careSetting === 'HOSPITALIZATION' && !draft.primaryDoctorId)
+    if (!draft.primaryDoctorId)
       nextErrors.primaryDoctorId = 'Seleccione el médico tratante principal.';
     if (draft.primaryDoctorId && !doctors.some((doctor) => doctor.id === draft.primaryDoctorId))
       nextErrors.primaryDoctorId = 'Seleccione un médico registrado.';
@@ -540,6 +570,33 @@ function QuoteEditor({
       }
     } else if (mode === 'revise' && source) {
       const revision = createQuoteRevision(source, crypto.randomUUID(), draft.revisionReason, now);
+      if (providerMode === 'postgresql') {
+        try {
+          const response = await fetch(`/api/quotes/${encodeURIComponent(source.id)}/revision`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+            body: JSON.stringify({
+              quote: {
+                ...revision,
+                ...common,
+                ...calculateQuoteTotals(draft.items, draft.discount, draft.insurerAmount),
+              },
+            }),
+          });
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.error || 'No se pudo guardar la cotización.');
+          await clearDraft();
+          await refreshWorkspace();
+          onSaved(
+            'Cotización actualizada. Se conserva su código, el historial anterior y una sola cuenta por cobrar.',
+          );
+        } catch (cause) {
+          setErrors({
+            totals: cause instanceof Error ? cause.message : 'No se pudo guardar la cotización.',
+          });
+        }
+        return;
+      }
       const saved = await addQuote({ ...revision, ...common });
       if (saved) {
         const cleared = await clearDraft();
@@ -555,8 +612,8 @@ function QuoteEditor({
     mode === 'create'
       ? 'Nueva cotización'
       : mode === 'edit'
-        ? `Editar borrador ${source?.id}`
-        : `Revisar ${source?.id}`;
+        ? `Editar ${quoteDisplayCode(source ? quoteRoot(source) : '')}`
+        : `Editar ${quoteDisplayCode(source ? quoteRoot(source) : '')}`;
   const saveAction =
     mode === 'create'
       ? 'QUOTE-CREATE-SUBMIT'
@@ -596,14 +653,14 @@ function QuoteEditor({
           </Button>
           <Button
             data-action-id={saveAction}
-            disabled={!draftReady}
+            disabled={!draftReady || saving}
             form="quote-editor-form"
             type="submit"
           >
             {mode === 'edit'
               ? 'Guardar cambios'
               : mode === 'revise'
-                ? 'Crear revisión'
+                ? 'Guardar cambios'
                 : 'Guardar borrador'}
           </Button>
         </>
@@ -633,7 +690,20 @@ function QuoteEditor({
         id="quote-editor-form"
         inert={!draftReady}
         noValidate
-        onSubmit={(event) => void submit(event)}
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (savingRef.current) return;
+          savingRef.current = true;
+          setSaving(true);
+          void submit(event)
+            .catch(() =>
+              setErrors({ totals: 'No se pudo guardar. Sus cambios se conservan; reintente.' }),
+            )
+            .finally(() => {
+              savingRef.current = false;
+              setSaving(false);
+            });
+        }}
       >
         <fieldset className="quote-fieldset full-field">
           <legend>Datos del paciente</legend>
@@ -1552,7 +1622,7 @@ function QuoteEditor({
 }
 
 export default function QuotesPage() {
-  const { patients, payments, providerMode, quotes, refreshWorkspace } = useWorkspace();
+  const { patients, payments, providerMode, quotes, refreshWorkspace, sendQuote } = useWorkspace();
   const accounts = useMemo(() => receivableAccounts(quotes, payments), [quotes, payments]);
   const { can, session } = useAuth();
   const router = useRouter();
@@ -1562,30 +1632,42 @@ export default function QuotesPage() {
   const [decisionError, setDecisionError] = useState<string | null>(null);
   const [decisionBusy, setDecisionBusy] = useState<string | null>(null);
   const [decisions, setDecisions] = useState<Record<string, QuoteDecision>>({});
+  const [decisionsReady, setDecisionsReady] = useState(providerMode !== 'postgresql');
   const [rejecting, setRejecting] = useState<Quote | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const decisionKeys = useRef<Record<string, string>>({});
   const [draftFilters, setDraftFilters] = useState({
-    status: '' as Quote['status'] | '',
+    status: '' as QuoteWorkflowStatus | '',
     createdDate: '',
   });
   const [appliedFilters, setAppliedFilters] = useState({
-    status: '' as Quote['status'] | '',
+    status: '' as QuoteWorkflowStatus | '',
     createdDate: '',
   });
   const [page, setPage] = useState(1);
   const editId = searchParams.get('edit');
   const reviseId = searchParams.get('revise');
   const source = quotes.find((quote) => quote.id === (editId ?? reviseId));
+  const logicalQuotes = latestLogicalQuotes(quotes);
+  const workflowStatus = (quote: Quote) =>
+    quoteWorkflowStatus(quote, quotes, Object.values(decisions));
+  const sourceEditable =
+    source &&
+    decisionsReady &&
+    ['DRAFT', 'SENT'].includes(workflowStatus(source)) &&
+    logicalQuotes.some((item) => item.id === source.id);
   const mode: EditorMode | null =
     searchParams.get('create') === '1'
       ? 'create'
-      : editId && source
+      : editId && sourceEditable
         ? 'edit'
-        : reviseId && source
+        : reviseId && sourceEditable
           ? 'revise'
           : null;
-  const visibleQuotes = filterQuotes(searchQuotes(quotes, patients, query), appliedFilters);
+  const visibleQuotes = filterQuotes(searchQuotes(logicalQuotes, patients, query), {
+    ...appliedFilters,
+    status: '',
+  }).filter((quote) => !appliedFilters.status || workflowStatus(quote) === appliedFilters.status);
   const pageSize = 10;
   const totalPages = Math.max(1, Math.ceil(visibleQuotes.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -1597,6 +1679,7 @@ export default function QuotesPage() {
       .then(async (response) => {
         if (!response.ok) throw new Error('No se pudo cargar el estado de las cotizaciones.');
         const payload = (await response.json()) as { decisions: unknown[] };
+        if (active) setDecisionsReady(true);
         if (active)
           setDecisions(
             Object.fromEntries(
@@ -1705,7 +1788,7 @@ export default function QuotesPage() {
               onChange={(event) =>
                 setDraftFilters((current) => ({
                   ...current,
-                  status: event.target.value as Quote['status'] | '',
+                  status: event.target.value as QuoteWorkflowStatus | '',
                 }))
               }
               value={draftFilters.status}
@@ -1713,6 +1796,8 @@ export default function QuotesPage() {
               <option value="">Todos</option>
               <option value="DRAFT">Borrador</option>
               <option value="SENT">Enviada</option>
+              <option value="APPROVED">Aprobada</option>
+              <option value="NOT_APPROVED">Rechazada</option>
             </select>
           </label>
           <label>
@@ -1803,7 +1888,7 @@ export default function QuotesPage() {
                     return (
                       <tr key={quote.id}>
                         <td>
-                          <span title={quote.id}>{quoteDisplayCode(quote.id)}</span>
+                          <span title={quoteRoot(quote)}>{quoteDisplayCode(quoteRoot(quote))}</span>
                           <br />
                           <small>v{quote.version}</small>
                         </td>
@@ -1824,13 +1909,7 @@ export default function QuotesPage() {
                               decisions[quote.id]?.decision === 'APPROVED' ? 'success' : 'warning'
                             }
                           >
-                            {decisions[quote.id]?.decision === 'APPROVED'
-                              ? 'Aprobada'
-                              : decisions[quote.id]?.decision === 'NOT_APPROVED'
-                                ? 'Rechazada'
-                                : quote.immutable
-                                  ? 'Enviada'
-                                  : 'Borrador'}
+                            {quoteStatusLabels[workflowStatus(quote)]}
                           </StatusTag>
                         </td>
                         <td>
@@ -1840,14 +1919,53 @@ export default function QuotesPage() {
                               data-action-id="QUOTE-DETAIL-NAVIGATE"
                               href={`/quotes/${quote.id}`}
                             >
-                              Editar
+                              Ver detalle
                             </Link>
+                            {can('quotes:write') &&
+                            decisionsReady &&
+                            ['DRAFT', 'SENT'].includes(workflowStatus(quote)) ? (
+                              <>
+                                <Link
+                                  className="action-link-button action-link-button--compact"
+                                  href={`/quotes?${quote.immutable ? 'revise' : 'edit'}=${quote.id}`}
+                                >
+                                  Editar
+                                </Link>
+                                {!quote.immutable ? (
+                                  <Button
+                                    className="button-secondary"
+                                    data-action-id="QUOTE-MARK-SENT"
+                                    disabled={Boolean(decisionBusy)}
+                                    onClick={async () => {
+                                      setDecisionBusy(quote.id);
+                                      try {
+                                        if (await sendQuote(quote.id))
+                                          setMessage(
+                                            'Cotización marcada como enviada. Se registró que la compartió con el cliente.',
+                                          );
+                                        else
+                                          setDecisionError(
+                                            'No se pudo marcar la cotización como enviada. Revise los datos y reintente.',
+                                          );
+                                      } finally {
+                                        setDecisionBusy(null);
+                                      }
+                                    }}
+                                    type="button"
+                                  >
+                                    Enviada
+                                  </Button>
+                                ) : null}
+                              </>
+                            ) : null}
                             {providerMode === 'postgresql' ? (
                               <>
                                 <Button
                                   data-action-id="QUOTE-APPROVE"
                                   disabled={
-                                    Boolean(decisions[quote.id]) || decisionBusy === quote.id
+                                    !decisionsReady ||
+                                    !['DRAFT', 'SENT'].includes(workflowStatus(quote)) ||
+                                    Boolean(decisionBusy)
                                   }
                                   onClick={() => void decide(quote, 'APPROVED')}
                                   type="button"
@@ -1858,7 +1976,9 @@ export default function QuotesPage() {
                                   className="button-secondary"
                                   data-action-id="QUOTE-REJECT"
                                   disabled={
-                                    Boolean(decisions[quote.id]) || decisionBusy === quote.id
+                                    !decisionsReady ||
+                                    !['DRAFT', 'SENT'].includes(workflowStatus(quote)) ||
+                                    Boolean(decisionBusy)
                                   }
                                   onClick={() => {
                                     setRejecting(quote);

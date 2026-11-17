@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
+import { lockQuoteRoot } from './quote-workflow';
 import { z } from 'zod';
 import {
   patientSchema,
@@ -1995,6 +1996,7 @@ export function postgresPersistence(): Persistence {
         if (payment.status !== 'APPLIED' || payment.voidReason)
           throw new MongoInputError('El alta de pago debe iniciar aplicada.');
         return transaction(pool, actor, async (c) => {
+          await lockQuoteRoot(c, actor, payment.quoteId);
           const quote = (
             await c.query<{ body: Quote; root_quote_id: string }>(
               `SELECT body,root_quote_id FROM analiza.quotes

@@ -457,6 +457,8 @@ export function searchQuotes(
       [
         quote.id,
         quoteDisplayCode(quote.id),
+        quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
+        quoteDisplayCode(quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id),
         quote.caseId ?? '',
         quote.status,
         patient?.fullName ?? '',

@@ -14,7 +14,8 @@ export const supplyRequestInputSchema = z
 export const supplyRequestSchema = supplyRequestInputSchema.omit({ idempotencyKey: true }).extend({
   id: z.string(),
   requestedBy: z.string(),
-  status: z.literal('RECEIVED'),
+  status: z.enum(['RECEIVED', 'ASSIGNED']),
+  assignedQuoteId: z.string().optional(),
   createdAt: z.string(),
 });
 

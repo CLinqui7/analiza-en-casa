@@ -3,6 +3,7 @@
 import { currentInventoryBalance } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { InventoryTransferDialog, WarehouseManagement } from '@/components/warehouse-management';
 import { InventoryTraceability } from '@/components/inventory-traceability';
@@ -75,6 +76,7 @@ const emptyClosureCopy: Record<
 };
 
 export default function InventoryPage() {
+  const router = useRouter();
   const { inventoryMovements, catalogItems, providerMode, refreshWorkspace } = useWorkspace();
   const { can } = useAuth();
   const operations = useOperations();
@@ -231,8 +233,7 @@ export default function InventoryPage() {
     setClosureTab('PENDING');
   };
   const openSuppliers = () => {
-    setSurface('SUPPLIERS');
-    setSupplierQuery('');
+    router.push('/inventory/suppliers');
   };
   const openWarehouses = () => {
     setSurface('WAREHOUSES');

@@ -3,7 +3,12 @@ import { isServerDataMode } from '@/lib/data-mode';
 import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { patientDocumentTypeSchema, patientSchema, type Patient } from '@analiza/contracts';
+import {
+  patientDocumentTypeSchema,
+  patientDependentSchema,
+  patientSchema,
+  type Patient,
+} from '@analiza/contracts';
 import {
   ageFromBirthDate,
   documentRules,
@@ -73,6 +78,8 @@ const patientFormSchema = z
     documentId: z.string().trim().min(1, 'El número de documento es obligatorio.'),
     birthDate: z.string().min(1, 'Ingrese la fecha de nacimiento.'),
     sex: z.enum(['M', 'F'], { error: 'Seleccione el sexo.' }),
+    hasDependents: z.boolean(),
+    dependents: z.array(patientDependentSchema).max(50),
     phone: z.string().trim().min(1, 'Ingrese el teléfono celular.'),
     company: z.string().trim(),
     referralOrigin: z.enum(['', 'SOCIAL_MEDIA', 'FAMILY_FRIENDS', 'DOCTOR']),
@@ -156,6 +163,7 @@ function patientValidationEntries(errors: FieldErrors<PatientForm>): PatientVali
   add(errors.fullName, 'Nombre completo', '[name="fullName"]');
   add(errors.birthDate, 'Fecha de nacimiento', '[name="birthDate"]');
   add(errors.sex, 'Sexo', '[name="sex"]');
+  add(errors.dependents, 'Datos de dependientes', '[data-action-id="PATIENT-DEPENDENTS"]');
   add(errors.phone, 'Teléfono celular', '[name="phone"]');
   add(errors.company, 'Empresa', '[data-action-id="PATIENT-COMPANY-SEARCH"]');
   add(errors.referralOrigin, 'Origen del paciente', '[name="referralOrigin"]');
@@ -554,6 +562,9 @@ export default function PatientsPage() {
   const [pendingIdentityFiles, setPendingIdentityFiles] = useState<File[]>([]);
   const [pendingResponsibleFiles, setPendingResponsibleFiles] = useState<File[]>([]);
   const [identityFiles, setIdentityFiles] = useState<PrivateFileMetadata[]>([]);
+  const [dependentFiles, setDependentFiles] = useState<
+    Record<string, Partial<Record<'BIRTH_CERTIFICATE' | 'CONSENT', File>>>
+  >({});
   const form = useForm<PatientForm>({
     resolver: zodResolver(patientFormSchema),
     defaultValues: {
@@ -562,6 +573,8 @@ export default function PatientsPage() {
       documentId: '',
       birthDate: '',
       sex: undefined,
+      hasDependents: false,
+      dependents: [],
       phone: '',
       company: '',
       referralOrigin: '',
@@ -594,7 +607,11 @@ export default function PatientsPage() {
         if (stored) {
           const parsed: unknown = JSON.parse(stored);
           if (parsed && typeof parsed === 'object' && 'fullName' in parsed) {
-            form.reset(parsed as PatientForm);
+            form.reset({
+              hasDependents: false,
+              dependents: [],
+              ...parsed,
+            } as unknown as PatientForm);
             setDraftRecovered(true);
           }
         }
@@ -633,6 +650,12 @@ export default function PatientsPage() {
     remove,
   } = useFieldArray({ control: form.control, name: 'contacts', keyName: 'fieldKey' });
   const editingPatient = patients.find((patient) => patient.id === searchParams.get('edit'));
+  const dependentArray = useFieldArray({
+    control: form.control,
+    name: 'dependents',
+    keyName: 'fieldKey',
+  });
+  const hasDependents = useWatch({ control: form.control, name: 'hasDependents' });
   const documentType = useWatch({ control: form.control, name: 'documentType' });
   const insuranceStatus = useWatch({ control: form.control, name: 'insurance.status' });
   const insurer = useWatch({ control: form.control, name: 'insurance.insurer' });
@@ -671,6 +694,8 @@ export default function PatientsPage() {
       documentId: editingPatient.documentId,
       birthDate: editingPatient.birthDate ?? '',
       sex: editingPatient.sex,
+      hasDependents: Boolean(editingPatient.dependents?.length),
+      dependents: editingPatient.dependents ?? [],
       phone: editingPatient.phone ?? '',
       company: editingPatient.company ?? '',
       referralOrigin: editingPatient.referralOrigin ?? '',
@@ -726,6 +751,7 @@ export default function PatientsPage() {
     setCoverageNotice(null);
     setHolderDialogOpen(false);
     setPendingIdentityFiles([]);
+    setDependentFiles({});
     setPendingResponsibleFiles([]);
     setIdentityFiles([]);
     setMapVisible(false);
@@ -1003,6 +1029,7 @@ export default function PatientsPage() {
       insurer: insurance.status === 'INSURED' ? insurance.insurer : undefined,
       birthDate: values.birthDate,
       sex: values.sex,
+      dependents: values.hasDependents ? values.dependents : [],
       company: values.company,
       referralOrigin: values.referralOrigin || undefined,
       homePhone: values.homePhone || undefined,
@@ -1036,7 +1063,9 @@ export default function PatientsPage() {
     }
     if (
       isServerDataMode(providerMode) &&
-      (pendingIdentityFiles.length || pendingResponsibleFiles.length)
+      (pendingIdentityFiles.length ||
+        pendingResponsibleFiles.length ||
+        Object.keys(dependentFiles).length)
     ) {
       try {
         const uploaded = await uploadPrivateFiles('patient', patient.id, [
@@ -1050,6 +1079,16 @@ export default function PatientsPage() {
           ),
         ]);
         setIdentityFiles((current) => [...uploaded, ...current]);
+        for (const dependent of patient.dependents ?? []) {
+          for (const documentKind of ['BIRTH_CERTIFICATE', 'CONSENT'] as const) {
+            const file = dependentFiles[dependent.id]?.[documentKind];
+            if (file)
+              await uploadPrivateFiles('patient', patient.id, [file], undefined, undefined, {
+                dependentId: dependent.id,
+                documentKind,
+              });
+          }
+        }
       } catch {
         setSaving(false);
         setResult(null);
@@ -1567,6 +1606,161 @@ export default function PatientsPage() {
                 </span>
               ) : null}
             </fieldset>
+            <section
+              className="full-field dependent-section"
+              data-action-id="PATIENT-DEPENDENTS"
+              tabIndex={-1}
+            >
+              <fieldset className="choice-fieldset">
+                <legend>Dependientes · hijos del paciente</legend>
+                <label>
+                  <input
+                    type="radio"
+                    name="hasDependents"
+                    checked={Boolean(hasDependents)}
+                    onChange={() => {
+                      form.setValue('hasDependents', true);
+                      if (!dependentArray.fields.length)
+                        dependentArray.append({
+                          id: crypto.randomUUID(),
+                          firstNames: '',
+                          lastNames: '',
+                          gender: undefined as unknown as 'M',
+                          birthDate: '',
+                        });
+                    }}
+                  />{' '}
+                  Sí
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="hasDependents"
+                    checked={!hasDependents}
+                    onChange={() => {
+                      form.setValue('hasDependents', false);
+                      dependentArray.replace([]);
+                      setDependentFiles({});
+                    }}
+                  />{' '}
+                  No
+                </label>
+              </fieldset>
+              {hasDependents ? (
+                <div className="page-stack">
+                  <p className="field-help">
+                    Registre cada hijo y adjunte sus documentos. Los archivos quedan privados en el
+                    expediente del paciente.
+                  </p>
+                  {dependentArray.fields.map((dependent, index) => (
+                    <section className="dependent-card" key={dependent.fieldKey}>
+                      <div className="page-header-actions">
+                        <h3>Dependiente {index + 1}</h3>
+                        <Button
+                          type="button"
+                          className="button-secondary"
+                          onClick={() => {
+                            dependentArray.remove(index);
+                            setDependentFiles((current) => {
+                              const next = { ...current };
+                              delete next[dependent.id];
+                              return next;
+                            });
+                            if (dependentArray.fields.length === 1)
+                              form.setValue('hasDependents', false);
+                          }}
+                        >
+                          Quitar dependiente
+                        </Button>
+                      </div>
+                      <div className="form-grid">
+                        <label>
+                          Nombres
+                          <input {...form.register(`dependents.${index}.firstNames`)} />
+                        </label>
+                        <label>
+                          Apellidos
+                          <input {...form.register(`dependents.${index}.lastNames`)} />
+                        </label>
+                        <label>
+                          Género
+                          <select {...form.register(`dependents.${index}.gender`)} defaultValue="">
+                            <option value="">Seleccione</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Femenino</option>
+                          </select>
+                        </label>
+                        <label>
+                          Fecha de nacimiento
+                          <input
+                            {...form.register(`dependents.${index}.birthDate`)}
+                            type="date"
+                            max={new Date().toISOString().slice(0, 10)}
+                          />
+                        </label>
+                        {(['BIRTH_CERTIFICATE', 'CONSENT'] as const).map((kind) => (
+                          <div key={kind}>
+                            <label>
+                              {kind === 'BIRTH_CERTIFICATE'
+                                ? 'Partida de nacimiento'
+                                : 'Consentimiento'}
+                              <input
+                                type="file"
+                                accept="application/pdf,image/*"
+                                onChange={(event) => {
+                                  const file = event.target.files?.[0];
+                                  setDependentFiles((current) => ({
+                                    ...current,
+                                    [dependent.id]: { ...current[dependent.id], [kind]: file },
+                                  }));
+                                }}
+                              />
+                            </label>
+                            {identityFiles
+                              .filter(
+                                (file) =>
+                                  file.dependentId === dependent.id && file.documentKind === kind,
+                              )
+                              .map((file) => (
+                                <a
+                                  className="button button-secondary"
+                                  key={file.id}
+                                  href={privateFileDownloadHref(file.id)}
+                                >
+                                  Descargar {file.name}
+                                </a>
+                              ))}
+                          </div>
+                        ))}
+                      </div>
+                      {form.formState.errors.dependents?.[index] ? (
+                        <p className="field-error" role="alert">
+                          Complete nombres, apellidos, género y una fecha de nacimiento válida.
+                        </p>
+                      ) : null}
+                    </section>
+                  ))}
+                  <div>
+                    <Button
+                      type="button"
+                      className="button-secondary"
+                      disabled={dependentArray.fields.length >= 50}
+                      onClick={() =>
+                        dependentArray.append({
+                          id: crypto.randomUUID(),
+                          firstNames: '',
+                          lastNames: '',
+                          gender: undefined as unknown as 'M',
+                          birthDate: '',
+                        })
+                      }
+                    >
+                      Agregar dependiente
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+            </section>
             <label>
               Teléfono celular{' '}
               <span className="required-marker" aria-label="obligatorio">

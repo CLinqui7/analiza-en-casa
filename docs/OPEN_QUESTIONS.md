@@ -1,5 +1,11 @@
 # Preguntas abiertas y bloqueadores
 
+## CLIENT-NOV17 · modalidades y entrega de insumos
+
+Confirmado por el usuario el 17/11: aprobar cualquiera de las tres modalidades crea un ingreso clínico; Entregado registra la enfermera receptora sin descontar existencias. Sustituye la restricción anterior de ingreso automático sólo para hospitalización. No se crean retrospectivamente ingresos sin revisión humana.
+
+Se consultó una ambigüedad del DOCX: si Precotización puede ampliar una cotización aprobada, pese a la prohibición de edición manual en ese mismo documento. Hasta recibir respuesta, sólo se asignan insumos a Borrador/Enviada. Un borrador no constituye un cargo hasta marcarse Enviada. La evidencia y el estado de entrega están en `docs/qa/CLIENT_PART1_IMPLEMENTATION_2026-11-17.md`.
+
 ## CLINICAL-NOV07 · origen y consumo de medicamentos
 
 Decisión recibida del usuario: configurar origen y unidades una vez por medicamento. Se implementa configuración reutilizable por artículo y organización, con referencia exacta desde la cotización, sin inferir consumo a partir de dosis ni asumir una unidad. Si falta la referencia o la configuración, el usuario debe completarla antes de registrar una aplicación que descuente inventario. No es una definición clínica pendiente del desarrollador; los valores los captura el equipo. El PDF del 7 de noviembre autoriza horarios y dilución por medicamento y sustituye la salida manual en Administración. No cierra las preguntas de PRN, reglas terapéuticas ni identidades de médicos de otras fuentes.

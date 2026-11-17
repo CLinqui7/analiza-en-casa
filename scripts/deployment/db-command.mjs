@@ -205,6 +205,7 @@ try {
     await client.query(`GRANT SELECT,INSERT ON analiza.inventory_trace_events TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.login_events TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.supply_requests TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.supply_request_assignments,analiza.received_order_deliveries TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.home_custodies TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.home_return_holds TO ${role}`);
     await client.query(`GRANT SELECT ON analiza.commercial_access TO ${role}`);

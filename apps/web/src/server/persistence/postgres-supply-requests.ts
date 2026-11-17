@@ -26,6 +26,7 @@ type Row = {
   status: 'RECEIVED';
   created_at: Date;
   idempotency_key: string;
+  assigned_quote_id?: string | null;
 };
 
 function publicRequest(row: Row): SupplyRequest {
@@ -37,7 +38,8 @@ function publicRequest(row: Row): SupplyRequest {
     quantity: row.quantity,
     priority: row.priority,
     note: row.note,
-    status: row.status,
+    status: row.assigned_quote_id ? 'ASSIGNED' : row.status,
+    assignedQuoteId: row.assigned_quote_id ?? undefined,
     createdAt: row.created_at.toISOString(),
   });
 }
@@ -62,10 +64,10 @@ export class PostgresSupplyRequestRepository {
     if (!can(actor.role, 'supply-requests:read')) throw new MongoAccessError();
     return transaction(this.pool, actor, async (client) => {
       const rows = await client.query<Row>(
-        `SELECT id,idempotency_key,requested_by,patient_id,catalog_item_id,quantity,priority,note,status,created_at
-         FROM analiza.supply_requests
-         WHERE organization_id=$1 AND ($2::boolean OR requested_by=$3)
-         ORDER BY created_at DESC,id LIMIT 500`,
+        `SELECT r.*,a.quote_id AS assigned_quote_id
+         FROM analiza.supply_requests r LEFT JOIN analiza.supply_request_assignments a ON a.organization_id=r.organization_id AND a.request_id=r.id
+         WHERE r.organization_id=$1 AND ($2::boolean OR r.requested_by=$3)
+         ORDER BY r.created_at DESC,r.id LIMIT 500`,
         [actor.organizationId, actor.role !== 'NURSE', actor.userId],
       );
       return rows.rows.map(publicRequest);

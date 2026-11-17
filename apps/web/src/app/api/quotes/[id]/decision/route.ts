@@ -10,6 +10,7 @@ import { authorizationStatus } from '@/server/http-auth';
 import { persistence } from '@/server/persistence';
 import { postgresPool, transaction } from '@/server/persistence/postgres-pool';
 import { MongoAccessError } from '@/server/validation/patients';
+import { lockQuoteRoot } from '@/server/persistence/quote-workflow';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -53,7 +54,7 @@ function failure(error: unknown) {
               : status === 422
                 ? error instanceof InvalidApproval
                   ? 'La cotización debe tener conceptos y ser su versión más reciente antes de aprobarse.'
-                  : 'Complete un médico principal vigente y una fecha de ingreso válida antes de aprobar la hospitalización.'
+                  : 'Complete un médico principal vigente y una fecha de ingreso válida antes de aprobar el ingreso clínico.'
                 : status === 401
                   ? 'Inicie sesión para continuar.'
                   : status === 403
@@ -81,7 +82,10 @@ export async function GET(request: NextRequest, { params }: Context) {
         reason: string | null;
         created_at: Date;
       }>(
-        'SELECT id,quote_id,decision,reason,created_at FROM analiza.quote_decisions WHERE organization_id=$1 AND quote_id=$2 ORDER BY created_at DESC,id DESC LIMIT 100',
+        `SELECT d.id,d.quote_id,d.decision,d.reason,d.created_at FROM analiza.quote_decisions d
+         JOIN analiza.quotes q ON q.organization_id=d.organization_id AND q.id=d.quote_id
+         WHERE d.organization_id=$1 AND q.root_quote_id=(SELECT root_quote_id FROM analiza.quotes WHERE organization_id=$1 AND id=$2)
+         ORDER BY d.created_at DESC,d.id DESC LIMIT 100`,
         [actor.organizationId, id],
       );
       return rows.rows.map((row) =>
@@ -106,6 +110,7 @@ export async function POST(request: NextRequest, { params }: Context) {
     const { id } = await params;
     const input = quoteDecisionInputSchema.parse(await boundedJson(request, 4096));
     const result = await transaction(postgresPool(), actor, async (client) => {
+      await lockQuoteRoot(client, actor, id);
       const quoteRow = await client.query<{
         body: unknown;
         record_version: number;
@@ -159,13 +164,20 @@ export async function POST(request: NextRequest, { params }: Context) {
           throw new DecisionConflict();
         return { row: previous, created: false };
       }
+      const latest = await client.query<{ id: string }>(
+        'SELECT id FROM analiza.quotes WHERE organization_id=$1 AND root_quote_id=$2 ORDER BY quote_version DESC LIMIT 1',
+        [actor.organizationId, quoteRow.rows[0].root_quote_id],
+      );
+      if (latest.rows[0]?.id !== id) throw new DecisionConflict();
+      const familyDecision = await client.query(
+        `SELECT 1 FROM analiza.quote_decisions d JOIN analiza.quotes q ON q.organization_id=d.organization_id AND q.id=d.quote_id
+         WHERE q.organization_id=$1 AND q.root_quote_id=$2 LIMIT 1`,
+        [actor.organizationId, quoteRow.rows[0].root_quote_id],
+      );
+      if (familyDecision.rowCount) throw new DecisionConflict();
       if (input.decision === 'APPROVED') {
-        const latest = await client.query<{ id: string }>(
-          'SELECT id FROM analiza.quotes WHERE organization_id=$1 AND root_quote_id=$2 ORDER BY quote_version DESC LIMIT 1',
-          [actor.organizationId, quoteRow.rows[0].root_quote_id],
-        );
-        if (latest.rows[0]?.id !== id || !quote.items.length) throw new InvalidApproval();
-        if (quote.careSetting === 'HOSPITALIZATION' && !quote.caseId) {
+        if (!quote.items.length) throw new InvalidApproval();
+        if (!quote.caseId) {
           const admissionDate = quote.admissionDate ?? '';
           const validDate =
             /^\d{4}-\d{2}-\d{2}$/.test(admissionDate) &&
@@ -229,11 +241,7 @@ export async function POST(request: NextRequest, { params }: Context) {
       )
         throw new DecisionConflict();
       if (inserted.rows[0]) {
-        if (
-          input.decision === 'APPROVED' &&
-          quote.careSetting === 'HOSPITALIZATION' &&
-          !quote.caseId
-        ) {
+        if (input.decision === 'APPROVED' && !quote.caseId) {
           const alreadyLinked = await client.query(
             "SELECT id FROM analiza.hospitalizations WHERE organization_id=$1 AND body->'linkedQuoteIds' @> jsonb_build_array($2::text) LIMIT 1",
             [actor.organizationId, id],
@@ -242,6 +250,7 @@ export async function POST(request: NextRequest, { params }: Context) {
             const admission = hospitalizationSchema.parse({
               id: randomUUID(),
               patientId: quote.patientId,
+              careSetting: quote.careSetting ?? 'HOSPITALIZATION',
               startDate: quote.admissionDate,
               endDate: quote.dischargeDate || undefined,
               admissionPeriods: [
