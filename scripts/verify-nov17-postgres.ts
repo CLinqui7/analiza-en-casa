@@ -75,6 +75,10 @@ try {
   await backend.patients.create(actor, { patient });
   assert.equal((await backend.patients.get(actor, patientId))?.dependents?.[0].id, dependentId);
   const storage = new Map<string, Uint8Array>();
+  const filePatientId = `${patientId}-files`;
+  await backend.patients.create(actor, {
+    patient: { ...patient, id: filePatientId, documentId: `NOV17-FILES-${run}` },
+  });
   const files = postgresFiles(pool, () => ({
     putObject: async ({ storageKey, bytes }) => {
       storage.set(storageKey, bytes);
@@ -83,7 +87,7 @@ try {
   }));
   const fileInput = {
     ownerType: 'patient' as const,
-    ownerId: patientId,
+    ownerId: filePatientId,
     name: 'partida-sintetica.pdf',
     mimeType: 'application/pdf',
     bytes: new Uint8Array([37, 80, 68, 70]),
@@ -91,7 +95,10 @@ try {
     documentKind: 'BIRTH_CERTIFICATE' as const,
   };
   const uploaded = await files.upload(actor, fileInput);
-  assert.equal((await files.listForOwner(actor, 'patient', patientId))[0].dependentId, dependentId);
+  assert.equal(
+    (await files.listForOwner(actor, 'patient', filePatientId))[0].dependentId,
+    dependentId,
+  );
   assert.deepEqual((await files.download(actor, uploaded.id))?.bytes, fileInput.bytes);
   assert.equal(await files.download(foreign, uploaded.id), null);
   await assert.rejects(files.upload(actor, { ...fileInput, dependentId: randomUUID() }));

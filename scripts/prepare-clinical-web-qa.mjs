@@ -64,6 +64,8 @@ writeFileSync(
     'NEXT_PUBLIC_REGISTRATION_MODE=disabled',
     'ANALIZA_DB_TRANSPORT=tcp',
     'ANALIZA_QA_MODE=1',
+    'ANALIZA_FILE_STORAGE=filesystem',
+    'ANALIZA_FILES_PATH=/tmp/analiza-qa-private-files',
     `PGHOST=${state.container}`,
     'PGPORT=5432',
     'PGDATABASE=analiza_qa',
