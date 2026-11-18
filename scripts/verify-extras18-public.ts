@@ -111,6 +111,20 @@ try {
       }),
     });
   let original = initial.quotes.find((q: { id: string }) => q.id === quoteId);
+  const serviceId = id + '-service';
+  if (!initial.catalogItems.some((item: { id: string }) => item.id === serviceId))
+    await post('/api/operations', {
+      command: 'catalog.save',
+      item: catalogItemSchema.parse({
+        id: serviceId,
+        sku: serviceId,
+        category: 'SERVICES',
+        name: 'Servicio ficticio QA',
+        status: 'ACTIVE',
+        salePriceExcludingTax: 20,
+        createdAt: new Date().toISOString(),
+      }),
+    });
   if (!original)
     original = await post('/api/quotes', {
       quote: quoteSchema.parse({
@@ -127,6 +141,7 @@ try {
             id: 'initial',
             name: 'Servicio ficticio QA',
             category: 'SERVICES',
+            inventoryItemId: serviceId,
             quantity: 1,
             unitPrice: 20,
             discountAmount: 0,
