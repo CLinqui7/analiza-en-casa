@@ -8,7 +8,15 @@ export function clinicalPdfBlocks(source: HTMLElement): ClinicalPdfBlock[] {
     .querySelectorAll('.no-print,button,script,style,input,select,textarea,[aria-hidden="true"]')
     .forEach((node) => node.remove());
   const blocks: ClinicalPdfBlock[] = [];
-  const text = (node: Node) => (node.textContent ?? '').replace(/\s+/g, ' ').trim();
+  const readableText = (node: Node): string => {
+    if (node.nodeType === 3) return node.textContent ?? '';
+    const content = [...node.childNodes].map(readableText).join('');
+    return node.nodeType === 1 &&
+      /^(BR|P|DIV|SECTION|H[1-6]|LI|DT|DD)$/.test((node as Element).tagName)
+      ? ` ${content} `
+      : content;
+  };
+  const text = (node: Node) => readableText(node).replace(/\s+/g, ' ').trim();
   function visit(element: Element) {
     if (element.tagName === 'TABLE') {
       const caption = element.querySelector('caption');

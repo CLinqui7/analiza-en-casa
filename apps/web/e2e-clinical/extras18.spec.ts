@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { readFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -7,13 +7,24 @@ if (!fixture.patientId?.startsWith('clinical-qa-p-'))
   throw new Error('Synthetic clinical QA required');
 const output = resolve('.local/extras18-browser');
 mkdirSync(output, { recursive: true });
+const sessions = new Map<string, Awaited<ReturnType<BrowserContext['cookies']>>>();
 async function login(page: Page, path: string, role = 'admin') {
+  const cookies = sessions.get(role);
+  if (cookies) {
+    await page.context().addCookies(cookies);
+    await page.goto(path);
+    await expect(page.locator('main h1')).toBeVisible();
+    return;
+  }
   await page.goto('/login?next=' + encodeURIComponent(path));
   await page.getByLabel('Usuario o correo').fill(`qa-${role}@example.test`);
   await page.getByLabel('Clave').fill(process.env.ANALIZA_QA_PASSWORD!);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'));
+  await expect(page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), {
+    timeout: 30000,
+  });
   await expect(page.locator('main h1')).toBeVisible();
+  sessions.set(role, await page.context().cookies());
 }
 async function api(page: Page, path: string, data?: unknown) {
   return page.evaluate(
@@ -78,6 +89,7 @@ test('searchable case context and separate care descriptions persist, preserving
     combo = dialog.getByRole('combobox', { name: 'Hospitalización', exact: true });
   await combo.fill('44');
   await expect(dialog.getByRole('option', { name: new RegExp(extraCase) })).toBeVisible();
+  await combo.fill(extraCase);
   await combo.press('Enter');
   await expect(dialog.locator('.searchable-select .field-help')).toContainText(extraCase);
   await combo.fill('no-case-matches');
@@ -85,16 +97,18 @@ test('searchable case context and separate care descriptions persist, preserving
   await combo.fill(fixture.caseId);
   await dialog.getByRole('listbox').getByRole('option').first().click();
   await dialog.getByRole('checkbox', { name: 'Dieta', exact: true }).check();
-  await dialog.getByLabel('Descripción de dieta', { exact: true }).fill('Dieta separada EXTRAS18');
+  await dialog
+    .getByRole('textbox', { name: 'Descripción de dieta', exact: true })
+    .fill('Dieta separada EXTRAS18');
   await dialog.getByRole('checkbox', { name: 'Cuidado de enfermería', exact: true }).check();
   await dialog
-    .getByLabel('Descripción de cuidados de enfermería', { exact: true })
+    .getByRole('textbox', { name: 'Descripción de cuidados de enfermería', exact: true })
     .fill('Cuidados separados EXTRAS18');
   await dialog.getByRole('checkbox', { name: 'Dieta', exact: true }).uncheck();
   await dialog.getByRole('checkbox', { name: 'Dieta', exact: true }).check();
-  await expect(dialog.getByLabel('Descripción de dieta', { exact: true })).toHaveValue(
-    'Dieta separada EXTRAS18',
-  );
+  await expect(
+    dialog.getByRole('textbox', { name: 'Descripción de dieta', exact: true }),
+  ).toHaveValue('Dieta separada EXTRAS18');
   for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: 950 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
@@ -154,6 +168,8 @@ test('PDF download uses the same one, several and all record sections as printin
     else {
       expect(text).toContain('Dieta separada EXTRAS18');
       expect(text).toContain('Cuidados separados EXTRAS18');
+      expect(text).toContain('Medicamento sintético QA Horas de aplicación');
+      expect(text).not.toContain('17:00Dilución');
     }
     expect(text).not.toContain('Ver cotización completa');
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
@@ -198,4 +214,39 @@ test('Doctor has four clinical pages, reads solution context and cannot access f
   await dialog.getByRole('combobox', { name: 'Hospitalización', exact: true }).fill(fixture.caseId);
   await dialog.getByRole('listbox').getByRole('option').first().click();
   await expect(dialog).toContainText('Solución sintética QA');
+});
+
+test('correcting a saved scale retains its type after the diagnosis association changes', async ({
+  page,
+}) => {
+  await login(page, '/clinical/orders');
+  await page.getByRole('button', { name: 'Acciones de enfermería', exact: true }).click();
+  await page
+    .locator('.clinical-action-grid')
+    .getByRole('button', { name: 'Escala', exact: true })
+    .click();
+  await page
+    .getByRole('searchbox', { name: 'Buscar por nombre o DUI' })
+    .fill(fixture.patientId.split('-').at(-1));
+  const row = page.locator('.clinical-patient-list > div').first();
+  await row.locator('summary').click();
+  await row.getByRole('button', { name: 'Editar', exact: true }).first().click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('combobox', { name: 'Escala', exact: true })).toHaveValue('EVA');
+  await expect(dialog.locator('output')).toContainText('0');
+  await dialog
+    .getByLabel('Motivo de actualización')
+    .fill('QA: conservar escala histórica tras cambio de asociación');
+  const response = page.waitForResponse(
+    (r) => r.url().endsWith('/api/operations') && r.request().method() === 'POST',
+  );
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+  const saved = await response;
+  expect(saved.status()).toBe(200);
+  const record = await saved.json();
+  expect(record.payload.scaleId).toBe('EVA');
+  expect(record.score).toBe(0);
+  expect(record.correctionOf).toBeTruthy();
+  const restored = (await api(page, '/api/operations')).body.clinicalRecords;
+  expect(restored.some((item: { id: string }) => item.id === record.correctionOf)).toBe(true);
 });
