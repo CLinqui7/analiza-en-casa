@@ -27,6 +27,18 @@ export default function PrequotesPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [syncPending, setSyncPending] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  async function syncWorkspace() {
+    setSyncing(true);
+    try {
+      setSyncPending(!(await refreshWorkspace()));
+    } catch {
+      setSyncPending(true);
+    } finally {
+      setSyncing(false);
+    }
+  }
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -140,7 +152,7 @@ export default function PrequotesPage() {
             : 'Solicitud asignada al borrador. Al marcar la cotización como Enviada, aparecerá en Cuentas por cobrar.',
       );
       closeSelection();
-      await Promise.all([load(), refreshWorkspace()]);
+      await Promise.all([load(), syncWorkspace()]);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo asignar.');
     } finally {
@@ -174,6 +186,21 @@ export default function PrequotesPage() {
         <p className="notice danger" role="alert">
           {error}
         </p>
+      ) : null}
+      {syncPending ? (
+        <div className="notice warning" role="status">
+          <p>
+            Los insumos ya se guardaron. No se pudo actualizar la vista de Cuentas por cobrar;
+            actualícela para consultar el saldo confirmado.
+          </p>
+          <Button
+            className="button-secondary"
+            disabled={syncing}
+            onClick={() => void syncWorkspace()}
+          >
+            {syncing ? 'Actualizando…' : 'Actualizar vista de saldos'}
+          </Button>
+        </div>
       ) : null}
       <Panel>
         <div className="table-heading">

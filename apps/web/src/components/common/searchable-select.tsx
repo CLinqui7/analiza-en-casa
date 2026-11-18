@@ -57,6 +57,7 @@ export function SearchableSelect({
   }, []);
 
   function choose(next: string) {
+    if (disabled) return;
     onChange(next);
     setQuery('');
     setOpen(false);
@@ -124,6 +125,7 @@ export function SearchableSelect({
           <button
             aria-label={`Limpiar ${ariaLabel}`}
             className="icon-button"
+            disabled={disabled}
             onClick={() => choose('')}
             type="button"
           >

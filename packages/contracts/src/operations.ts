@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { scaleIds, scaleDefinitionSchema, type ClinicalRecord } from './clinical-records';
+import {
+  scaleIds,
+  scaleDefinitionSchema,
+  type ClinicalRecord,
+  type ClinicalQuoteContext,
+} from './clinical-records';
 
 const id = z.string().trim().min(1).max(120);
 const text = z.string().trim().min(1).max(500);
@@ -371,6 +376,7 @@ export const confirmedSaleInputSchema = z
 export const confirmedSaleSchema = confirmedSaleInputSchema.extend({ confirmedBy: id });
 export type ConfirmedSale = z.infer<typeof confirmedSaleSchema>;
 export type OperationsSnapshot = {
+  clinicalQuotes?: ClinicalQuoteContext[];
   currentJvpe: string;
   clinicalRecords: ClinicalRecord[];
   clinicalStockItems: Array<{ id: string; name: string }>;

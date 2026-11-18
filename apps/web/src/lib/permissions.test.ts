@@ -1,12 +1,55 @@
 import { describe, expect, it } from 'vitest';
-import { can, isAdministrator, permissionForPath, roles } from './permissions';
+import { can, isAdministrator, permissionForPath, roleAllowsPath, roles } from './permissions';
 
 // test-id: vitest:b2-doctors-admin-only
 
 describe('doctor administration authorization', () => {
+  it('limits Doctor to the four clinical screens and own profile, with no financial commands', () => {
+    for (const route of [
+      '/clinical',
+      '/clinical/orders',
+      '/clinical/hospitalizations',
+      '/agenda',
+      '/profile',
+    ])
+      expect(roleAllowsPath('DOCTOR', route)).toBe(true);
+    for (const route of [
+      '/patients',
+      '/quotes',
+      '/receivables',
+      '/catalogs/clinical',
+      '/clinical/prequotes',
+      '/settings',
+      '/nursing-team',
+      '/reports',
+      '/dashboard',
+    ])
+      expect(roleAllowsPath('DOCTOR', route)).toBe(false);
+    for (const permission of [
+      'quotes:read',
+      'quotes:write',
+      'payments:read',
+      'payments:write',
+      'insurance:read',
+      'reports:read',
+      'clinical-config:write',
+      'nurses:manage',
+      'settings:write',
+    ] as const)
+      expect(can('DOCTOR', permission)).toBe(false);
+    for (const permission of [
+      'clinical:read',
+      'clinical:write',
+      'clinical:sign',
+      'cases:read',
+      'agenda:read',
+      'agenda:write',
+    ] as const)
+      expect(can('DOCTOR', permission)).toBe(true);
+  });
   it('allows quote authors to read selectable doctors without granting directory edits', () => {
     for (const role of roles) {
-      expect(can(role, 'doctors:read')).toBe(can(role, 'quotes:write'));
+      expect(can(role, 'doctors:read')).toBe(role === 'DOCTOR' || can(role, 'quotes:write'));
     }
     expect(can(undefined, 'doctors:read')).toBe(false);
     for (const role of ['FINANCE', 'DOCTOR', 'MANAGER'] as const) {

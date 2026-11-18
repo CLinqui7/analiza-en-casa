@@ -25,6 +25,7 @@ async function actorFor(request: NextRequest, write: boolean) {
   const backend = await persistence();
   const token = request.cookies.get(sessionCookieName)?.value;
   const actor = await backend.auth.requireSession(token);
+  if (actor.role === 'DOCTOR') throw new MongoAccessError();
   if (!write && !can(actor.role, 'quotes:read')) throw new MongoAccessError();
   if (write)
     await backend.auth.requireCsrf(token, request.headers.get(csrfHeaderName) ?? undefined);

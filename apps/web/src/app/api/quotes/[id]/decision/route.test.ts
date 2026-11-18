@@ -60,6 +60,15 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('quote approval boundary', () => {
+  it('rejects Doctor financial decisions before accessing quote data', async () => {
+    vi.mocked(persistence).mockResolvedValue({
+      auth: { requireSession: vi.fn().mockResolvedValue({ ...actor, role: 'DOCTOR' }) },
+    } as never);
+    expect((await POST(request({ id: decisionId, decision: 'APPROVED' }), context)).status).toBe(
+      403,
+    );
+    expect(transaction).not.toHaveBeenCalled();
+  });
   it.each(['HOSPITALIZATION', 'HOME_OUTPATIENT', 'CLINIC_OUTPATIENT'])(
     'approves %s, locks its version, and creates one audited admission',
     async (careSetting) => {

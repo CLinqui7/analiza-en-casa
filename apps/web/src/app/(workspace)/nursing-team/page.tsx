@@ -274,7 +274,7 @@ export default function NursingTeamPage() {
                 <>
                   <option value="ADMIN">Administrador</option>
                   <option value="MANAGER">Gerente</option>
-                  <option value="DOCTOR">Médico</option>
+                  <option value="DOCTOR">Doctor</option>
                   <option value="INVENTORY">Inventario</option>
                   <option value="FINANCE">Finanzas</option>
                   <option value="AUDITOR">Auditoría</option>

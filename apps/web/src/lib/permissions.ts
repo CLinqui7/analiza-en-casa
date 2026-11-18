@@ -111,20 +111,15 @@ const permissions: Record<Role, readonly Permission[]> = {
     'supply-requests:write',
   ],
   DOCTOR: [
-    'dashboard:read',
     'patients:read',
-    'patients:write',
     'cases:read',
     'cases:write',
-    'quotes:read',
-    'quotes:write',
-    'insurance:read',
     'clinical:read',
     'clinical:write',
     'clinical:sign',
     'medical-orders:write',
     'agenda:read',
-    'reports:read',
+    'agenda:write',
   ],
   NURSE: [
     'dashboard:read',
@@ -176,9 +171,10 @@ export function isRole(value: unknown): value is Role {
 }
 
 export function can(role: Role | undefined, permission: Permission): boolean {
-  if (permission === 'clinical-config:write') return !!role && roles.includes(role);
+  if (permission === 'clinical-config:write')
+    return !!role && role !== 'DOCTOR' && roles.includes(role);
   if (permission === 'doctors:read')
-    return can(role, 'settings:write') || can(role, 'quotes:write');
+    return role === 'DOCTOR' || can(role, 'settings:write') || can(role, 'quotes:write');
   return Boolean(role && permissions[role].includes(permission));
 }
 
@@ -222,4 +218,16 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
 
 export function permissionForPath(pathname: string): Permission | undefined {
   return routePermissions.find(({ prefix }) => pathname.startsWith(prefix))?.permission;
+}
+
+export function roleAllowsPath(role: Role | undefined, pathname: string): boolean {
+  if (role !== 'DOCTOR') return true;
+  const path = pathname.split('?')[0].replace(/\/$/, '') || '/';
+  return [
+    '/clinical',
+    '/clinical/hospitalizations',
+    '/clinical/orders',
+    '/agenda',
+    '/profile',
+  ].includes(path);
 }

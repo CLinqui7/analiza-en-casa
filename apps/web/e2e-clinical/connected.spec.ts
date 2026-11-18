@@ -67,7 +67,8 @@ async function editor(page: Page, label: string, nursing = false) {
     .first()
     .click();
   const dialog = page.getByRole('dialog');
-  await dialog.getByRole('combobox', { name: 'Hospitalización', exact: true }).selectOption(caseId);
+  await dialog.getByRole('combobox', { name: 'Hospitalización', exact: true }).fill(caseId);
+  await dialog.getByRole('option').first().click();
   return dialog;
 }
 async function persist(page: Page) {
@@ -92,7 +93,7 @@ test('medical and nursing forms persist through HTTP, reload and record printing
     'Indicación médica',
     'Evolución clínica',
     'Historia clínica',
-    'Antecedentes clínicos',
+    'Antecedentes personales',
   ]) {
     const dialog = await editor(page, label);
     await dialog.getByLabel('Resumen', { exact: true }).fill(`Texto sintético ${run} ${label}`);
@@ -114,7 +115,12 @@ test('medical and nursing forms persist through HTTP, reload and record printing
         .check();
     await expect(dialog.getByRole('checkbox', { name: /Laboratorio/ })).toBeChecked();
     await expect(dialog.getByRole('checkbox', { name: /Laboratorio/ })).toBeDisabled();
-    if (plan !== 'LABORATORY') await dialog.getByLabel('Descripción').fill('Plan sintético ' + run);
+    if (plan !== 'LABORATORY')
+      await dialog
+        .getByLabel(
+          plan === 'DIET' ? 'Descripción de dieta' : 'Descripción de cuidados de enfermería',
+        )
+        .fill('Plan sintético ' + run);
     const saved = await persist(page);
     if (plan === 'LABORATORY') expect(saved.laboratories).toContain('Laboratorio sintético QA');
   }
@@ -162,7 +168,7 @@ test('medical and nursing forms persist through HTTP, reload and record printing
     'Indicación médica',
     'Evolución clínica',
     'Historia clínica',
-    'Antecedentes clínicos',
+    'Antecedentes personales',
   ])
     await expect(page.locator('#clinical-print-root')).toContainText(
       `Texto sintético ${run} ${label}`,

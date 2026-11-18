@@ -475,6 +475,21 @@ test('Nov18 unpriced supply can be added once with a confirmed price and the sam
   await expect(add).toBeEnabled();
   await page.setViewportSize({ width: 390, height: 844 });
   await saveScreenshot(page, 'nov18-price-mobile');
+  let writes = 0,
+    failedRefresh = false;
+  page.on('request', (request) => {
+    if (request.url().endsWith('/api/prequotes') && request.method() === 'POST') writes++;
+  });
+  await page.route('**/api/workspace', async (route) => {
+    if (!failedRefresh) {
+      failedRefresh = true;
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Fallo sintético de sincronización' }),
+      });
+    } else await route.continue();
+  });
   const pending = page.waitForResponse(
     (r) => r.url().endsWith('/api/prequotes') && r.request().method() === 'POST',
   );
@@ -482,6 +497,13 @@ test('Nov18 unpriced supply can be added once with a confirmed price and the sam
   const response = await pending;
   expect(response.status(), await response.text()).toBe(200);
   const saved = await response.json();
+  await expect(page.getByText('Los insumos ya se guardaron.', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Actualizar vista de saldos', exact: true }).click();
+  await expect(
+    page.getByRole('button', { name: 'Actualizar vista de saldos', exact: true }),
+  ).toHaveCount(0);
+  expect(writes).toBe(1);
+  await page.unroute('**/api/workspace');
   expect(
     (await api(page, '/api/prequotes', response.request().postDataJSON())).body.alreadyAssigned,
   ).toBe(true);

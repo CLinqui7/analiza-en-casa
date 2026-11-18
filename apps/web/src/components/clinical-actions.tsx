@@ -21,8 +21,9 @@ import { ActionMenu } from './common/action-menu';
 const medical: ClinicalKind[] = ['INDICATION', 'EVOLUTION', 'HISTORY', 'BACKGROUND', 'VITALS'];
 export function ClinicalActions({ initialKind }: { initialKind?: ClinicalKind }) {
   const operations = useOperations();
-  const { patients, quotes } = useWorkspace();
-  const { can } = useAuth();
+  const { patients, quotes: financialQuotes } = useWorkspace();
+  const { can, session } = useAuth();
+  const quotes = session?.role === 'DOCTOR' ? (operations.clinicalQuotes ?? []) : financialQuotes;
   const [group, setGroup] = useState(
     initialKind && !medical.includes(initialKind) ? 'nursing' : 'medical',
   );

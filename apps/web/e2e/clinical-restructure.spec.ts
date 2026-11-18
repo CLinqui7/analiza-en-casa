@@ -49,7 +49,7 @@ test('medical and nursing entry points expose usable manual forms and preserve p
     'Indicación médica',
     'Evolución clínica',
     'Historia clínica',
-    'Antecedentes clínicos',
+    'Antecedentes personales',
   ]) {
     await page.locator('.clinical-action-grid').getByRole('button', { name: kind }).click();
     await page
@@ -60,7 +60,8 @@ test('medical and nursing entry points expose usable manual forms and preserve p
     const dialog = page.getByRole('dialog');
     await dialog
       .getByRole('combobox', { name: 'Hospitalización', exact: true })
-      .selectOption('case-demo-001');
+      .fill('case-demo-001');
+    await dialog.getByRole('option').first().click();
     await dialog.getByLabel('Resumen', { exact: true }).fill('Observación sintética de QA');
     await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
     await expect(dialog.getByRole('alert')).toContainText('conexión segura');
@@ -89,7 +90,8 @@ test('medical and nursing entry points expose usable manual forms and preserve p
     await expect(dialog.getByRole('button', { name: 'Guardar', exact: true })).toHaveCount(1);
     await dialog
       .getByRole('combobox', { name: 'Hospitalización', exact: true })
-      .selectOption('case-demo-001');
+      .fill('case-demo-001');
+    await dialog.getByRole('option').first().click();
     if (kind === 'Signos vitales' || kind === 'Nota de enfermería') {
       const add = dialog.getByRole('button', { name: 'Agregar registro' });
       const before = await add.boundingBox();
@@ -120,7 +122,8 @@ test('all ten scales show numerical options with source-specific totals', async 
   const dialog = page.getByRole('dialog');
   await dialog
     .getByRole('combobox', { name: 'Hospitalización', exact: true })
-    .selectOption('case-demo-001');
+    .fill('case-demo-001');
+  await dialog.getByRole('option').first().click();
   for (const [scale, score] of [
     ['EVA', 0],
     ['GLASGOW', 15],

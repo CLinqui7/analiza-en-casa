@@ -1,4 +1,43 @@
 import { z } from 'zod';
+import type { Quote } from './index';
+
+export type ClinicalQuoteContext = Pick<
+  Quote,
+  | 'id'
+  | 'patientId'
+  | 'caseId'
+  | 'rootQuoteId'
+  | 'originalQuoteId'
+  | 'version'
+  | 'status'
+  | 'createdAt'
+  | 'diagnosisSummary'
+> & {
+  items: Array<
+    Pick<Quote['items'][number], 'id' | 'name' | 'category' | 'quantity' | 'inventoryItemId'>
+  >;
+};
+/** Explicit clinical projection: no prices, payer details, discounts or financial comments. */
+export function clinicalQuoteContext(quote: Quote): ClinicalQuoteContext {
+  return {
+    id: quote.id,
+    patientId: quote.patientId,
+    caseId: quote.caseId,
+    rootQuoteId: quote.rootQuoteId,
+    originalQuoteId: quote.originalQuoteId,
+    version: quote.version,
+    status: quote.status,
+    createdAt: quote.createdAt,
+    diagnosisSummary: quote.diagnosisSummary,
+    items: quote.items.map(({ id, name, category, quantity, inventoryItemId }) => ({
+      id,
+      name,
+      category,
+      quantity,
+      inventoryItemId,
+    })),
+  };
+}
 
 /** Client supplied forms: analizaencasa31oct_.pdf, pp. 1–12. No dose inference. */
 export const clinicalSourceVersion = 'analizaencasa31oct-2026-v1';
@@ -367,7 +406,7 @@ export const clinicalLabels: Record<ClinicalKind, string> = {
   INDICATION: 'Indicación médica',
   EVOLUTION: 'Evolución clínica',
   HISTORY: 'Historia clínica',
-  BACKGROUND: 'Antecedentes clínicos',
+  BACKGROUND: 'Antecedentes personales',
   MEDICATION_CARD: 'Tarjeta de medicamentos',
   FLUID_BALANCE: 'Balance hídrico',
   CARE_PLAN: 'Plan de cuidado',
@@ -489,6 +528,10 @@ export const clinicalPayloadSchema = z.discriminatedUnion('kind', [
         .max(3)
         .optional(),
       summary: optionalText,
+      descriptions: z
+        .object({ DIET: optionalText.optional(), NURSING: optionalText.optional() })
+        .strict()
+        .optional(),
     })
     .strict()
     .refine((v) => !!v.plan || !!v.plans?.length, 'Seleccione al menos un tipo de cuidado.')
@@ -498,7 +541,12 @@ export const clinicalPayloadSchema = z.discriminatedUnion('kind', [
     )
     .refine((v) => !v.plan || !v.plans || v.plans.includes(v.plan), 'Revise los tipos de cuidado.')
     .refine(
-      (v) => !(v.plans ?? [v.plan]).some((p) => p !== 'LABORATORY') || !!v.summary,
+      (v) =>
+        (v.plans ?? [v.plan]).every(
+          (p) =>
+            p === 'LABORATORY' ||
+            (v.descriptions ? !!v.descriptions[p as 'DIET' | 'NURSING']?.trim() : !!v.summary),
+        ),
       'Describa el plan de cuidado.',
     ),
   z
@@ -676,6 +724,13 @@ export const carePlanLabels = {
   NURSING: 'Cuidado de enfermería',
   LABORATORY: 'Laboratorio',
 } as const;
+/** Quote products identified by the client's naming convention; never infers dose or consumption. */
+export function isMedicationCardItem(item: { category: string; name: string }) {
+  return (
+    item.category === 'MEDICATIONS' ||
+    /\bsolucion(?:es)?\b/i.test(item.name.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
+  );
+}
 export function carePlanTypes(payload: Extract<ClinicalPayload, { kind: 'CARE_PLAN' }>) {
   return payload.plans ?? (payload.plan ? [payload.plan] : []);
 }

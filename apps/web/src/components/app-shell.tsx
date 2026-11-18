@@ -15,7 +15,7 @@ import {
 } from 'react';
 import { useAuth } from '@/components/providers';
 import { landingPath, type AuthSession } from '@/lib/auth';
-import { permissionForPath, type Permission } from '@/lib/permissions';
+import { permissionForPath, roleAllowsPath, type Permission } from '@/lib/permissions';
 import { isCoreRelease, isReleasedPath } from '@/lib/release-profile';
 import { ScreenHelp } from './screen-help';
 import type { AccountProfile } from '@/lib/account-profile';
@@ -638,7 +638,7 @@ export function AppShell({ children }: PropsWithChildren) {
             ? '/agenda'
             : '/patients';
     router.push(
-      `${isReleasedPath(route) ? route : '/patients'}?search=${encodeURIComponent(query)}`,
+      `${session?.role === 'DOCTOR' ? '/clinical' : isReleasedPath(route) ? route : '/patients'}?search=${encodeURIComponent(query)}`,
     );
   }
 
@@ -756,7 +756,7 @@ export function AppShell({ children }: PropsWithChildren) {
   if (pathname.startsWith('/dashboard') && !canOpenDashboard) {
     return <DashboardAccessRedirect session={session} />;
   }
-  if (required && !can(required)) {
+  if (!roleAllowsPath(session.role, pathname) || (required && !can(required))) {
     return (
       <main className="access-denied" role="alert">
         Acceso restringido para el rol {session.role}.
@@ -796,7 +796,7 @@ export function AppShell({ children }: PropsWithChildren) {
             aria-label="Ir al inicio de Analiza en Casa"
             className="brand"
             data-action-id="DASHBOARD-NAVIGATE"
-            href={canOpenDashboard ? '/dashboard' : '/patients'}
+            href={landingPath(session)}
             scroll={false}
           >
             <Image
@@ -839,7 +839,12 @@ export function AppShell({ children }: PropsWithChildren) {
           <ul className="nav-list">
             {navigation.map((group) => {
               if (group.href && group.permission && group.actionId) {
-                if (!can(group.permission) || !isReleasedPath(group.href)) return null;
+                if (
+                  !roleAllowsPath(session.role, group.href) ||
+                  !can(group.permission) ||
+                  !isReleasedPath(group.href)
+                )
+                  return null;
                 return (
                   <li key={group.href}>
                     <Link
@@ -862,6 +867,7 @@ export function AppShell({ children }: PropsWithChildren) {
               const childrenForRole =
                 group.children?.filter(
                   (child) =>
+                    roleAllowsPath(session.role, child.href) &&
                     can(child.permission) &&
                     (child.href !== '/reports/visits-goals' || commercialAccess !== null) &&
                     (child.href !== '/dashboard' || canOpenDashboard) &&

@@ -93,7 +93,7 @@ export default function ClinicalHospitalizationsPage() {
     shifts,
     updateHospitalization,
   } = useWorkspace();
-  const { can } = useAuth();
+  const { can, session } = useAuth();
   const [query, setQuery] = useState('');
   const [careSetting, setCareSetting] = useState<CareSetting | ''>('');
   const [columnFilters, setColumnFilters] =
@@ -466,7 +466,11 @@ export default function ClinicalHospitalizationsPage() {
                           <Link
                             className="clinical-table-action clinical-table-action-primary"
                             data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"
-                            href={`/hospitalizations/${hospitalization.id}`}
+                            href={
+                              session?.role === 'DOCTOR'
+                                ? `/clinical?case=${encodeURIComponent(hospitalization.id)}`
+                                : `/hospitalizations/${hospitalization.id}`
+                            }
                           >
                             Abrir
                           </Link>

@@ -1,6 +1,7 @@
 /** Synthetic QA only. Run against a dedicated PostgreSQL instance through loopback. */
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
+import { writeFileSync } from 'node:fs';
 import {
   clinicalScales,
   clinicalRecordInputSchema,
@@ -279,7 +280,7 @@ try {
     );
   }
   check('all ten scale definitions and persisted arithmetic');
-  for (const role of ['NURSE', 'DOCTOR', 'FINANCE', 'INVENTORY', 'AUDITOR'] as const) {
+  for (const role of ['NURSE', 'FINANCE', 'INVENTORY', 'AUDITOR'] as const) {
     const staff = { ...actor, role, userId: `qa-${role.toLowerCase()}` };
     const entry = {
       id: `discount-${role}-${run}`,
@@ -802,6 +803,205 @@ try {
   check(
     'medication stock configuration enforces organization, unique medicine and immutable consumed rule snapshots',
   );
+  const separated = await save({
+    kind: 'CARE_PLAN',
+    plans: ['DIET', 'NURSING'],
+    summary: '',
+    descriptions: { DIET: 'Dieta sintética separada', NURSING: 'Cuidados sintéticos separados' },
+  });
+  assert.deepEqual(separated.payload.kind === 'CARE_PLAN' && separated.payload.descriptions, {
+    DIET: 'Dieta sintética separada',
+    NURSING: 'Cuidados sintéticos separados',
+  });
+  const correctedPlan = await save(
+    {
+      kind: 'CARE_PLAN',
+      plans: ['DIET', 'NURSING'],
+      summary: '',
+      descriptions: { DIET: 'Dieta corregida sintética', NURSING: 'Cuidados sintéticos separados' },
+    },
+    { correctionOf: separated.id, correctionReason: 'Corrección sintética de dieta' },
+  );
+  const planHistory = await transaction(pool, actor, (c) => listClinicalRecords(c, actor));
+  assert.equal(correctedPlan.rootId, separated.id);
+  assert.deepEqual(planHistory.find((r) => r.id === separated.id)?.payload, separated.payload);
+  await assert.rejects(
+    save({
+      kind: 'CARE_PLAN',
+      plans: ['DIET', 'NURSING'],
+      summary: '',
+      descriptions: { DIET: 'Sólo una descripción' },
+    }),
+  );
+  check(
+    'separate diet and nursing descriptions persist; corrections preserve original and reject missing descriptions',
+  );
+
+  const solutionId = `solution-${run}`,
+    solutionQuoteId = `solution-quote-${run}`;
+  await transaction(pool, actor, async (c) => {
+    const item = catalogItemSchema.parse({
+      id: solutionId,
+      sku: solutionId,
+      category: 'SUPPLIES',
+      name: 'Solución sintética QA',
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+    });
+    await c.query(
+      'INSERT INTO analiza.catalog_items(organization_id,id,body) VALUES($1,$2,$3::jsonb)',
+      [actor.organizationId, solutionId, JSON.stringify(item)],
+    );
+    const q = quoteSchema.parse({
+      id: solutionQuoteId,
+      patientId,
+      caseId,
+      version: 1,
+      status: 'SENT',
+      immutable: true,
+      summary: 'QA solución',
+      createdAt: new Date().toISOString(),
+      items: [
+        {
+          id: 'solution-line',
+          category: 'SUPPLIES',
+          name: item.name,
+          quantity: 1,
+          unitPrice: 2,
+          inventoryItemId: solutionId,
+        },
+      ],
+      subtotal: 2,
+      total: 2,
+      patientAmount: 2,
+    });
+    await c.query(
+      'INSERT INTO analiza.quotes(organization_id,id,case_id,patient_id,root_quote_id,quote_version,body) VALUES($1,$2,$3,$4,$2,1,$5::jsonb)',
+      [actor.organizationId, q.id, caseId, patientId, JSON.stringify(q)],
+    );
+    const movement = inventoryMovementSchema.parse({
+      id: `solution-entry-${run}`,
+      itemId: solutionId,
+      warehouseId,
+      kind: 'ENTRY',
+      quantity: 10,
+      createdAt: new Date().toISOString(),
+      reason: 'Entrada sintética QA',
+      user: actor.userId,
+    });
+    await c.query(
+      'INSERT INTO analiza.inventory_movements(organization_id,id,item_id,warehouse_id,idempotency_key,delta,body) VALUES($1,$2,$3,$4,$2,10,$5::jsonb)',
+      [actor.organizationId, movement.id, solutionId, warehouseId, JSON.stringify(movement)],
+    );
+  });
+  await backend.operations.execute(actor, {
+    command: 'configuration.save',
+    entry: {
+      ...rule,
+      id: `solution-rule-${run}`,
+      inventoryItemId: solutionId,
+      label: 'Solución sintética QA',
+      unitsPerApplication: 2,
+    },
+  });
+  const solutionCard = await save({
+    kind: 'MEDICATION_CARD',
+    chronic: '',
+    instructions: 'Prueba sintética',
+    stock: [],
+    schedule: [
+      {
+        medicationId: `${solutionQuoteId}:solution-line`,
+        times: ['12:10'],
+        dilution: 'Texto sintético',
+      },
+    ],
+  });
+  assert.equal(solutionCard.medications?.filter((m) => m.inventoryItemId === solutionId).length, 1);
+  assert.ok(
+    (await backend.operations.list(actor)).clinicalStockItems.some((i) => i.id === solutionId),
+  );
+  const solutionCommand = {
+    command: 'clinical.record',
+    record: {
+      id: randomUUID(),
+      patientId,
+      caseId,
+      date: '2026-11-18',
+      payload: {
+        ...scheduledPayload,
+        cardId: solutionCard.id,
+        time: '12:10',
+        items: [
+          {
+            medicationId: `${solutionQuoteId}:solution-line`,
+            scheduledTime: '12:10',
+            applied: true,
+            reason: '',
+          },
+        ],
+      },
+    },
+  };
+  const appliedSolutions = await Promise.all([
+    saveClinicalRecord(pool, actor, solutionCommand),
+    saveClinicalRecord(pool, actor, solutionCommand),
+  ]);
+  assert.equal(appliedSolutions[0].id, appliedSolutions[1].id);
+  const solutionBalance = await transaction(pool, actor, async (c) =>
+    Number(
+      (
+        await c.query(
+          'SELECT sum(delta) AS n FROM analiza.inventory_movements WHERE organization_id=$1 AND item_id=$2',
+          [actor.organizationId, solutionId],
+        )
+      ).rows[0].n,
+    ),
+  );
+  assert.equal(solutionBalance, 8);
+  check(
+    'named supply solution is loaded once, configured and deducted once under concurrent replay',
+  );
+
+  const doctor = { ...actor, userId: 'qa-doctor', role: 'DOCTOR' as const };
+  const doctorWorkspace = await backend.workspace(doctor);
+  for (const key of ['quotes', 'payments', 'purchases', 'catalogItems', 'auditEntries'] as const)
+    assert.equal(doctorWorkspace[key].length, 0);
+  const doctorOperations = await backend.operations.list(doctor);
+  const clinicalQuote = doctorOperations.clinicalQuotes?.find((q) => q.id === solutionQuoteId);
+  assert.ok(clinicalQuote?.items.some((i) => i.inventoryItemId === solutionId));
+  assert.equal('total' in clinicalQuote!, false);
+  assert.equal('unitPrice' in clinicalQuote!.items[0], false);
+  await assert.rejects(backend.quotes.get(doctor, solutionQuoteId));
+  await assert.rejects(
+    backend.operations.execute(doctor, { command: 'configuration.save', entry: rule }),
+  );
+  const doctorRecord = await saveClinicalRecord(pool, doctor, {
+    command: 'clinical.record',
+    record: {
+      id: randomUUID(),
+      patientId,
+      caseId,
+      date,
+      payload: { kind: 'BACKGROUND', summary: 'Antecedente sintético del doctor' },
+    },
+  });
+  assert.equal(doctorRecord.createdBy, 'qa-doctor');
+  check(
+    'Doctor reads clinical context and writes records while financial access and configuration writes are denied',
+  );
+  if (process.env.CLINICAL_QA_RESULT)
+    writeFileSync(
+      process.env.CLINICAL_QA_RESULT,
+      JSON.stringify({
+        status: 'PASS',
+        patientId,
+        caseId,
+        solutionId,
+        solutionQuoteId,
+        checks: evidence,
+      }),
+    );
   console.log(
     JSON.stringify({
       status: 'PASS',

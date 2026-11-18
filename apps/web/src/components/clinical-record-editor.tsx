@@ -10,6 +10,7 @@ import {
   clinicalLabels,
   carePlanLabels,
   carePlanTypes,
+  isMedicationCardItem,
   clinicalRecordInputSchema,
   clinicalScales,
   currentClinicalRecords,
@@ -29,6 +30,7 @@ import {
 } from '@analiza/contracts';
 import { useWorkspace, useAuth } from './providers';
 import { caseQuotes, clinicalDate } from '@/lib/clinical-queries';
+import { SearchableSelect } from './common/searchable-select';
 
 type Operations = OperationsSnapshot & {
   busy: boolean;
@@ -58,8 +60,9 @@ export function ClinicalRecordEditor({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const { patients, hospitalizations, quotes, nursingResources } = useWorkspace();
-  const { session } = useAuth();
+  const { patients, hospitalizations, quotes: financialQuotes, nursingResources } = useWorkspace();
+  const { session, can } = useAuth();
+  const quotes = session?.role === 'DOCTOR' ? (operations.clinicalQuotes ?? []) : financialQuotes;
   const [patientId, setPatientId] = useState(original?.patientId ?? initialPatient);
   const [caseId, setCaseId] = useState(original?.caseId ?? '');
   const [id] = useState(() => crypto.randomUUID());
@@ -76,6 +79,13 @@ export function ClinicalRecordEditor({
   const [plans, setPlans] = useState<Array<keyof typeof carePlanLabels>>(
     original?.payload.kind === 'CARE_PLAN' ? carePlanTypes(original.payload) : [],
   );
+  const [planDescriptions, setPlanDescriptions] = useState<Record<string, string>>(() => {
+    if (original?.payload.kind !== 'CARE_PLAN') return {};
+    if (original.payload.descriptions)
+      return { ...original.payload.descriptions } as Record<string, string>;
+    const previous = carePlanTypes(original.payload).filter((plan) => plan !== 'LABORATORY');
+    return previous.length === 1 ? { [previous[0]]: original.payload.summary } : {};
+  });
   const [fluid, setFluid] = useState<Extract<ClinicalPayload, { kind: 'FLUID_BALANCE' }>>(
     original?.payload.kind === 'FLUID_BALANCE'
       ? original.payload
@@ -100,17 +110,15 @@ export function ClinicalRecordEditor({
     patients.find((patient) => patient.id === patientId)?.diagnosis ??
     '';
   const quotedMeds = selectedQuotes.flatMap((quote) =>
-    quote.items
-      .filter((item) => item.category === 'MEDICATIONS')
-      .map((item) => ({
-        ...item,
-        key: `${quote.id}:${item.id}`,
-        sourceMedicationId: JSON.stringify([
-          quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
-          item.id,
-          item.inventoryItemId ?? item.name,
-        ]),
-      })),
+    quote.items.filter(isMedicationCardItem).map((item) => ({
+      ...item,
+      key: `${quote.id}:${item.id}`,
+      sourceMedicationId: JSON.stringify([
+        quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
+        item.id,
+        item.inventoryItemId ?? item.name,
+      ]),
+    })),
   );
   const laboratories = selectedQuotes.flatMap((quote) =>
     quote.items.filter((item) => item.category === 'STUDIES'),
@@ -206,6 +214,7 @@ export function ClinicalRecordEditor({
     setApplied({});
     setSchedule({});
     setPlans([]);
+    setPlanDescriptions({});
     setRowCount(1);
     setError('');
     if (!original)
@@ -260,7 +269,19 @@ export function ClinicalRecordEditor({
         notes: value('notes'),
       };
     else if (kind === 'CARE_PLAN')
-      payload = { kind, plans: selectedPlans, summary: value('summary') };
+      payload = {
+        kind,
+        plans: selectedPlans,
+        summary:
+          original?.payload.kind === 'CARE_PLAN' && !original.payload.descriptions
+            ? original.payload.summary
+            : '',
+        descriptions: Object.fromEntries(
+          selectedPlans
+            .filter((plan) => plan !== 'LABORATORY')
+            .map((plan) => [plan, value(`description-${plan}`)]),
+        ),
+      };
     else if (kind === 'VITALS')
       payload = {
         kind,
@@ -383,7 +404,6 @@ export function ClinicalRecordEditor({
             <select
               value={patientId}
               disabled={!!original}
-              required
               onChange={(event) => {
                 setPatientId(event.target.value);
                 changeCase('');
@@ -397,24 +417,22 @@ export function ClinicalRecordEditor({
               ))}
             </select>
           </label>
-          <label>
-            Hospitalización
-            <select
+          <div>
+            <span className="field-label">Hospitalización</span>
+            <SearchableSelect
+              ariaLabel="Hospitalización"
               value={caseId}
               disabled={!!original}
-              required
-              onChange={(event) => changeCase(event.target.value)}
-            >
-              <option value="">Seleccione hospitalización</option>
-              {hospitalizations
+              placeholder="Buscar hospitalización…"
+              onChange={changeCase}
+              options={hospitalizations
                 .filter((record) => record.patientId === patientId)
-                .map((record) => (
-                  <option key={record.id} value={record.id}>
-                    {record.id} · {record.startDate}
-                  </option>
-                ))}
-            </select>
-          </label>
+                .map((record) => ({
+                  value: record.id,
+                  label: `${record.id} · ${record.startDate}`,
+                }))}
+            />
+          </div>
           <label>
             Fecha
             <input
@@ -621,19 +639,37 @@ export function ClinicalRecordEditor({
                   )}
                 </section>
               ) : null}
-              {selectedPlans.some((p) => p !== 'LABORATORY') ? (
-                <label>
-                  Descripción
-                  <textarea
-                    name="summary"
-                    required
-                    rows={6}
-                    defaultValue={
-                      original?.payload.kind === 'CARE_PLAN' ? original.payload.summary : ''
-                    }
-                  />
-                </label>
+              {original?.payload.kind === 'CARE_PLAN' &&
+              !original.payload.descriptions &&
+              original.payload.summary ? (
+                <p className="notice">
+                  Descripción anterior, conservada: {original.payload.summary}
+                </p>
               ) : null}
+              <div className="clinical-care-descriptions">
+                {(['DIET', 'NURSING'] as const)
+                  .filter((plan) => selectedPlans.includes(plan))
+                  .map((plan) => (
+                    <label key={plan} className="clinical-care-description">
+                      {plan === 'DIET'
+                        ? 'Descripción de dieta'
+                        : 'Descripción de cuidados de enfermería'}
+                      <textarea
+                        name={`description-${plan}`}
+                        required
+                        rows={4}
+                        maxLength={12000}
+                        value={planDescriptions[plan] ?? ''}
+                        onChange={(event) =>
+                          setPlanDescriptions((current) => ({
+                            ...current,
+                            [plan]: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                  ))}
+              </div>
             </>
           ) : null}
           {kind === 'VITALS' || kind === 'NURSING_NOTE' ? (
@@ -882,14 +918,21 @@ export function ClinicalRecordEditor({
                   <p className="field-help">
                     El consumo utiliza el origen y las unidades configurados para cada medicamento.
                   </p>
-                  <Link
-                    className="button button-secondary"
-                    href="/catalogs/clinical"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Configurar consumo de medicamentos ↗
-                  </Link>
+                  {can('clinical-config:write') ? (
+                    <Link
+                      className="button button-secondary"
+                      href="/catalogs/clinical"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Configurar consumo de medicamentos ↗
+                    </Link>
+                  ) : (
+                    <p className="field-help">
+                      Si falta el origen o las unidades, solicite al equipo encargado completar la
+                      configuración de consumo.
+                    </p>
+                  )}
                 </section>
                 <fieldset className="clinical-administration-details">
                   <legend>Detalle de la administración</legend>

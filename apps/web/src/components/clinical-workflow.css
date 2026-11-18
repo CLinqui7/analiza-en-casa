@@ -2,6 +2,54 @@
   --clinical-accent: #b32c46;
   gap: 1.4rem;
 }
+.clinical-care-descriptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1rem;
+}
+.clinical-care-description {
+  display: grid;
+  align-content: start;
+  gap: 0.7rem;
+  padding: 1.1rem;
+  border: 1px solid #d8e4e8;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff, #f5f9fa);
+  color: #1d4656;
+  font-weight: 650;
+}
+.clinical-care-description:focus-within {
+  border-color: #b32c46;
+  box-shadow: 0 0 0 3px #b32c460c;
+}
+.clinical-care-description textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+.clinical-editor .searchable-select {
+  min-width: 0;
+}
+.clinical-editor .searchable-select-options {
+  max-height: 240px;
+  overflow-y: auto;
+}
+.clinical-editor .searchable-select .field-help {
+  display: block;
+  overflow-wrap: anywhere;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .clinical-care-description {
+    animation: clinical-appear 160ms ease-out;
+    transition:
+      border-color 140ms,
+      box-shadow 140ms;
+  }
+  .clinical-print-option {
+    transition:
+      background-color 140ms,
+      border-color 140ms;
+  }
+}
 .clinical-workflow :is(h1, h2, h3, strong) {
   overflow-wrap: anywhere;
 }

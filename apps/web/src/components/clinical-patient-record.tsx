@@ -8,6 +8,8 @@ import {
   clinicalLabels,
   type ClinicalKind,
   type ClinicalRecord,
+  type Quote,
+  type ClinicalQuoteContext,
 } from '@analiza/contracts';
 import {
   quoteDisplayCode,
@@ -15,7 +17,7 @@ import {
   normalizeText,
   normalizeDocument,
 } from '@analiza/domain';
-import { useWorkspace } from './providers';
+import { useWorkspace, useAuth } from './providers';
 import { useOperations } from '@/lib/use-operations';
 import { ClinicalRecordView } from './clinical-record-view';
 import { printClinicalSection } from '@/lib/clinical-queries';
@@ -43,7 +45,7 @@ function PatientRecordContent() {
   const {
     patients,
     hospitalizations,
-    quotes,
+    quotes: financialQuotes,
     clinicalDocuments,
     vitalReadings,
     shifts,
@@ -51,6 +53,11 @@ function PatientRecordContent() {
     doctors,
   } = useWorkspace();
   const operations = useOperations();
+  const { session } = useAuth();
+  const doctorOnly = session?.role === 'DOCTOR';
+  const quotes: Array<Quote | ClinicalQuoteContext> = doctorOnly
+    ? (operations.clinicalQuotes ?? [])
+    : financialQuotes;
   const [selectedPatient, setPatient] = useState(params.get('patient') ?? '');
   const [selectedCase, setCase] = useState(params.get('case') ?? '');
   // Keep historical report links useful after the client-approved regrouping.
@@ -62,11 +69,14 @@ function PatientRecordContent() {
         ? 1
         : 0;
   });
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(params.get('search') ?? '');
   const [recent, setRecent] = useState(false);
   const [days, setDays] = useState(7);
   const [history, setHistory] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
+  const [exportMode, setExportMode] = useState<'print' | 'pdf'>('print');
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState('');
   const [printSections, setPrintSections] = useState([0, 1, 2, 3]);
   const [nursingKind, setNursingKind] = useState('ALL');
   const [medicalKind, setMedicalKind] = useState<ClinicalKind>('INDICATION');
@@ -125,6 +135,31 @@ function PatientRecordContent() {
   );
   const visits = operations.visits.filter((visit) => visit.patientId === requestedPatient);
   const patientShifts = shifts.filter((shift) => shift.patientId === requestedPatient);
+  async function downloadSelection() {
+    if (pdfBusy || !printSections.length) return;
+    setPdfBusy(true);
+    setPdfError('');
+    try {
+      const source = document.getElementById('patient-record-selection-print');
+      if (!source) throw new Error('No se pudo preparar la selección.');
+      const { clinicalPdfBlocks, buildClinicalPdf } = await import('@/lib/clinical-pdf');
+      const bytes = await buildClinicalPdf(clinicalPdfBlocks(source));
+      const url = URL.createObjectURL(
+        new Blob([new Uint8Array(bytes)], { type: 'application/pdf' }),
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'expediente-clinico.pdf';
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (cause) {
+      setPdfError(
+        cause instanceof Error ? cause.message : 'No se pudo descargar el PDF. Intente de nuevo.',
+      );
+    } finally {
+      setPdfBusy(false);
+    }
+  }
   function renderRecords(entries: ClinicalRecord[], printing = false) {
     return entries.map((record) => (
       <div className="clinical-record-block" key={record.id}>
@@ -180,8 +215,12 @@ function PatientRecordContent() {
                         <th>Categoría</th>
                         <th>Concepto</th>
                         <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Descuento</th>
+                        {!doctorOnly ? (
+                          <>
+                            <th>Precio</th>
+                            <th>Descuento</th>
+                          </>
+                        ) : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -195,27 +234,40 @@ function PatientRecordContent() {
                           </td>
                           <td>{item.name}</td>
                           <td>{item.quantity}</td>
-                          <td>{money(item.unitPrice)}</td>
-                          <td>{money(item.discountAmount ?? 0)}</td>
+                          {'unitPrice' in item ? (
+                            <>
+                              <td>{money(Number(item.unitPrice))}</td>
+                              <td>
+                                {money(
+                                  Number('discountAmount' in item ? (item.discountAmount ?? 0) : 0),
+                                )}
+                              </td>
+                            </>
+                          ) : null}
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <p>
-                  Subtotal: {money(quote.subtotal)} · Descuento: {money(quote.discountAmount)} ·
-                  Total: {money(quote.total)}
-                </p>
-                <p>
-                  Aseguradora: {money(quote.insurerAmount)} · Paciente: {money(quote.patientAmount)}
-                </p>
-                <p>{quote.comments}</p>
-                <Link
-                  className="button button-secondary no-print"
-                  href={`/quotes/${encodeURIComponent(quote.id)}`}
-                >
-                  Ver cotización completa
-                </Link>
+                {'total' in quote ? (
+                  <>
+                    <p>
+                      Subtotal: {money(Number(quote.subtotal))} · Descuento:{' '}
+                      {money(Number(quote.discountAmount))} · Total: {money(Number(quote.total))}
+                    </p>
+                    <p>
+                      Aseguradora: {money(Number(quote.insurerAmount))} · Paciente:{' '}
+                      {money(Number(quote.patientAmount))}
+                    </p>
+                    <p>{'comments' in quote ? String(quote.comments ?? '') : ''}</p>
+                    <Link
+                      className="button button-secondary no-print"
+                      href={`/quotes/${encodeURIComponent(quote.id)}`}
+                    >
+                      Ver cotización completa
+                    </Link>
+                  </>
+                ) : null}
               </article>
             ))}
           </section>
@@ -595,7 +647,7 @@ function PatientRecordContent() {
       {patient ? (
         <>
           <div className="table-heading">
-            {selectedCase ? (
+            {selectedCase && !doctorOnly ? (
               <Link
                 className="button button-secondary"
                 href={`/hospitalizations/${encodeURIComponent(selectedCase)}`}
@@ -630,11 +682,24 @@ function PatientRecordContent() {
             </label>
             <Button
               onClick={() => {
+                setExportMode('print');
+                setPdfError('');
                 setPrintSections(section === 4 ? [0, 1, 2, 3] : [section]);
                 setPrintOpen(true);
               }}
             >
               Imprimir {section === 4 ? 'expediente completo' : 'sección'}
+            </Button>
+            <Button
+              className="button-secondary"
+              onClick={() => {
+                setExportMode('pdf');
+                setPdfError('');
+                setPrintSections(section === 4 ? [0, 1, 2, 3] : [section]);
+                setPrintOpen(true);
+              }}
+            >
+              Descargar PDF
             </Button>
           </div>
           <nav className="clinical-tabs" aria-label="Secciones del expediente">
@@ -656,7 +721,7 @@ function PatientRecordContent() {
           ) : null}
           <Dialog
             open={printOpen}
-            title="Imprimir expediente"
+            title={exportMode === 'pdf' ? 'Descargar expediente en PDF' : 'Imprimir expediente'}
             description="Elija las secciones que desea incluir. Se respetan el paciente, la hospitalización y las versiones seleccionadas."
             onClose={() => setPrintOpen(false)}
             footer={
@@ -665,10 +730,18 @@ function PatientRecordContent() {
                   Cancelar
                 </Button>
                 <Button
-                  disabled={!printSections.length}
-                  onClick={() => printClinicalSection('patient-record-selection-print')}
+                  disabled={!printSections.length || pdfBusy}
+                  onClick={() =>
+                    exportMode === 'pdf'
+                      ? void downloadSelection()
+                      : printClinicalSection('patient-record-selection-print')
+                  }
                 >
-                  Imprimir selección
+                  {exportMode === 'pdf'
+                    ? pdfBusy
+                      ? 'Preparando PDF…'
+                      : 'Descargar selección en PDF'
+                    : 'Imprimir selección'}
                 </Button>
               </>
             }
@@ -678,7 +751,9 @@ function PatientRecordContent() {
                 Seleccionar expediente completo
               </Button>
               <fieldset>
-                <legend>Secciones a imprimir</legend>
+                <legend>
+                  {exportMode === 'pdf' ? 'Secciones a descargar' : 'Secciones a imprimir'}
+                </legend>
                 {sections.slice(0, 4).map((label, index) => (
                   <label className="clinical-print-option" key={label}>
                     <input
@@ -713,6 +788,11 @@ function PatientRecordContent() {
                   ? `${printSections.length} de 4 secciones seleccionadas`
                   : 'Seleccione al menos una sección.'}
               </p>
+              {pdfError ? (
+                <p role="alert" className="notice danger">
+                  {pdfError}
+                </p>
+              ) : null}
             </div>
           </Dialog>
         </>

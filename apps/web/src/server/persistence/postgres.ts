@@ -10,6 +10,8 @@ import {
   shiftSchema,
   configurationEntrySchema,
   initialDiagnoses,
+  isMedicationCardItem,
+  clinicalQuoteContext,
   clinicalScales,
   type ConfigurationEntry,
   catalogItemSchema,
@@ -578,6 +580,13 @@ export function postgresPersistence(): Persistence {
     async list(actor) {
       return transaction(pool, actor, async (c) => {
         const result: OperationsSnapshot = emptyOperations();
+        if (actor.role === 'DOCTOR') {
+          const rows = await c.query<{ body: Quote }>(
+            'SELECT body FROM analiza.quotes WHERE organization_id=$1 ORDER BY created_at DESC,id',
+            [actor.organizationId],
+          );
+          result.clinicalQuotes = rows.rows.map((row) => clinicalQuoteContext(row.body));
+        }
         if (can(actor.role, 'clinical:read')) {
           const ownResource = await c.query<{ value: string }>(
             "SELECT coalesce(body->>'jvpe',body->>'boardRegistrationNumber','') AS value FROM analiza.nursing_resources WHERE organization_id=$1 AND user_id=$2 ORDER BY id LIMIT 1",
@@ -585,13 +594,19 @@ export function postgresPersistence(): Persistence {
           );
           result.currentJvpe = ownResource.rows[0]?.value ?? '';
         }
-        if (can(actor.role, 'clinical-config:write'))
+        if (can(actor.role, 'clinical-config:write') || actor.role === 'DOCTOR')
           result.configuration = (
             await c.query(
               'SELECT body FROM analiza.configuration_entries WHERE organization_id=$1 ORDER BY id',
               [actor.organizationId],
             )
-          ).rows.map((r) => configurationEntrySchema.parse(r.body));
+          ).rows
+            .map((r) => configurationEntrySchema.parse(r.body))
+            .filter(
+              (entry) =>
+                actor.role !== 'DOCTOR' ||
+                ['DIAGNOSIS', 'SCALE', 'MEDICATION', 'MEDICATION_STOCK'].includes(entry.category),
+            );
         for (const [index, label] of initialDiagnoses.entries()) {
           const id = `diagnosis-initial-${index + 1}`;
           if (!result.configuration.some((entry) => entry.id === id))
@@ -605,13 +620,15 @@ export function postgresPersistence(): Persistence {
         }
         const records = await listClinicalRecords(c, actor);
         if (can(actor.role, 'clinical:read')) result.clinicalRecords = records;
-        if (can(actor.role, 'clinical-config:write')) {
+        if (can(actor.role, 'clinical-config:write') || actor.role === 'DOCTOR') {
           result.clinicalStockItems = (
             await c.query(
-              "SELECT id,body->>'name' AS name FROM analiza.catalog_items WHERE organization_id=$1 AND body->>'category'='MEDICATIONS' AND body->>'status'='ACTIVE' ORDER BY body->>'name'",
+              "SELECT id,body FROM analiza.catalog_items WHERE organization_id=$1 AND body->>'status'='ACTIVE' ORDER BY body->>'name'",
               [actor.organizationId],
             )
-          ).rows;
+          ).rows
+            .filter((row) => isMedicationCardItem(row.body))
+            .map((row) => ({ id: row.id, name: row.body.name }));
         }
         if (can(actor.role, 'payments:read') || can(actor.role, 'clinical:read'))
           result.medicationReturns = medicationReturns(records);
@@ -655,7 +672,7 @@ export function postgresPersistence(): Persistence {
             });
           });
         }
-        if (can(actor.role, 'reports:read')) {
+        if (can(actor.role, 'reports:read') || actor.role === 'DOCTOR') {
           // A transaction owns one pg client. Keep its queries sequential: pg@9 will reject
           // overlapping client.query calls even when the current driver only warns about them.
           const professionals = await c.query(
@@ -676,7 +693,8 @@ export function postgresPersistence(): Persistence {
             'SELECT body FROM analiza.visit_goals WHERE organization_id=$1 ORDER BY month DESC,id',
             [actor.organizationId],
           );
-          result.goals = goals.rows.map((r) => goalSchema.parse(r.body));
+          if (can(actor.role, 'reports:read'))
+            result.goals = goals.rows.map((r) => goalSchema.parse(r.body));
         }
         await populateFieldOperations(c, actor, result);
         return result;
@@ -1483,10 +1501,10 @@ export function postgresPersistence(): Persistence {
               `${actor.organizationId}:medication-stock:${entry.inventoryItemId}`,
             ]);
             const valid = await c.query(
-              "SELECT 1 FROM analiza.catalog_items i JOIN analiza.warehouses w ON w.organization_id=i.organization_id WHERE i.organization_id=$1 AND i.id=$2 AND i.body->>'category'='MEDICATIONS' AND i.body->>'status'='ACTIVE' AND w.id=$3 AND w.status='ACTIVE'",
+              "SELECT i.body FROM analiza.catalog_items i JOIN analiza.warehouses w ON w.organization_id=i.organization_id WHERE i.organization_id=$1 AND i.id=$2 AND i.body->>'status'='ACTIVE' AND w.id=$3 AND w.status='ACTIVE'",
               [actor.organizationId, entry.inventoryItemId, entry.warehouseId],
             );
-            if (!valid.rowCount)
+            if (!valid.rowCount || !isMedicationCardItem(valid.rows[0].body))
               throw new MongoInputError(
                 'Seleccione un medicamento y una bodega activos de esta organización.',
               );

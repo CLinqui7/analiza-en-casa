@@ -45,6 +45,20 @@ export function ClinicalRecordView({
       {'summary' in payload && payload.summary ? (
         <p className="clinical-prose">{payload.summary}</p>
       ) : null}
+      {payload.kind === 'CARE_PLAN' && payload.descriptions
+        ? (['DIET', 'NURSING'] as const)
+            .filter((plan) => carePlanTypes(payload).includes(plan))
+            .map((plan) => (
+              <section key={plan}>
+                <h4>
+                  {plan === 'DIET'
+                    ? 'Descripción de dieta'
+                    : 'Descripción de cuidados de enfermería'}
+                </h4>
+                <p className="clinical-prose">{payload.descriptions?.[plan]}</p>
+              </section>
+            ))
+        : null}
       {payload.kind === 'MEDICATION_CARD' ? (
         <>
           <ul>

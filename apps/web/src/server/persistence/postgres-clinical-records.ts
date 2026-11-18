@@ -4,6 +4,7 @@ import { z } from 'zod';
 import {
   clinicalRecordInputSchema,
   carePlanTypes,
+  isMedicationCardItem,
   currentClinicalRecords,
   medicationApplicationKey,
   medicationScheduleKey,
@@ -53,21 +54,19 @@ export function latestCaseQuotes(quotes: Quote[]) {
 }
 export function quoteMedications(quotes: Quote[]): MedicationSnapshot[] {
   return latestCaseQuotes(quotes).flatMap((quote) =>
-    quote.items
-      .filter((item) => item.category === 'MEDICATIONS')
-      .map((item) => ({
-        id: `${quote.id}:${item.id}`,
-        name: item.name,
-        chronic: false,
-        quoteId: quote.id,
-        quoteItemId: item.id,
-        sourceMedicationId: JSON.stringify([
-          quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
-          item.id,
-          item.inventoryItemId ?? item.name,
-        ]),
-        ...(item.inventoryItemId ? { inventoryItemId: item.inventoryItemId } : {}),
-      })),
+    quote.items.filter(isMedicationCardItem).map((item) => ({
+      id: `${quote.id}:${item.id}`,
+      name: item.name,
+      chronic: false,
+      quoteId: quote.id,
+      quoteItemId: item.id,
+      sourceMedicationId: JSON.stringify([
+        quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
+        item.id,
+        item.inventoryItemId ?? item.name,
+      ]),
+      ...(item.inventoryItemId ? { inventoryItemId: item.inventoryItemId } : {}),
+    })),
   );
 }
 
@@ -85,10 +84,10 @@ async function deductStock(
     `${actor.organizationId}:${itemId}:${warehouseId}`,
   ]);
   const valid = await c.query(
-    `SELECT 1 FROM analiza.catalog_items i JOIN analiza.warehouses w ON w.organization_id=i.organization_id WHERE i.organization_id=$1 AND i.id=$2 AND i.body->>'category'='MEDICATIONS' AND i.body->>'status'='ACTIVE' AND w.id=$3 AND w.status='ACTIVE'`,
+    `SELECT i.body FROM analiza.catalog_items i JOIN analiza.warehouses w ON w.organization_id=i.organization_id WHERE i.organization_id=$1 AND i.id=$2 AND i.body->>'status'='ACTIVE' AND w.id=$3 AND w.status='ACTIVE'`,
     [actor.organizationId, itemId, warehouseId],
   );
-  if (!valid.rowCount)
+  if (!valid.rowCount || !isMedicationCardItem(valid.rows[0].body))
     throw new MongoInputError(
       'Revise el artículo y el origen en Configuración clínica → Consumo de medicamentos.',
     );
@@ -361,10 +360,10 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
             'La asignación debe corresponder a un medicamento de esta hospitalización.',
           );
         const valid = await c.query(
-          `SELECT 1 FROM analiza.catalog_items i JOIN analiza.warehouses w ON w.organization_id=i.organization_id WHERE i.organization_id=$1 AND i.id=$2 AND i.body->>'category'='MEDICATIONS' AND w.id=$3 AND w.status='ACTIVE'`,
+          `SELECT i.body FROM analiza.catalog_items i JOIN analiza.warehouses w ON w.organization_id=i.organization_id WHERE i.organization_id=$1 AND i.id=$2 AND i.body->>'status'='ACTIVE' AND w.id=$3 AND w.status='ACTIVE'`,
           [actor.organizationId, entry.inventoryItemId, entry.warehouseId],
         );
-        if (!valid.rowCount)
+        if (!valid.rowCount || !isMedicationCardItem(valid.rows[0].body))
           throw new MongoInputError('Seleccione un artículo y una bodega disponibles.');
       }
     }
@@ -374,7 +373,7 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
       );
       const plans = [...carePlanTypes(payload)];
       if (labs.length && !plans.includes('LABORATORY')) plans.push('LABORATORY');
-      record.payload = { kind: 'CARE_PLAN', plans, summary: payload.summary };
+      record.payload = { ...payload, plans };
       if (plans.includes('LABORATORY')) record.laboratories = labs;
     }
     if (payload.kind === 'NURSING_NOTE') {

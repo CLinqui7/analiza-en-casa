@@ -1,7 +1,10 @@
-import type { Hospitalization, Quote } from '@analiza/contracts';
-export function caseQuotes(quotes: Quote[], hospitalization?: Hospitalization) {
+import type { Hospitalization, ClinicalQuoteContext } from '@analiza/contracts';
+export function caseQuotes<T extends ClinicalQuoteContext>(
+  quotes: T[],
+  hospitalization?: Hospitalization,
+) {
   if (!hospitalization) return [];
-  const roots = new Map<string, Quote>();
+  const roots = new Map<string, T>();
   for (const quote of quotes.filter(
     (quote) =>
       quote.patientId === hospitalization.patientId &&
