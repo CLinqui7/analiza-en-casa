@@ -19,16 +19,18 @@ async function saveDraft(page: Page, dialog: Locator, summary: string) {
   if (!(await patient.inputValue())) await patient.selectOption({ index: 1 });
   await dialog.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
   await dialog.getByLabel('Diagnóstico', { exact: true }).selectOption({ index: 1 });
-  await dialog.getByLabel('Responsable administrativo').fill(summary);
+  await expect(dialog.getByLabel('Responsable administrativo')).toHaveAttribute('readonly', '');
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/quotes$/);
-  return page.evaluate((diagnosis) => {
+  const id = await page.evaluate(() => {
     const quotes = JSON.parse(
       window.localStorage.getItem('analiza.en.casa.workspace.v3.quotes') ?? '[]',
     );
-    return quotes.find((quote: { manager?: string }) => quote.manager === diagnosis)?.id;
-  }, summary);
+    return quotes.at(-1)?.id;
+  });
+  expect(id, summary).toBeTruthy();
+  return id;
 }
 
 test('quotes list searches normalized id, patient, case and status, then clears', async ({

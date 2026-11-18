@@ -120,6 +120,13 @@ const navigation: NavigationGroup[] = [
         actionId: 'QUOTE-NAVIGATE',
       },
       {
+        label: 'Solicitudes de insumos',
+        icon: 'supplyRequests',
+        href: '/supply-requests',
+        permission: 'supply-requests:read',
+        actionId: 'SUPPLY-REQUESTS-NAVIGATE',
+      },
+      {
         label: 'Precotización',
         icon: 'supplyRequests',
         href: '/clinical/prequotes',
@@ -194,13 +201,6 @@ const navigation: NavigationGroup[] = [
     label: 'Inventario y compras',
     icon: 'inventory',
     children: [
-      {
-        label: 'Solicitudes de insumos',
-        icon: 'supplyRequests',
-        href: '/supply-requests',
-        permission: 'supply-requests:read',
-        actionId: 'SUPPLY-REQUESTS-NAVIGATE',
-      },
       {
         label: 'Existencias',
         icon: 'stock',

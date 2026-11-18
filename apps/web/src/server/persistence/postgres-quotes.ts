@@ -105,6 +105,21 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
         await requireCatalogPrices(client, actor, quote, previousQuote);
         if (previousQuote) await preserveDeliveredLines(client, actor, quote, previousQuote);
 
+        if (previousQuote) {
+          quote.manager = previousQuote.manager;
+        } else {
+          const owner = await client.query<{ display_name: string }>(
+            `SELECT u.display_name FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id
+             WHERE u.id=$1 AND m.organization_id=$2 AND m.active AND u.disabled_at IS NULL`,
+            [actor.userId, actor.organizationId],
+          );
+          if (!owner.rows[0]?.display_name?.trim())
+            throw new MongoInputError(
+              'No se pudo confirmar el responsable de la cotización. Revise su perfil.',
+            );
+          quote.manager = owner.rows[0].display_name;
+        }
+
         const stored: Quote = {
           ...quote,
           rootQuoteId: rootId,
@@ -191,6 +206,7 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
         ).rows[0];
         const currentQuote = current ? quoteSchema.parse(current.body) : null;
         if (!currentQuote || !canEditQuote(currentQuote)) throw new MongoConflictError();
+        quote.manager = currentQuote.manager;
         if (!hasSameQuoteVersionIdentity(currentQuote, quote))
           throw new MongoInputError(
             'Conserve el paciente, la hospitalización, la versión y el origen del borrador. Cree una revisión para cambiar de versión.',

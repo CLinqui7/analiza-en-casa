@@ -34,6 +34,8 @@ export async function quoteFulfillmentHttp(
     const requestId = request.nextUrl.searchParams.get('requestId');
     if (requestId !== null && (!requestId.trim() || requestId.length > 200))
       throw new MongoInputError('Solicitud no válida.');
+    const search = request.nextUrl.searchParams.get('search')?.trim() ?? '';
+    if (search.length > 200) throw new MongoInputError('La búsqueda admite hasta 200 caracteres.');
     const pool = postgresPool();
     const result = write
       ? kind === 'prequotes'
@@ -41,7 +43,7 @@ export async function quoteFulfillmentHttp(
         : await deliverReceivedOrder(pool, actor, await boundedJson(request))
       : kind === 'prequotes'
         ? await prequoteInbox(pool, actor, page, requestId ?? undefined)
-        : await receivedOrders(pool, actor, page);
+        : await receivedOrders(pool, actor, page, search);
     return NextResponse.json(result, { headers: privateHeaders });
   } catch (error) {
     const conflict =

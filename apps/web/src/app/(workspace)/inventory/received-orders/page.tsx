@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { quoteDisplayCode } from '@analiza/domain';
 import { useAuth } from '@/components/providers';
@@ -10,6 +10,9 @@ export default function ReceivedOrdersPage() {
   const { can } = useAuth();
   const [inbox, setInbox] = useState<ReceivedOrderInbox | null>(null);
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
+  const request = useRef<AbortController | null>(null);
   const [selected, setSelected] = useState<ReceivedOrderEntry | null>(null);
   const [nurseId, setNurseId] = useState('');
   const [quantity, setQuantity] = useState(0);
@@ -18,20 +21,39 @@ export default function ReceivedOrdersPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSearch(query.trim());
+      setPage(1);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+  useEffect(() => () => request.current?.abort(), []);
   const load = useCallback(async () => {
+    request.current?.abort();
+    const controller = new AbortController();
+    request.current = controller;
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`/api/received-orders?page=${page}`, { cache: 'no-store' });
+      const response = await fetch(
+        `/api/received-orders?page=${page}&search=${encodeURIComponent(search)}`,
+        {
+          cache: 'no-store',
+          signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]),
+        },
+      );
       const payload = await response.json();
+      if (controller.signal.aborted) return;
       if (!response.ok) throw new Error(payload.error || 'No se pudo consultar los pedidos.');
       setInbox(payload);
     } catch (cause) {
+      if (controller.signal.aborted) return;
       setError(cause instanceof Error ? cause.message : 'No se pudo consultar los pedidos.');
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
-  }, [page]);
+  }, [page, search]);
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timer);
@@ -98,6 +120,31 @@ export default function ReceivedOrdersPage() {
         </p>
       ) : null}
       <Panel>
+        <div className="order-search">
+          <label htmlFor="received-order-patient">
+            Buscar paciente por nombre o DUI
+            <input
+              id="received-order-patient"
+              type="search"
+              value={query}
+              maxLength={200}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Nombre completo o documento"
+            />
+          </label>
+          {query ? (
+            <Button
+              className="button-secondary"
+              onClick={() => {
+                setQuery('');
+                setSearch('');
+                setPage(1);
+              }}
+            >
+              Limpiar búsqueda
+            </Button>
+          ) : null}
+        </div>
         <div className="table-heading">
           <h2>Productos por entregar</h2>
           <Button className="button-secondary" disabled={loading} onClick={() => void load()}>
@@ -128,6 +175,9 @@ export default function ReceivedOrdersPage() {
                     </td>
                     <td data-label="Paciente">
                       <strong>{entry.patientName}</strong>
+                      {entry.patientDocument ? (
+                        <small className="cell-secondary">{entry.patientDocument}</small>
+                      ) : null}
                     </td>
                     <td data-label="Ítem">{entry.itemName}</td>
                     <td data-label="Cantidad">{entry.quantity}</td>
@@ -157,8 +207,12 @@ export default function ReceivedOrdersPage() {
           </div>
         ) : (
           <EmptyState
-            title="Sin pedidos"
-            detail="Las líneas de medicamentos e insumos de las cotizaciones aparecerán aquí."
+            title={search ? 'Sin coincidencias' : 'Sin pedidos'}
+            detail={
+              search
+                ? 'No hay pedidos para ese nombre o documento. Pruebe otra búsqueda.'
+                : 'Las líneas de medicamentos e insumos de las cotizaciones aparecerán aquí.'
+            }
           />
         )}
         <div className="table-heading">

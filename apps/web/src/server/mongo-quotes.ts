@@ -200,6 +200,18 @@ export class MongoQuoteRepository {
           previousQuote = publicQuote(previous);
         }
         await requireCatalogPrices(this.database, actor, quote, session, previousQuote);
+        if (previousQuote) {
+          quote.manager = previousQuote.manager;
+        } else {
+          const owner = await this.database
+            .collection('users')
+            .findOne({ id: actor.userId }, { session });
+          if (!owner?.displayName?.trim() || owner.disabledAt)
+            throw new MongoInputError(
+              'No se pudo confirmar el responsable de la cotización. Revise su perfil.',
+            );
+          quote.manager = owner.displayName;
+        }
         const stored: StoredQuote = {
           ...quote,
           rootQuoteId: rootId,
@@ -249,6 +261,7 @@ export class MongoQuoteRepository {
           { session },
         );
         if (!current || !canEditQuote(publicQuote(current))) throw new MongoConflictError();
+        quote.manager = current.manager;
         if (!hasSameQuoteVersionIdentity(publicQuote(current), quote))
           throw new MongoInputError(
             'Conserve el paciente, la hospitalización, la versión y el origen del borrador. Cree una revisión para cambiar de versión.',

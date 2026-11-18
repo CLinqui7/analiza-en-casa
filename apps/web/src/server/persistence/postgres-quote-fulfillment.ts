@@ -29,7 +29,7 @@ const latestQuotes = `SELECT DISTINCT ON (root_quote_id) id,root_quote_id,patien
 const terminal = `SELECT 1 FROM analiza.quote_decisions d JOIN analiza.quotes qd ON qd.organization_id=d.organization_id AND qd.id=d.quote_id
   WHERE qd.organization_id=$1 AND qd.root_quote_id=q.root_quote_id`;
 const orderLines = `WITH q AS (${latestQuotes}), lines AS (
-  SELECT q.id AS "quoteId",q.root_quote_id AS "rootId",q.created_at AS "createdAt",p.body->>'fullName' AS "patientName",line->>'id' AS "lineId",
+  SELECT q.id AS "quoteId",q.root_quote_id AS "rootId",q.created_at AS "createdAt",p.body->>'fullName' AS "patientName",coalesce(p.body->>'documentId','') AS "patientDocument",line->>'id' AS "lineId",
   line->>'name' AS "itemName",(line->>'quantity')::numeric AS quantity,q.body->>'status' AS status
   FROM q JOIN analiza.patients p ON p.organization_id=$1 AND p.id=q.patient_id CROSS JOIN LATERAL jsonb_array_elements(q.body->'items') line
   WHERE line->>'category' IN ('MEDICATIONS','SUPPLIES') AND NOT EXISTS (${terminal} AND d.decision='NOT_APPROVED')
@@ -47,6 +47,7 @@ export async function prequoteInbox(
       `SELECT r.id,r.created_at AS "createdAt",r.patient_id AS "patientId",p.body->>'fullName' AS "patientName",
       i.body->>'name' AS "itemName",r.quantity,r.note,r.priority,r.requested_by AS "requestedBy",
       CASE WHEN i.body->>'status'='ACTIVE' THEN (i.body->>'salePriceExcludingTax')::numeric ELSE NULL END AS "unitPrice",
+      (i.body->>'status'='ACTIVE' AND i.body->>'category' IN ('MEDICATIONS','SUPPLIES','EQUIPMENT')) AS "itemAvailable",
       a.quote_id AS "assignedQuoteId",a.root_quote_id AS "rootQuoteId",latest.id AS "currentQuoteId",
       EXISTS(SELECT 1 FROM jsonb_array_elements(latest.body->'items') line WHERE line->>'id'=a.line_id) AS "assignmentPresent"
       FROM analiza.supply_requests r JOIN analiza.patients p ON p.organization_id=r.organization_id AND p.id=r.patient_id
@@ -177,17 +178,22 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
     if (
       !item ||
       item.status !== 'ACTIVE' ||
-      !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category) ||
-      typeof item.salePriceExcludingTax !== 'number' ||
-      !Number.isFinite(item.salePriceExcludingTax)
+      !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category)
     )
       throw new MongoInputError(
-        'Configure el precio de venta del artículo en Catálogos antes de asignarlo.',
+        'El artículo no está disponible para añadirlo. Revise su estado en Catálogos.',
       );
-    if (item.salePriceExcludingTax !== input.expectedUnitPrice)
+    const manualPrice = item.salePriceExcludingTax == null;
+    if (manualPrice && input.priceSource !== 'MANUAL')
+      throw new MongoInputError('Indique y confirme el precio unitario de esta solicitud.');
+    if (
+      !manualPrice &&
+      (input.priceSource === 'MANUAL' || item.salePriceExcludingTax !== input.expectedUnitPrice)
+    )
       throw new MongoInputError(
         'El precio cambió. Actualice la bandeja y confirme el nuevo importe.',
       );
+    const unitPrice = manualPrice ? input.expectedUnitPrice : item.salePriceExcludingTax;
     const lineId = `supply-request-${request.id}`;
     const items = [
       ...source.items,
@@ -197,7 +203,7 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
         inventoryItemId: request.catalog_item_id,
         name: item.name,
         quantity: request.quantity,
-        unitPrice: item.salePriceExcludingTax,
+        unitPrice,
         discountAmount: 0,
       },
     ];
@@ -259,11 +265,13 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
         updated.id,
         root,
         lineId,
-        item.salePriceExcludingTax,
+        unitPrice,
         actor.userId,
       ],
     );
     await audit(c, actor, 'SUPPLY_REQUEST_ASSIGNED', 'supply_request', request.id);
+    if (manualPrice)
+      await audit(c, actor, 'SUPPLY_REQUEST_MANUAL_PRICE_CONFIRMED', 'supply_request', request.id);
     await audit(
       c,
       actor,
@@ -283,16 +291,28 @@ export async function receivedOrders(
   pool: Pool,
   actor: ServerActor,
   page: number,
+  search = '',
 ): Promise<ReceivedOrderInbox> {
   if (!can(actor.role, 'inventory:read')) throw new MongoAccessError();
   return transaction(pool, actor, async (c) => {
+    const normalizedSearch = search
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    const filter = `WHERE $2='' OR strpos(translate(lower("patientName"),'áéíóúüñ','aeiouun'),$2)>0
+      OR strpos(lower("patientDocument"),$2)>0
+      OR ($3<>'' AND strpos(regexp_replace("patientDocument",'[^0-9]','','g'),$3)>0)`;
+    const digits = /^[\d\s.-]+$/.test(normalizedSearch) ? normalizedSearch.replace(/\D/g, '') : '';
+    const params = [actor.organizationId, normalizedSearch, digits];
     const rows = await c.query(
-      `${orderLines} SELECT * FROM lines ORDER BY "createdAt" DESC,"quoteId","lineId" LIMIT 50 OFFSET $2`,
-      [actor.organizationId, (page - 1) * 50],
+      `${orderLines} SELECT * FROM lines ${filter} ORDER BY "createdAt" DESC,"quoteId","lineId" LIMIT 50 OFFSET $4`,
+      [...params, (page - 1) * 50],
     );
-    const count = await c.query(`${orderLines} SELECT count(*)::integer AS count FROM lines`, [
-      actor.organizationId,
-    ]);
+    const count = await c.query(
+      `${orderLines} SELECT count(*)::integer AS count FROM lines ${filter}`,
+      params,
+    );
     const roots = [...new Set(rows.rows.map((row) => row.rootId))];
     const deliveries = await c.query(
       `SELECT d.*,n.body->>'displayName' AS nurse_name FROM analiza.received_order_deliveries d

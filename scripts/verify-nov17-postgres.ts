@@ -221,7 +221,10 @@ try {
   });
   const scoped = await prequoteInbox(pool, actor, 999, request.id);
   assert.equal(scoped.total, 1);
-  assert.deepEqual(scoped.entries.map((entry) => entry.id), [request.id]);
+  assert.deepEqual(
+    scoped.entries.map((entry) => entry.id),
+    [request.id],
+  );
   assert.ok(scoped.quotes.some((quote) => quote.id === second.id));
   assert.ok(scoped.quotes.every((quote) => quote.patientId === patientId));
   assert.deepEqual((await prequoteInbox(pool, actor, 1, otherRequest.id)).quotes, []);
@@ -230,7 +233,9 @@ try {
   assert.deepEqual(foreignScope.quotes, []);
   assert.equal(foreignScope.total, 0);
   await assert.rejects(prequoteInbox(pool, nurse, 1, request.id));
-  pass('request-specific quote refresh ignores inbox pagination and isolates patient, organization and role');
+  pass(
+    'request-specific quote refresh ignores inbox pagination and isolates patient, organization and role',
+  );
   await assert.rejects(
     assignSupplyRequest(pool, actor, {
       ...assignment,
@@ -604,6 +609,147 @@ try {
   pass(
     'removed unfulfilled assignment is explicit in both inboxes; empty pagination retains total',
   );
+  // Nov18: actor-owned responsibility survives forged payloads and revisions.
+  const ownerId = `nov18-owner-${run}`;
+  const owned = await backend.quotes.create(actor, {
+    quote: {
+      ...draft,
+      id: ownerId,
+      rootQuoteId: ownerId,
+      originalQuoteId: ownerId,
+      manager: 'Nombre ajeno falsificado',
+    },
+  });
+  assert.equal(owned.manager, 'Usuario ficticio ADMIN');
+  const ownerEdited = await backend.quotes.replace(actor, ownerId, {
+    quote: { ...owned, manager: 'Otro responsable' },
+    expectedVersion: 1,
+  });
+  assert.equal(ownerEdited.manager, owned.manager);
+  const ownerSent = await backend.quotes.send(actor, ownerId, 2);
+  const ownerRevision = await backend.quotes.reviseSent(actor, ownerId, {
+    quote: {
+      ...createQuoteRevision(ownerSent, randomUUID(), 'Revisión sintética', now),
+      manager: 'Responsable sustituido',
+    },
+  });
+  assert.equal(ownerRevision.manager, owned.manager);
+  pass('quote creator resolved on server; forged owner ignored on create, edit and sent revision');
+
+  // Missing catalogue price is supplied explicitly for this request, never invented or saved globally.
+  await transaction(pool, actor, async (c) => {
+    await c.query(
+      "UPDATE analiza.catalog_items SET body=body-'salePriceExcludingTax' WHERE organization_id=$1 AND id=$2",
+      [actor.organizationId, itemId],
+    );
+  });
+  const pricedRequest = await requestRepo.create(nurse, {
+    idempotencyKey: randomUUID(),
+    patientId,
+    catalogItemId: itemId,
+    quantity: 3,
+    priority: 'LOW',
+    note: 'Precio confirmado QA',
+  });
+  const manual = {
+    idempotencyKey: randomUUID(),
+    requestId: pricedRequest.id,
+    quoteId: ownerRevision.id,
+    expectedRecordVersion: 1,
+    expectedUnitPrice: 7.25,
+    priceSource: 'MANUAL',
+  };
+  await assert.rejects(assignSupplyRequest(pool, actor, { ...manual, priceSource: undefined }));
+  await assert.rejects(assignSupplyRequest(pool, nurse, manual));
+  await assert.rejects(assignSupplyRequest(pool, foreign, manual));
+  await assert.rejects(assignSupplyRequest(pool, actor, { ...manual, expectedUnitPrice: -1 }));
+  const manualResult = await assignSupplyRequest(pool, actor, manual);
+  assert.equal((await assignSupplyRequest(pool, actor, manual)).alreadyAssigned, true);
+  const manualQuote = await storedQuote(manualResult.quoteId);
+  assert.equal(manualQuote.items.at(-1)?.unitPrice, 7.25);
+  assert.equal(manualQuote.items.at(-1)?.quantity, 3);
+  assert.equal(manualQuote.total, 37.57); // (20 + 21.75) less the fixture's 10% supplies discount.
+  assert.deepEqual(await storedQuote(ownerRevision.id), ownerRevision);
+  const manualAudit = await transaction(pool, actor, async (c) => {
+    const price = (
+      await c.query('SELECT body FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2', [
+        actor.organizationId,
+        itemId,
+      ])
+    ).rows[0].body.salePriceExcludingTax;
+    assert.equal(price, undefined);
+    return (
+      await c.query(
+        "SELECT count(*)::int AS count FROM analiza.audit_events WHERE organization_id=$1 AND resource_id=$2 AND action='SUPPLY_REQUEST_MANUAL_PRICE_CONFIRMED'",
+        [actor.organizationId, pricedRequest.id],
+      )
+    ).rows[0].count;
+  });
+  assert.equal(manualAudit, 1);
+  await transaction(pool, actor, async (c) => {
+    await c.query(
+      'UPDATE analiza.catalog_items SET body=$3::jsonb WHERE organization_id=$1 AND id=$2',
+      [actor.organizationId, itemId, JSON.stringify(item)],
+    );
+  });
+  pass(
+    'explicit missing catalogue price adds quantity and audited amount once, preserves discounts and catalogue',
+  );
+
+  // Search applies before pagination, treats wildcard characters literally and stays tenant scoped.
+  const searchPatient = `${patientId}-search`;
+  await backend.patients.create(actor, {
+    patient: {
+      ...patient,
+      id: searchPatient,
+      fullName: `Ángela Búsqueda ${run}`,
+      documentId: '99123456-7',
+      dependents: [],
+    },
+  });
+  const searchQuoteId = `nov18-search-${run}`;
+  await backend.quotes.create(actor, {
+    quote: {
+      ...draft,
+      id: searchQuoteId,
+      rootQuoteId: searchQuoteId,
+      originalQuoteId: searchQuoteId,
+      patientId: searchPatient,
+      items: Array.from({ length: 51 }, (_, index) => ({
+        ...draft.items[0],
+        id: `search-line-${index}`,
+      })),
+    },
+  });
+  for (const query of ['ANGELA BUSQUEDA', '99123456-7', '991234567']) {
+    const results = await receivedOrders(pool, actor, 1, query);
+    assert.equal(results.total, 51);
+    assert.equal(results.entries.length, 50);
+    assert.ok(results.entries.every((entry) => entry.rootId === searchQuoteId));
+    const lastPage = await receivedOrders(pool, actor, 2, query);
+    assert.equal(lastPage.entries.length, 1);
+    assert.equal(lastPage.total, 51);
+    assert.equal((await receivedOrders(pool, foreign, 1, query)).total, 0);
+  }
+  assert.equal((await receivedOrders(pool, actor, 1, '%')).total, 0);
+  assert.equal((await receivedOrders(pool, actor, 1, 'sin coincidencias QA')).total, 0);
+  pass(
+    'patient search by accents/case/document punctuation across pages, literal wildcards and tenant isolation',
+  );
+  const unpricedItemId = `nov18-unpriced-${run}`;
+  await transaction(pool, actor, async (c) => {
+    const unpricedItem = {
+      ...item,
+      id: unpricedItemId,
+      sku: `NOV18-NOPRICE-${run}`,
+      name: 'Insumo sin precio sintético Nov18',
+      salePriceExcludingTax: undefined,
+    };
+    await c.query(
+      'INSERT INTO analiza.catalog_items(organization_id,id,body) VALUES($1,$2,$3::jsonb)',
+      [actor.organizationId, unpricedItemId, JSON.stringify(unpricedItem)],
+    );
+  });
   const result = {
     status: 'PASS',
     checks,
@@ -612,6 +758,9 @@ try {
     itemId,
     quoteId: third.id,
     originalQuoteId: first.id,
+    unpricedItemId,
+    searchPatient,
+    searchQuoteId,
   };
   if (process.env.NOV17_QA_RESULT)
     writeFileSync(process.env.NOV17_QA_RESULT, JSON.stringify(result, null, 2));

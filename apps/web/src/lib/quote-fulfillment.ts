@@ -6,6 +6,7 @@ export const assignSupplySchema = z
     quoteId: z.string().min(1),
     expectedRecordVersion: z.number().int().positive(),
     expectedUnitPrice: z.number().finite().nonnegative(),
+    priceSource: z.enum(['CATALOG', 'MANUAL']).optional(),
     approvedExtension: z
       .object({ decisionId: z.uuid(), reason: z.string().trim().min(5).max(1000) })
       .strict()
@@ -32,6 +33,7 @@ export type PrequoteEntry = {
   priority: string;
   requestedBy: string;
   unitPrice: number | null;
+  itemAvailable: boolean;
   assignedQuoteId: string | null;
   currentQuoteId: string | null;
   assignmentPresent: boolean;
@@ -58,6 +60,7 @@ export type ReceivedOrderEntry = {
   createdAt: string;
   patientName: string;
   lineId: string;
+  patientDocument: string;
   itemName: string;
   quantity: number;
   delivered: number;

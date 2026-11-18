@@ -1,0 +1,19 @@
+Fuente: part18nov_.docx
+SHA256: a866b9cb65cd08a9e8a48dedb4d63379308acd07fe5a91e5dd2a2246d129729e
+Extracción literal. Original sin modificar; sin imágenes.
+
+Analiza en Casa – Correcciones – 18 de noviembre de 2026
+Pendientes del documento Variaciones del sistema (Flujo nuevo)
+Correcciones
+Clínico → Cotizaciones
+Responsable administrativo: ya aparece por default, pero se puede editar. Debe quedar bloqueado (no editable), para que no se cambie por otro nombre.
+Inventario y compras → Solicitudes de insumos
+Mover la ventana Solicitudes de insumos de Inventario y compras al menú de Clínico.
+Clínico → Precotización
+La solicitud de insumos sí llega a Precotización, y al dar "Revisar solicitud" sí permite asignar una cotización. Al seleccionarla aparece "Motivo de la ampliación", que se mantiene.
+Hoy hay dos botones que hacen lo mismo: "Actualizar cotizaciones" y "Guardar ampliación". Dejar solo uno:
+Quitar el botón "Actualizar cotizaciones".
+Cambiar "Guardar ampliación" por "Añadir a cotización".
+Al dar clic en "Añadir a cotización", los productos de la solicitud deben sumarse a la cotización seleccionada. Actualmente no se están sumando.
+Inventario y compras → Pedidos recibidos
+Agregar un buscador de paciente (por nombre o DUI); actualmente no existe.

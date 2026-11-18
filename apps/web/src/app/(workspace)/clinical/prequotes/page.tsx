@@ -20,6 +20,8 @@ export default function PrequotesPage() {
   const choiceRequest = useRef<AbortController | null>(null);
   const [quoteId, setQuoteId] = useState('');
   const [extensionReason, setExtensionReason] = useState('');
+  const [manualPrice, setManualPrice] = useState('');
+  const [addedQuoteId, setAddedQuoteId] = useState<string | null>(null);
   const [key, setKey] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -52,6 +54,7 @@ export default function PrequotesPage() {
     setChoices([]);
     setQuoteId('');
     setExtensionReason('');
+    setManualPrice('');
     setError('');
     try {
       // Scope by request, not inbox page: other requests can move it to another page.
@@ -85,8 +88,18 @@ export default function PrequotesPage() {
     setSelected(null);
   }
   const chosen = choices.find((quote) => quote.id === quoteId);
+  const confirmedPrice = selected?.unitPrice ?? (manualPrice.trim() ? Number(manualPrice) : null);
+  const priceReady =
+    confirmedPrice !== null && Number.isFinite(confirmedPrice) && confirmedPrice >= 0;
   async function assign() {
-    if (!selected || !chosen || choiceState !== 'ready' || selected.unitPrice === null || busy)
+    if (
+      !selected ||
+      !chosen ||
+      choiceState !== 'ready' ||
+      !selected.itemAvailable ||
+      !priceReady ||
+      busy
+    )
       return;
     if (
       chosen.status === 'APPROVED' &&
@@ -103,7 +116,8 @@ export default function PrequotesPage() {
           requestId: selected.id,
           quoteId,
           expectedRecordVersion: chosen.recordVersion,
-          expectedUnitPrice: selected.unitPrice,
+          expectedUnitPrice: confirmedPrice,
+          priceSource: selected.unitPrice === null ? 'MANUAL' : 'CATALOG',
           idempotencyKey: key,
           ...(chosen.status === 'APPROVED'
             ? {
@@ -117,6 +131,7 @@ export default function PrequotesPage() {
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || 'No se pudo asignar la solicitud.');
+      setAddedQuoteId(payload.quoteId);
       setMessage(
         chosen.status === 'APPROVED'
           ? 'Ampliación registrada. Se conservaron la aprobación, el historial y los pagos; la cuenta por cobrar está actualizada.'
@@ -146,9 +161,14 @@ export default function PrequotesPage() {
         </div>
       </header>
       {message ? (
-        <p className="notice success" role="status">
-          {message}
-        </p>
+        <div className="notice success" role="status">
+          <p>{message}</p>
+          {addedQuoteId ? (
+            <Link className="button button-secondary" href={`/quotes/${addedQuoteId}`}>
+              Ver cotización actualizada
+            </Link>
+          ) : null}
+        </div>
       ) : null}
       {error && !selected ? (
         <p className="notice danger" role="alert">
@@ -262,17 +282,14 @@ export default function PrequotesPage() {
                   busy ||
                   choiceState !== 'ready' ||
                   !chosen ||
-                  selected.unitPrice === null ||
+                  !selected.itemAvailable ||
+                  !priceReady ||
                   (chosen.status === 'APPROVED' &&
                     (!chosen.approvalDecisionId || extensionReason.trim().length < 5))
                 }
                 onClick={() => void assign()}
               >
-                {busy
-                  ? 'Guardando…'
-                  : chosen?.status === 'APPROVED'
-                    ? 'Guardar ampliación'
-                    : 'Guardar asignación'}
+                {busy ? 'Añadiendo…' : 'Añadir a cotización'}
               </Button>
             ) : null}
           </>
@@ -288,11 +305,40 @@ export default function PrequotesPage() {
               </p>
               <p>
                 {selected.unitPrice === null
-                  ? 'Precio pendiente de configurar en Catálogos'
+                  ? 'Precio de catálogo pendiente'
                   : `Precio unitario ${money(selected.unitPrice)} · Importe ${money(selected.unitPrice * selected.quantity)} antes de descuentos de la cotización`}
               </p>
             </div>
             {selected.note ? <p className="notice">{selected.note}</p> : null}
+            {!selected.assignedQuoteId && selected.itemAvailable && selected.unitPrice === null ? (
+              <label>
+                Precio unitario de esta solicitud (USD)
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={manualPrice}
+                  disabled={busy}
+                  onChange={(event) => setManualPrice(event.target.value)}
+                  placeholder="Ingrese el precio confirmado"
+                />
+                <span className="field-help">
+                  El catálogo no tiene precio de venta. Confirme el importe con el equipo; se
+                  guardará en esta cotización sin cambiar el catálogo.
+                </span>
+                {priceReady ? (
+                  <span className="field-help">
+                    Importe a añadir: {money(confirmedPrice! * selected.quantity)} antes de
+                    descuentos.
+                  </span>
+                ) : null}
+              </label>
+            ) : null}
+            {!selected.itemAvailable && !selected.assignedQuoteId ? (
+              <p className="notice warning">
+                El artículo no está disponible. Revise su estado en Catálogos.
+              </p>
+            ) : null}
             {error ? (
               <p className="notice danger" role="alert">
                 {error}
@@ -335,20 +381,17 @@ export default function PrequotesPage() {
                     ))}
                   </select>
                 </label>
-                <div className="action-row">
+                {choiceState === 'loading' ? (
+                  <p role="status">Buscando las cotizaciones vigentes del paciente…</p>
+                ) : null}
+                {choiceState === 'error' ? (
                   <Button
                     className="button-secondary"
-                    disabled={busy || choiceState === 'loading'}
                     onClick={() => void refreshChoices(selected)}
                   >
-                    {choiceState === 'loading'
-                      ? 'Consultando cotizaciones…'
-                      : 'Actualizar cotizaciones'}
+                    Reintentar consulta
                   </Button>
-                  {choiceState === 'loading' ? (
-                    <span role="status">Buscando las cotizaciones vigentes del paciente…</span>
-                  ) : null}
-                </div>
+                ) : null}
                 <p className="field-help">
                   Puede asignar a Borrador o Enviada, o registrar una ampliación auditada de una
                   Aprobada. Las rechazadas no admiten ampliaciones.

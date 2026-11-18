@@ -3409,3 +3409,21 @@ button:disabled {
     animation: none;
   }
 }
+
+/* Patient filtering stays usable within the received-order panel at every width. */
+.order-search {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.order-search label {
+  display: grid;
+  gap: 7px;
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.order-search .button {
+  flex: 0 0 auto;
+}

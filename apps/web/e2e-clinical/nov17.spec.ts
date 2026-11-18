@@ -254,24 +254,26 @@ test('Nov17 prequote refresh, assignment, nurse delivery, supplier table CRUD an
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Asignar a una cotización').selectOption(quote.id);
   const otherQuote = await makeQuote(page);
-  await dialog.getByRole('button', { name: 'Actualizar cotizaciones', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Cerrar', exact: true }).click();
+  await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
   await expect(
     dialog.getByLabel('Asignar a una cotización').locator(`option[value="${otherQuote.id}"]`),
   ).toHaveCount(1);
   await page.route('**/api/prequotes?requestId=*', (route) =>
     route.fulfill({ status: 503, json: { error: 'Interrupción sintética de consulta' } }),
   );
-  await dialog.getByRole('button', { name: 'Actualizar cotizaciones', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Cerrar', exact: true }).click();
+  await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
   await expect(dialog.getByRole('alert')).toContainText('Interrupción sintética');
-  await expect(dialog.getByRole('button', { name: 'Guardar asignación' })).toBeDisabled();
+  await expect(dialog.getByRole('button', { name: 'Añadir a cotización' })).toBeDisabled();
   await expect(
     dialog.getByText('Este paciente no tiene cotizaciones disponibles', { exact: false }),
   ).toHaveCount(0);
   await page.unroute('**/api/prequotes?requestId=*');
-  await dialog.getByRole('button', { name: 'Actualizar cotizaciones', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Reintentar consulta', exact: true }).click();
   await dialog.getByLabel('Asignar a una cotización').selectOption(quote.id);
   await saveScreenshot(page, 'prequote-assignment');
-  await dialog.getByRole('button', { name: 'Guardar asignación' }).click();
+  await dialog.getByRole('button', { name: 'Añadir a cotización' }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole('status').filter({ hasText: 'Solicitud asignada' })).toBeVisible();
   const code = 'COT-' + quote.id.replaceAll('-', '').slice(-8).toUpperCase();
@@ -384,19 +386,22 @@ test('Extras1 restores empty quote owner and retains it across edits, autosave a
   await expect.poll(async () => (await api(page, url)).body.draft?.priority).toBe('HIGH');
   await page.reload();
   await expect(owner).toHaveValue('Usuario ficticio ADMIN');
-  await owner.fill('Responsable elegido por el equipo');
+  await expect(owner).toHaveAttribute('readonly', '');
+  expect(
+    (await api(page, url, { ...previous, manager: 'Nombre ajeno recuperado' }, 'PUT')).status,
+  ).toBe(200);
+  await page.reload();
+  await expect(owner).toHaveValue('Usuario ficticio ADMIN');
   await page.getByLabel('Fecha de ingreso', { exact: true }).fill('2026-11-19');
   await expect
     .poll(async () => (await api(page, url)).body.draft?.manager)
-    .toBe('Responsable elegido por el equipo');
+    .toBe('Usuario ficticio ADMIN');
   await page.reload();
-  await expect(owner).toHaveValue('Responsable elegido por el equipo');
+  await expect(owner).toHaveValue('Usuario ficticio ADMIN');
   await page.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
 });
 
-test('Extras1 late profile response does not replace a name entered by the user', async ({
-  page,
-}) => {
+test('Nov18 owner stays locked while profile loads and cannot be replaced', async ({ page }) => {
   await login(page, '/quotes');
   expect(
     (await api(page, '/api/quotes/form-draft?key=quote.create.new', {}, 'DELETE')).status,
@@ -413,19 +418,125 @@ test('Extras1 late profile response does not replace a name entered by the user'
   await page.getByRole('button', { name: '+ Nuevo' }).click();
   const owner = page.getByLabel('Responsable administrativo');
   await expect(page.locator('#quote-editor-form')).toHaveAttribute('aria-busy', 'false');
-  await owner.fill('Responsable manual con perfil pendiente');
+  await expect(owner).toHaveAttribute('readonly', '');
   const loaded = page.waitForResponse((response) => response.url().endsWith('/api/profile'));
   release();
   await loaded;
   await page.locator('[data-action-id="QUOTE-PRIORITY"]').selectOption('LOW');
-  await expect(owner).toHaveValue('Responsable manual con perfil pendiente');
+  await expect(owner).toHaveValue('Usuario ficticio ADMIN');
   await expect
     .poll(
       async () =>
         (await api(page, '/api/quotes/form-draft?key=quote.create.new')).body.draft?.manager,
     )
-    .toBe('Responsable manual con perfil pendiente');
+    .toBe('Usuario ficticio ADMIN');
   await page.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
+});
+
+test('Nov18 unpriced supply can be added once with a confirmed price and the same receivable', async ({
+  page,
+}) => {
+  test.setTimeout(180000);
+  await login(page, '/quotes');
+  const quote = await makeQuote(page);
+  expect(quote.manager).toBe('Usuario ficticio ADMIN');
+  expect(
+    (
+      await api(page, `/api/quotes/${quote.id}/decision`, {
+        id: randomUUID(),
+        decision: 'APPROVED',
+        reason: null,
+      })
+    ).status,
+  ).toBe(201);
+  const request = await api(page, '/api/supply-requests', {
+    idempotencyKey: randomUUID(),
+    patientId: evidence.patientId,
+    catalogItemId: evidence.unpricedItemId,
+    quantity: 3,
+    priority: 'HIGH',
+    note: 'Solicitud sin precio de catálogo QA',
+  });
+  expect(request.status).toBe(201);
+  await page.goto('/clinical/prequotes');
+  await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Asignar a una cotización').selectOption(quote.id);
+  await expect(dialog.getByRole('button', { name: 'Actualizar cotizaciones' })).toHaveCount(0);
+  const add = dialog.getByRole('button', { name: 'Añadir a cotización', exact: true });
+  await expect(add).toHaveCount(1);
+  await expect(add).toBeDisabled();
+  await dialog
+    .getByLabel('Motivo de la ampliación')
+    .fill('Insumos y precio confirmados por el equipo sintético');
+  await expect(add).toBeDisabled();
+  await dialog.getByLabel('Precio unitario de esta solicitud (USD)').fill('7.25');
+  await expect(dialog.getByText('Importe a añadir:', { exact: false })).toContainText('21.75');
+  await expect(add).toBeEnabled();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await saveScreenshot(page, 'nov18-price-mobile');
+  const pending = page.waitForResponse(
+    (r) => r.url().endsWith('/api/prequotes') && r.request().method() === 'POST',
+  );
+  await add.click();
+  const response = await pending;
+  expect(response.status(), await response.text()).toBe(200);
+  const saved = await response.json();
+  expect(
+    (await api(page, '/api/prequotes', response.request().postDataJSON())).body.alreadyAssigned,
+  ).toBe(true);
+  await expect(dialog).toHaveCount(0);
+  await page.getByRole('link', { name: 'Ver cotización actualizada' }).click();
+  await expect(page).toHaveURL(new RegExp('/quotes/' + saved.quoteId + '$'));
+  await expect(page.getByText('Insumo sin precio sintético Nov18', { exact: true })).toBeVisible();
+  const after = (await api(page, '/api/quotes')).body.quotes.find(
+    (row: { quote: { id: string } }) => row.quote.id === saved.quoteId,
+  ).quote;
+  expect(after.total).toBe(41.75);
+  expect(after.items.at(-1).quantity).toBe(3);
+  const code = 'COT-' + quote.id.replaceAll('-', '').slice(-8).toUpperCase();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/receivables');
+  const account = page.getByRole('row').filter({ hasText: code });
+  await expect(account).toHaveCount(1);
+  await expect(account).toContainText('41.75');
+});
+
+test('Nov18 patient search crosses pages and supply requests are under Clinical', async ({
+  page,
+}) => {
+  await login(page, '/inventory/received-orders');
+  const search = page.getByLabel('Buscar paciente por nombre o DUI');
+  await search.fill('ANGELA BUSQUEDA');
+  await expect(page.getByText('Página 1 · 51 líneas', { exact: true })).toBeVisible();
+  await expect(page.locator('tbody tr')).toHaveCount(50);
+  await page.getByRole('button', { name: 'Siguiente', exact: true }).click();
+  await expect(page.locator('tbody tr')).toHaveCount(1);
+  await search.fill('991234567');
+  await expect(page.getByText('Página 1 · 51 líneas', { exact: true })).toBeVisible();
+  await expect(page.locator('tbody tr')).toHaveCount(50);
+  await search.fill('Sin coincidencias sintéticas');
+  await expect(page.getByRole('heading', { name: 'Sin coincidencias', exact: true })).toBeVisible();
+  await search.fill('99123456-7');
+  await expect(page.locator('tbody tr')).toHaveCount(50);
+  for (const width of [1440, 768, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await saveScreenshot(page, 'nov18-orders-' + width);
+  }
+  await page.getByRole('button', { name: 'Limpiar búsqueda', exact: true }).click();
+  await expect(search).toHaveValue('');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/supply-requests');
+  const clinical = page
+    .locator('.nav-group')
+    .filter({ has: page.locator('.nav-group-trigger').filter({ hasText: 'Clínico' }) });
+  await expect(
+    clinical.getByRole('link', { name: 'Solicitudes de insumos', exact: true }),
+  ).toBeVisible();
+  const inventory = page.locator('.nav-group').filter({
+    has: page.locator('.nav-group-trigger').filter({ hasText: 'Inventario y compras' }),
+  });
+  await expect(inventory.locator('a[href="/supply-requests"]')).toHaveCount(0);
 });
 
 test('Approved extension keeps approval and the same admission, with reason and closed general editing', async ({
@@ -458,7 +569,7 @@ test('Approved extension keeps approval and the same admission, with reason and 
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Asignar a una cotización').selectOption(quote.id);
   await expect(dialog.locator('option:checked')).toContainText('Aprobada');
-  const save = dialog.getByRole('button', { name: 'Guardar ampliación', exact: true });
+  const save = dialog.getByRole('button', { name: 'Añadir a cotización', exact: true });
   await expect(save).toBeDisabled();
   await dialog
     .getByLabel('Motivo de la ampliación')

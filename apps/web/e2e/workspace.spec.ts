@@ -44,7 +44,8 @@ async function markSyntheticQuoteSent(page: import('@playwright/test').Page, dia
   return page.evaluate((expected) => {
     const key = 'analiza.en.casa.workspace.v3.quotes';
     const quotes = JSON.parse(window.localStorage.getItem(key) ?? '[]');
-    const quote = quotes.find((item: { manager?: string }) => item.manager === expected);
+    const quote = quotes.at(-1);
+    if (!quote) throw new Error(expected);
     if (!quote) throw new Error('No se encontró la cotización sintética.');
     quote.status = 'SENT';
     quote.immutable = true;
@@ -721,7 +722,10 @@ test('hospitalization route retains listing and limits case editing to clinical 
   await createDialog.getByLabel('Paciente').selectOption('patient-demo-001');
   await createDialog.getByLabel('Médico tratante principal').selectOption({ index: 1 });
   await createDialog.getByLabel('Tipo de cuenta').selectOption('EMPRESA');
-  await createDialog.getByLabel('Responsable administrativo').fill('Responsable QA');
+  await expect(createDialog.getByLabel('Responsable administrativo')).toHaveAttribute(
+    'readonly',
+    '',
+  );
   await createDialog.getByLabel('Próxima acción').fill('Confirmar visita de QA');
   await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
   await expect(page.getByRole('status')).toContainText(
@@ -933,9 +937,7 @@ test('an already sent quote version remains immutable and has no manual send but
   await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
   await page.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
   await page.getByLabel('Diagnóstico', { exact: true }).selectOption('Faringitis aguda');
-  await page
-    .getByLabel('Responsable administrativo')
-    .fill('Coordinación sintética para prueba de inmutabilidad.');
+  await expect(page.getByLabel('Responsable administrativo')).toHaveAttribute('readonly', '');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   const quoteId = await markSyntheticQuoteSent(
@@ -973,9 +975,7 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
   await page.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
   await page.getByLabel('Diagnóstico', { exact: true }).selectOption('Faringitis aguda');
-  await page
-    .getByLabel('Responsable administrativo')
-    .fill('Flujo sintético para validar pago idempotente.');
+  await expect(page.getByLabel('Responsable administrativo')).toHaveAttribute('readonly', '');
   const catalog = page.getByRole('combobox', {
     name: 'Buscar ítem de catálogo por código o nombre',
   });

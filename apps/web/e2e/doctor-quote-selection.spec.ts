@@ -94,13 +94,11 @@ test('700 historical doctors support normalized searches, distinct choices and s
   await secondary.selectOption('doctor-secondary');
   await dialog.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
   await dialog.getByLabel('Diagnóstico', { exact: true }).selectOption({ index: 1 });
-  await dialog.getByLabel('Responsable administrativo').fill('QA directorio histórico');
+  await expect(dialog.getByLabel('Responsable administrativo')).toHaveAttribute('readonly', '');
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.quotes') ?? '[]').find(
-      (q: { manager?: string }) => q.manager === 'QA directorio histórico',
-    ),
+    JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.quotes') ?? '[]').at(-1),
   );
   expect(saved.primaryDoctorId).toBe('doctor-accent-a');
   expect(saved.secondaryDoctorId).toBe('doctor-secondary');

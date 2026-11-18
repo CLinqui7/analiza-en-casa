@@ -216,7 +216,6 @@ function QuoteEditor({
   const [patientRefreshNotice, setPatientRefreshNotice] = useState<string | null>(null);
   const [draftReady, setDraftReady] = useState(false);
   const [draftRecovered, setDraftRecovered] = useState(false);
-  const managerEdited = useRef(false);
   const [managerLoadError, setManagerLoadError] = useState(false);
   const [managerLoadAttempt, setManagerLoadAttempt] = useState(0);
   useEffect(() => {
@@ -237,12 +236,8 @@ function QuoteEditor({
         if (controller.signal.aborted) return;
         if (!profile.displayName?.trim()) throw new Error('Profile name unavailable');
         setManagerLoadError(false);
-        // Restore finishes first. Fill old empty drafts too, preserving names entered by the user.
-        setDraft((current) =>
-          current.manager?.trim() || managerEdited.current
-            ? current
-            : { ...current, manager: profile.displayName },
-        );
+        // An unsaved recovered draft must use the authenticated creator, never a typed name.
+        setDraft((current) => ({ ...current, manager: profile.displayName }));
       })
       .catch(() => {
         if (!controller.signal.aborted) setManagerLoadError(true);
@@ -1041,22 +1036,18 @@ function QuoteEditor({
                     managerLoadError && !draft.manager?.trim() ? 'quote-manager-help' : undefined
                   }
                   data-action-id="QUOTE-MANAGER"
-                  onChange={(event) => {
-                    managerEdited.current = true;
-                    const manager = event.target.value;
-                    setDraft((current) => ({ ...current, manager }));
-                  }}
+                  readOnly
+                  aria-readonly="true"
                   value={draft.manager ?? ''}
                 />
               </label>
               {managerLoadError && !draft.manager?.trim() ? (
                 <div className="field-help" id="quote-manager-help" role="status">
-                  No se pudo consultar su nombre. Puede escribirlo o{' '}
+                  No se pudo consultar su nombre.
                   <Button
                     className="button-secondary"
                     type="button"
                     onClick={() => {
-                      managerEdited.current = false;
                       setManagerLoadAttempt((attempt) => attempt + 1);
                     }}
                   >
