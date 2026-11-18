@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "syntheticOnly": true,
+  "organization": "157a0046-7ed7-4bd6-85b8-005431466298",
+  "quoteId": "pending18-qa-13513537-9b97-4005-8335-b211bc539427-quote",
+  "requestId": "97edb9e8-3039-4592-a59a-c7a5dee5ba17",
+  "latestQuoteId": "7422246e-ac97-43f8-9478-52ccdb742356",
+  "oldTotal": 18,
+  "newTotal": 18,
+  "insurerAmount": 3,
+  "patientAmount": 15,
+  "paid": 5,
+  "balance": 10,
+  "accounts": 1,
+  "versions": 2,
+  "addedLines": 1,
+  "concurrentReplay": true,
+  "browserReload": true,
+  "errors": []
+}
