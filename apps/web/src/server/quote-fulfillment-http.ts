@@ -31,13 +31,16 @@ export async function quoteFulfillmentHttp(
     const page = Number(request.nextUrl.searchParams.get('page') ?? 1);
     if (!Number.isSafeInteger(page) || page < 1 || page > 100000)
       throw new MongoInputError('Página no válida.');
+    const requestId = request.nextUrl.searchParams.get('requestId');
+    if (requestId !== null && (!requestId.trim() || requestId.length > 200))
+      throw new MongoInputError('Solicitud no válida.');
     const pool = postgresPool();
     const result = write
       ? kind === 'prequotes'
         ? await assignSupplyRequest(pool, actor, await boundedJson(request))
         : await deliverReceivedOrder(pool, actor, await boundedJson(request))
       : kind === 'prequotes'
-        ? await prequoteInbox(pool, actor, page)
+        ? await prequoteInbox(pool, actor, page, requestId ?? undefined)
         : await receivedOrders(pool, actor, page);
     return NextResponse.json(result, { headers: privateHeaders });
   } catch (error) {

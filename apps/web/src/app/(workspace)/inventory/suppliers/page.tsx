@@ -88,51 +88,78 @@ export default function SuppliersPage() {
         </div>
       </Panel>
       {visible.length ? (
-        <div className="supplier-grid">
-          {visible.map((item) => (
-            <Panel key={item.id} className="supplier-card">
-              <div className="page-header-actions">
-                <span className="eyebrow">{item.sku}</span>
-                <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
-                  {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
-                </StatusTag>
-              </div>
-              <h2>{item.name}</h2>
-              <dl className="definition-list">
-                <div>
-                  <dt>Contacto</dt>
-                  <dd>{item.contactName || 'Sin registrar'}</dd>
-                </div>
-                <div>
-                  <dt>Teléfonos</dt>
-                  <dd>
-                    {[item.landlinePhone, item.mobilePhone].filter(Boolean).join(' · ') ||
-                      'Sin registrar'}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Correo</dt>
-                  <dd>{item.email || 'Sin registrar'}</dd>
-                </div>
-                <div>
-                  <dt>Dirección y notas</dt>
-                  <dd>{item.notes || 'Sin registrar'}</dd>
-                </div>
-              </dl>
-              {can('catalogs:write') ? (
-                <Button
-                  className="button-secondary"
-                  onClick={() => {
-                    setError('');
-                    setDraft({ ...item });
-                  }}
-                >
-                  Editar proveedor
-                </Button>
-              ) : null}
-            </Panel>
-          ))}
-        </div>
+        <Panel className="supplier-directory">
+          <div className="table-heading">
+            <h2>Directorio de proveedores</h2>
+            <p>Información de contacto y estado de cada proveedor.</p>
+          </div>
+          <div
+            className="table-wrap supplier-table-wrap"
+            role="region"
+            aria-label="Directorio de proveedores"
+            tabIndex={0}
+          >
+            <table className="supplier-table" aria-label="Proveedores">
+              <thead>
+                <tr>
+                  <th scope="col">Proveedor</th>
+                  <th scope="col">Contacto</th>
+                  <th scope="col">Teléfonos</th>
+                  <th scope="col">Correo</th>
+                  <th scope="col">Dirección y notas</th>
+                  <th scope="col">Estado</th>
+                  {can('catalogs:write') ? <th scope="col">Acciones</th> : null}
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((item) => (
+                  <tr key={item.id}>
+                    <th scope="row">
+                      <strong>{item.name}</strong>
+                      <small className="cell-secondary">{item.sku}</small>
+                    </th>
+                    <td>{item.contactName || 'Sin registrar'}</td>
+                    <td>
+                      {item.landlinePhone ? (
+                        <span className="supplier-phone">
+                          {item.landlinePhone}
+                          <small>Fijo</small>
+                        </span>
+                      ) : null}
+                      {item.mobilePhone ? (
+                        <span className="supplier-phone">
+                          {item.mobilePhone}
+                          <small>Celular</small>
+                        </span>
+                      ) : null}
+                      {!item.landlinePhone && !item.mobilePhone ? 'Sin registrar' : null}
+                    </td>
+                    <td>{item.email || 'Sin registrar'}</td>
+                    <td>{item.notes || 'Sin registrar'}</td>
+                    <td>
+                      <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
+                        {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                      </StatusTag>
+                    </td>
+                    {can('catalogs:write') ? (
+                      <td>
+                        <Button
+                          className="button-secondary"
+                          onClick={() => {
+                            setError('');
+                            setDraft({ ...item });
+                          }}
+                        >
+                          Editar proveedor
+                        </Button>
+                      </td>
+                    ) : null}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
       ) : (
         <EmptyState title="Sin proveedores" detail="Registre un proveedor o ajuste su búsqueda." />
       )}

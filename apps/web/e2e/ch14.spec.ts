@@ -220,18 +220,10 @@ test('CH14 preserves supplier contacts in the dedicated directory without mutati
   await admin.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click();
   await expect(admin.getByRole('heading', { name: 'Proveedores', exact: true })).toBeVisible();
   await expect(admin.locator('[data-action-id="INVENTORY-SUPPLIERS-CREATE"]')).toBeEnabled();
-  await expect(
-    admin.locator('.supplier-card').first().getByText('Contacto', { exact: true }),
-  ).toBeVisible();
-  await expect(
-    admin.locator('.supplier-card').first().getByText('Teléfonos', { exact: true }),
-  ).toBeVisible();
-  await expect(
-    admin.locator('.supplier-card').first().getByText('Correo', { exact: true }),
-  ).toBeVisible();
-  await expect(
-    admin.locator('.supplier-card').first().getByText('Dirección y notas', { exact: true }),
-  ).toBeVisible();
+  await expect(admin.getByRole('table', { name: 'Proveedores', exact: true })).toBeVisible();
+  for (const name of ['Contacto', 'Teléfonos', 'Correo', 'Dirección y notas']) {
+    await expect(admin.getByRole('columnheader', { name, exact: true })).toBeVisible();
+  }
   await expect(admin.getByText('Proveedor sintético de QA')).toBeVisible();
   await admin.getByLabel('Buscar proveedor', { exact: true }).fill('sin-proveedor-ch14');
   await expect(admin.getByText('Sin proveedores', { exact: true })).toBeVisible();

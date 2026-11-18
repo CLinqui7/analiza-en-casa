@@ -225,15 +225,11 @@ test('Nov17 quote owner, manual Enviada, edit one logical quote and approve all 
   ).toHaveCount(0);
 });
 
-test('Nov17 prequote assignment, nurse delivery, supplier CRUD and responsive screens', async ({
+test('Nov17 prequote refresh, assignment, nurse delivery, supplier table CRUD and responsive screens', async ({
   page,
 }) => {
   test.setTimeout(180000);
   await login(page, '/quotes');
-  const quote = await makeQuote(page);
-  expect((await api(page, `/api/quotes/${quote.id}/send`, { expectedVersion: 1 })).status).toBe(
-    200,
-  );
   const request = await api(page, '/api/supply-requests', {
     idempotencyKey: randomUUID(),
     patientId: evidence.patientId,
@@ -244,15 +240,45 @@ test('Nov17 prequote assignment, nurse delivery, supplier CRUD and responsive sc
   });
   expect(request.status).toBe(201);
   await page.goto('/clinical/prequotes');
+  await expect(page.locator('tbody tr').first()).toBeVisible();
+  // A quote created after loading the inbox must be available without reloading the page.
+  const quote = await makeQuote(page);
+  expect((await api(page, `/api/quotes/${quote.id}/send`, { expectedVersion: 1 })).status).toBe(
+    200,
+  );
   await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
   const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Asignar a una cotización').selectOption(quote.id);
+  const otherQuote = await makeQuote(page);
+  await dialog.getByRole('button', { name: 'Actualizar cotizaciones', exact: true }).click();
+  await expect(
+    dialog.getByLabel('Asignar a una cotización').locator(`option[value="${otherQuote.id}"]`),
+  ).toHaveCount(1);
+  await page.route('**/api/prequotes?requestId=*', (route) =>
+    route.fulfill({ status: 503, json: { error: 'Interrupción sintética de consulta' } }),
+  );
+  await dialog.getByRole('button', { name: 'Actualizar cotizaciones', exact: true }).click();
+  await expect(dialog.getByRole('alert')).toContainText('Interrupción sintética');
+  await expect(dialog.getByRole('button', { name: 'Guardar asignación' })).toBeDisabled();
+  await expect(
+    dialog.getByText('Este paciente no tiene cotizaciones disponibles', { exact: false }),
+  ).toHaveCount(0);
+  await page.unroute('**/api/prequotes?requestId=*');
+  await dialog.getByRole('button', { name: 'Actualizar cotizaciones', exact: true }).click();
   await dialog.getByLabel('Asignar a una cotización').selectOption(quote.id);
   await saveScreenshot(page, 'prequote-assignment');
   await dialog.getByRole('button', { name: 'Guardar asignación' }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole('status').filter({ hasText: 'Solicitud asignada' })).toBeVisible();
-  await page.goto('/inventory/received-orders');
   const code = 'COT-' + quote.id.replaceAll('-', '').slice(-8).toUpperCase();
+  await page.goto('/receivables');
+  const account = page.getByRole('row').filter({ hasText: code });
+  await expect(account).toHaveCount(1);
+  await expect(account).toContainText('40.00');
+  await page.goto('/quotes?search=' + code);
+  await expect(page.locator('tbody tr')).toHaveCount(1);
+  await expect(page.locator('tbody tr')).toContainText('40.00');
+  await page.goto('/inventory/received-orders');
   await page
     .locator('tbody tr')
     .filter({ hasText: code })
@@ -279,11 +305,10 @@ test('Nov17 prequote assignment, nurse delivery, supplier CRUD and responsive sc
   await dialog.getByRole('button', { name: 'Guardar proveedor' }).click();
   await expect(dialog).toHaveCount(0);
   await page.reload();
-  await expect(page.locator('.supplier-card').filter({ hasText: name })).toContainText(
-    'Contacto sintético',
-  );
+  await expect(page.getByRole('table', { name: 'Proveedores', exact: true })).toBeVisible();
+  await expect(page.getByRole('row').filter({ hasText: name })).toContainText('Contacto sintético');
   await page
-    .locator('.supplier-card')
+    .getByRole('row')
     .filter({ hasText: name })
     .getByRole('button', { name: 'Editar proveedor' })
     .click();
@@ -293,6 +318,11 @@ test('Nov17 prequote assignment, nurse delivery, supplier CRUD and responsive sc
   await dialog.getByLabel('Teléfono celular').fill('0000-0000');
   await dialog.getByRole('button', { name: 'Guardar proveedor' }).click();
   await expect(dialog).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('row').filter({ hasText: name })).toContainText('0000-0000');
+  await page.getByLabel('Buscar proveedor').fill(name);
+  await expect(page.locator('.supplier-table tbody tr')).toHaveCount(1);
+  await saveScreenshot(page, 'suppliers-table-desktop');
   await page.setViewportSize({ width: 390, height: 844 });
   await saveScreenshot(page, 'suppliers-mobile');
   await page.goto('/catalogs');
@@ -305,6 +335,72 @@ test('Nov17 prequote assignment, nurse delivery, supplier CRUD and responsive sc
     await expect(page.locator('tbody tr').first()).toBeVisible();
     await saveScreenshot(page, name);
   }
+});
+
+test('Extras1 restores empty quote owner and retains it across edits, autosave and reload', async ({
+  page,
+}) => {
+  await login(page, '/quotes?create=1');
+  const owner = page.getByLabel('Responsable administrativo');
+  await expect(owner).toHaveValue('Usuario ficticio ADMIN');
+  const url = '/api/quotes/form-draft?key=quote.create.new';
+  await expect
+    .poll(async () => (await api(page, url)).body.draft?.manager)
+    .toBe('Usuario ficticio ADMIN');
+  const previous = (await api(page, url)).body.draft;
+  expect((await api(page, url, { ...previous, manager: '' }, 'PUT')).status).toBe(200);
+  await page.evaluate(() => sessionStorage.clear());
+  await page.reload();
+  await expect(
+    page.getByText('Se recuperó el formulario pendiente.', { exact: false }),
+  ).toBeVisible();
+  await expect(owner).toHaveValue('Usuario ficticio ADMIN');
+  await page.getByLabel('Buscar paciente', { exact: true }).fill('Paciente sintético');
+  await page.getByLabel('Fecha de ingreso', { exact: true }).fill('2026-11-18');
+  await page.getByLabel('Prioridad', { exact: true }).selectOption('HIGH');
+  await expect(owner).toHaveValue('Usuario ficticio ADMIN');
+  await expect.poll(async () => (await api(page, url)).body.draft?.priority).toBe('HIGH');
+  await page.reload();
+  await expect(owner).toHaveValue('Usuario ficticio ADMIN');
+  await owner.fill('Responsable elegido por el equipo');
+  await page.getByLabel('Fecha de ingreso', { exact: true }).fill('2026-11-19');
+  await expect
+    .poll(async () => (await api(page, url)).body.draft?.manager)
+    .toBe('Responsable elegido por el equipo');
+  await page.reload();
+  await expect(owner).toHaveValue('Responsable elegido por el equipo');
+  await page.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
+});
+
+test('Extras1 late profile response does not replace a name entered by the user', async ({
+  page,
+}) => {
+  await login(page, '/quotes');
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/api/profile', async (route) => {
+    const response = await route.fetch();
+    await gate;
+    await route.fulfill({ response });
+  });
+  await page.getByRole('button', { name: '+ Nuevo' }).click();
+  const owner = page.getByLabel('Responsable administrativo');
+  await expect(page.locator('#quote-editor-form')).toHaveAttribute('aria-busy', 'false');
+  await owner.fill('Responsable manual con perfil pendiente');
+  const loaded = page.waitForResponse((response) => response.url().endsWith('/api/profile'));
+  release();
+  await loaded;
+  await page.getByLabel('Prioridad', { exact: true }).selectOption('LOW');
+  await expect(owner).toHaveValue('Responsable manual con perfil pendiente');
+  await expect
+    .poll(
+      async () =>
+        (await api(page, '/api/quotes/form-draft?key=quote.create.new')).body.draft?.manager,
+    )
+    .toBe('Responsable manual con perfil pendiente');
+  await page.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
 });
 
 test('Approved extension keeps approval and the same admission, with reason and closed general editing', async ({

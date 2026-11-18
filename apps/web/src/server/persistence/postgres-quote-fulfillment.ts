@@ -39,6 +39,7 @@ export async function prequoteInbox(
   pool: Pool,
   actor: ServerActor,
   page: number,
+  requestId?: string,
 ): Promise<PrequoteInbox> {
   if (!can(actor.role, 'quotes:write')) throw new MongoAccessError();
   return transaction(pool, actor, async (c) => {
@@ -52,12 +53,13 @@ export async function prequoteInbox(
       JOIN analiza.catalog_items i ON i.organization_id=r.organization_id AND i.id=r.catalog_item_id
       LEFT JOIN analiza.supply_request_assignments a ON a.organization_id=r.organization_id AND a.request_id=r.id
       LEFT JOIN LATERAL (SELECT q.id,q.body FROM analiza.quotes q WHERE q.organization_id=r.organization_id AND q.root_quote_id=a.root_quote_id ORDER BY q.quote_version DESC LIMIT 1) latest ON true
-      WHERE r.organization_id=$1 ORDER BY r.created_at DESC,r.id LIMIT 50 OFFSET $2`,
-      [actor.organizationId, (page - 1) * 50],
+      WHERE r.organization_id=$1 AND ($3::text IS NULL OR r.id=$3)
+      ORDER BY r.created_at DESC,r.id LIMIT 50 OFFSET $2`,
+      [actor.organizationId, requestId ? 0 : (page - 1) * 50, requestId ?? null],
     );
     const count = await c.query(
-      'SELECT count(*)::integer AS count FROM analiza.supply_requests WHERE organization_id=$1',
-      [actor.organizationId],
+      'SELECT count(*)::integer AS count FROM analiza.supply_requests WHERE organization_id=$1 AND ($2::text IS NULL OR id=$2)',
+      [actor.organizationId, requestId ?? null],
     );
     const quotes = await c.query(
       `WITH q AS (${latestQuotes}) SELECT q.id,q.root_quote_id AS "rootId",q.patient_id AS "patientId",

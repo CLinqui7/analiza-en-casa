@@ -216,23 +216,39 @@ function QuoteEditor({
   const [patientRefreshNotice, setPatientRefreshNotice] = useState<string | null>(null);
   const [draftReady, setDraftReady] = useState(false);
   const [draftRecovered, setDraftRecovered] = useState(false);
+  const managerEdited = useRef(false);
+  const [managerLoadError, setManagerLoadError] = useState(false);
+  const [managerLoadAttempt, setManagerLoadAttempt] = useState(0);
   useEffect(() => {
-    if (mode !== 'create' || !draftReady || draftRecovered || !session || session.mode === 'mock')
-      return;
+    if (mode !== 'create' || !draftReady || !session) return;
     const controller = new AbortController();
-    void fetch('/api/profile', { cache: 'no-store', signal: controller.signal })
-      .then(async (response) =>
-        response.ok ? (response.json() as Promise<{ displayName: string }>) : null,
-      )
+    const profile =
+      session.mode === 'mock'
+        ? Promise.resolve({ displayName: session.role })
+        : fetch('/api/profile', {
+            cache: 'no-store',
+            signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]),
+          }).then(async (response) => {
+            if (!response.ok) throw new Error('Profile unavailable');
+            return response.json() as Promise<{ displayName: string }>;
+          });
+    void profile
       .then((profile) => {
-        if (profile?.displayName && !controller.signal.aborted)
-          setDraft((current) =>
-            current.manager ? current : { ...current, manager: profile.displayName },
-          );
+        if (controller.signal.aborted) return;
+        if (!profile.displayName?.trim()) throw new Error('Profile name unavailable');
+        setManagerLoadError(false);
+        // Restore finishes first. Fill old empty drafts too, preserving names entered by the user.
+        setDraft((current) =>
+          current.manager?.trim() || managerEdited.current
+            ? current
+            : { ...current, manager: profile.displayName },
+        );
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!controller.signal.aborted) setManagerLoadError(true);
+      });
     return () => controller.abort();
-  }, [mode, draftReady, draftRecovered, session]);
+  }, [mode, draftReady, session, managerLoadAttempt]);
   const [autosaveError, setAutosaveError] = useState(false);
   const draftDiscarded = useRef(false);
   const saveChain = useRef<Promise<void>>(Promise.resolve());
@@ -1016,16 +1032,37 @@ function QuoteEditor({
                 </span>
               ) : null}
             </label>
-            <label>
-              Responsable administrativo
+            <div>
+              <label htmlFor="quote-manager">Responsable administrativo</label>
               <input
-                data-action-id="QUOTE-MANAGER"
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, manager: event.target.value }))
+                id="quote-manager"
+                aria-describedby={
+                  managerLoadError && !draft.manager?.trim() ? 'quote-manager-help' : undefined
                 }
+                data-action-id="QUOTE-MANAGER"
+                onChange={(event) => {
+                  managerEdited.current = true;
+                  const manager = event.target.value;
+                  setDraft((current) => ({ ...current, manager }));
+                }}
                 value={draft.manager ?? ''}
               />
-            </label>
+              {managerLoadError && !draft.manager?.trim() ? (
+                <div className="field-help" id="quote-manager-help" role="status">
+                  No se pudo consultar su nombre. Puede escribirlo o{' '}
+                  <Button
+                    className="button-secondary"
+                    type="button"
+                    onClick={() => {
+                      managerEdited.current = false;
+                      setManagerLoadAttempt((attempt) => attempt + 1);
+                    }}
+                  >
+                    Reintentar
+                  </Button>
+                </div>
+              ) : null}
+            </div>
             <label>
               Prioridad
               <select

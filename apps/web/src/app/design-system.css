@@ -2,7 +2,7 @@
    This layer intentionally preserves the existing page layouts and behavior. */
 .dependent-section,
 .dependent-card,
-.supplier-card,
+.supplier-directory,
 .fulfillment-summary {
   min-width: 0;
 }
@@ -16,19 +16,62 @@
   padding: clamp(16px, 2vw, 24px);
   background: var(--surface-soft, #f8fafc);
 }
-.dependent-card h3,
-.supplier-card h2 {
+.dependent-card h3 {
   margin-top: 0;
   overflow-wrap: anywhere;
 }
-.dependent-summary-grid,
-.supplier-grid {
+.dependent-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: 20px;
 }
-.supplier-card .definition-list dd {
+.supplier-table {
+  width: 100%;
+  min-width: 920px;
+  table-layout: fixed;
+}
+.supplier-table th,
+.supplier-table td {
+  white-space: normal;
   overflow-wrap: anywhere;
+  vertical-align: top;
+}
+.supplier-table th:first-child {
+  width: 20%;
+}
+.supplier-table th:nth-child(5) {
+  width: 18%;
+}
+.supplier-table th:nth-child(6) {
+  width: 9%;
+}
+.supplier-table tbody th {
+  text-align: left;
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+}
+.supplier-table-wrap:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 4px;
+}
+.supplier-phone {
+  display: block;
+  margin-bottom: 8px;
+}
+.supplier-phone small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.supplier-table .button {
+  white-space: normal;
+  max-width: 100%;
+}
+.supplier-directory .table-heading {
+  gap: 12px;
 }
 .fulfillment-hero {
   display: flex;
@@ -163,7 +206,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .dependent-card,
-  .supplier-card,
+  .supplier-directory,
   .fulfillment-summary {
     animation: fulfillment-enter 0.22s ease-out both;
   }
@@ -180,7 +223,7 @@
 }
 @media print {
   .dependent-card,
-  .supplier-card,
+  .supplier-directory,
   .fulfillment-summary {
     animation: none !important;
   }

@@ -1,11 +1,11 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { quoteDisplayCode } from '@analiza/domain';
 import { useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
-import type { PrequoteEntry, PrequoteInbox } from '@/lib/quote-fulfillment';
+import type { PrequoteChoice, PrequoteEntry, PrequoteInbox } from '@/lib/quote-fulfillment';
 import { quoteStatusLabels } from '@/lib/quote-workflow';
 
 const money = (amount: number) =>
@@ -15,6 +15,9 @@ export default function PrequotesPage() {
   const [inbox, setInbox] = useState<PrequoteInbox | null>(null);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<PrequoteEntry | null>(null);
+  const [choices, setChoices] = useState<PrequoteChoice[]>([]);
+  const [choiceState, setChoiceState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const choiceRequest = useRef<AbortController | null>(null);
   const [quoteId, setQuoteId] = useState('');
   const [extensionReason, setExtensionReason] = useState('');
   const [key, setKey] = useState('');
@@ -40,10 +43,51 @@ export default function PrequotesPage() {
     const timer = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timer);
   }, [load]);
-  const choices = inbox?.quotes.filter((quote) => quote.patientId === selected?.patientId) ?? [];
+  useEffect(() => () => choiceRequest.current?.abort(), []);
+  async function refreshChoices(entry: PrequoteEntry) {
+    choiceRequest.current?.abort();
+    const controller = new AbortController();
+    choiceRequest.current = controller;
+    setChoiceState('loading');
+    setChoices([]);
+    setQuoteId('');
+    setExtensionReason('');
+    setError('');
+    try {
+      // Scope by request, not inbox page: other requests can move it to another page.
+      const response = await fetch(`/api/prequotes?requestId=${encodeURIComponent(entry.id)}`, {
+        cache: 'no-store',
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]),
+      });
+      const payload = await response.json();
+      if (!response.ok)
+        throw new Error(payload.error || 'No se pudieron consultar las cotizaciones.');
+      if (controller.signal.aborted) return;
+      const refreshed = (payload as PrequoteInbox).entries.find((item) => item.id === entry.id);
+      if (!refreshed) throw new Error('La solicitud ya no está disponible. Actualice la bandeja.');
+      setSelected(refreshed);
+      setChoices(
+        (payload as PrequoteInbox).quotes.filter(
+          (quote) => quote.patientId === refreshed.patientId,
+        ),
+      );
+      setChoiceState('ready');
+    } catch (cause) {
+      if (controller.signal.aborted) return;
+      setChoiceState('error');
+      setError(
+        cause instanceof Error ? cause.message : 'No se pudieron consultar las cotizaciones.',
+      );
+    }
+  }
+  function closeSelection() {
+    choiceRequest.current?.abort();
+    setSelected(null);
+  }
   const chosen = choices.find((quote) => quote.id === quoteId);
   async function assign() {
-    if (!selected || !chosen || selected.unitPrice === null || busy) return;
+    if (!selected || !chosen || choiceState !== 'ready' || selected.unitPrice === null || busy)
+      return;
     if (
       chosen.status === 'APPROVED' &&
       (!chosen.approvalDecisionId || extensionReason.trim().length < 5)
@@ -80,7 +124,7 @@ export default function PrequotesPage() {
             ? 'Solicitud asignada. La cotización y su saldo en Cuentas por cobrar están actualizados.'
             : 'Solicitud asignada al borrador. Al marcar la cotización como Enviada, aparecerá en Cuentas por cobrar.',
       );
-      setSelected(null);
+      closeSelection();
       await Promise.all([load(), refreshWorkspace()]);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo asignar.');
@@ -161,6 +205,7 @@ export default function PrequotesPage() {
                           setExtensionReason('');
                           setKey(crypto.randomUUID());
                           setError('');
+                          void refreshChoices(entry);
                         }}
                       >
                         Revisar solicitud
@@ -202,19 +247,20 @@ export default function PrequotesPage() {
       <Dialog
         open={Boolean(selected)}
         onClose={() => {
-          if (!busy) setSelected(null);
+          if (!busy) closeSelection();
         }}
         title="Revisar solicitud de insumos"
         description="La asignación conserva una sola cotización y deja constancia de los productos añadidos."
         footer={
           <>
-            <Button className="button-secondary" disabled={busy} onClick={() => setSelected(null)}>
+            <Button className="button-secondary" disabled={busy} onClick={closeSelection}>
               Cerrar
             </Button>
             {selected && !selected.assignedQuoteId ? (
               <Button
                 disabled={
                   busy ||
+                  choiceState !== 'ready' ||
                   !chosen ||
                   selected.unitPrice === null ||
                   (chosen.status === 'APPROVED' &&
@@ -273,7 +319,7 @@ export default function PrequotesPage() {
                 <label>
                   Asignar a una cotización
                   <select
-                    disabled={busy}
+                    disabled={busy || choiceState !== 'ready'}
                     value={quoteId}
                     onChange={(event) => {
                       setQuoteId(event.target.value);
@@ -289,6 +335,20 @@ export default function PrequotesPage() {
                     ))}
                   </select>
                 </label>
+                <div className="action-row">
+                  <Button
+                    className="button-secondary"
+                    disabled={busy || choiceState === 'loading'}
+                    onClick={() => void refreshChoices(selected)}
+                  >
+                    {choiceState === 'loading'
+                      ? 'Consultando cotizaciones…'
+                      : 'Actualizar cotizaciones'}
+                  </Button>
+                  {choiceState === 'loading' ? (
+                    <span role="status">Buscando las cotizaciones vigentes del paciente…</span>
+                  ) : null}
+                </div>
                 <p className="field-help">
                   Puede asignar a Borrador o Enviada, o registrar una ampliación auditada de una
                   Aprobada. Las rechazadas no admiten ampliaciones.
@@ -315,10 +375,15 @@ export default function PrequotesPage() {
                     </label>
                   </>
                 ) : null}
-                {!choices.length ? (
-                  <Link className="button button-secondary" href="/quotes?create=1">
-                    Crear cotización
-                  </Link>
+                {choiceState === 'ready' && !choices.length ? (
+                  <div className="page-stack">
+                    <p className="notice">
+                      Este paciente no tiene cotizaciones disponibles para asignar esta solicitud.
+                    </p>
+                    <Link className="button button-secondary" href="/quotes?create=1">
+                      Crear cotización
+                    </Link>
+                  </div>
                 ) : null}
                 {chosen?.status === 'DRAFT' ? (
                   <p className="notice">

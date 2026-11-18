@@ -219,6 +219,18 @@ try {
     priority: 'LOW',
     note: '',
   });
+  const scoped = await prequoteInbox(pool, actor, 999, request.id);
+  assert.equal(scoped.total, 1);
+  assert.deepEqual(scoped.entries.map((entry) => entry.id), [request.id]);
+  assert.ok(scoped.quotes.some((quote) => quote.id === second.id));
+  assert.ok(scoped.quotes.every((quote) => quote.patientId === patientId));
+  assert.deepEqual((await prequoteInbox(pool, actor, 1, otherRequest.id)).quotes, []);
+  const foreignScope = await prequoteInbox(pool, foreign, 1, request.id);
+  assert.deepEqual(foreignScope.entries, []);
+  assert.deepEqual(foreignScope.quotes, []);
+  assert.equal(foreignScope.total, 0);
+  await assert.rejects(prequoteInbox(pool, nurse, 1, request.id));
+  pass('request-specific quote refresh ignores inbox pagination and isolates patient, organization and role');
   await assert.rejects(
     assignSupplyRequest(pool, actor, {
       ...assignment,
