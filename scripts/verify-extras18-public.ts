@@ -220,7 +220,10 @@ try {
     errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/receivables');
-  const row = page.getByRole('row').filter({ hasText: code });
+  const accountTable = page.locator('.panel').filter({
+    has: page.getByRole('heading', { name: 'Estado de cuentas', exact: true }),
+  });
+  const row = accountTable.getByRole('row').filter({ hasText: code });
   await expect(row).toHaveCount(1);
   await expect(row).toContainText('29.57');
   await page.reload();
