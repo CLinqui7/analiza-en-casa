@@ -2,7 +2,7 @@
 
 Fuente: [texto literal](sources/CLIENT_EXTRAS1_2026-11-17.txt). SHA256 del DOCX: `312251e0d04734dacee22dcb9891367aaa769f8818246297025e70cf7e6ac316`. El original no se modificó. No contiene imágenes.
 
-Estado: implementación, pruebas conectadas y revisión visual aprobadas; publicación pendiente. Código funcional comprobado: `3e2080cb71340449d2379f36a134c7d4f8be7936`; ajuste visual final comprobado: `de81fbcbd6e1cddfb30b3a5e10688488e6938cdb`.
+Estado: publicado y verificado en Contabo el 18/11/2026, después de GitHub, release `614b1b4bca2f93de4b85414504581ffe9803b3e2`. Código funcional comprobado: `3e2080cb71340449d2379f36a134c7d4f8be7936`; ajuste visual final comprobado: `de81fbcbd6e1cddfb30b3a5e10688488e6938cdb`.
 
 | ID | Corrección solicitada | Implementación y criterio de aceptación |
 | --- | --- | --- |
@@ -39,4 +39,6 @@ Se añadieron pruebas de concurrencia, separación entre sesiones, token ausente
 
 La repetición focalizada alcanzó el límite de inicios de sesión de la cuenta sintética; pasó al reintentar. Hubo también una conexión reiniciada del túnel PostgreSQL de QA. No se modificaron límites ni autenticación de producción. El entorno y las capturas sólo contienen datos ficticios.
 
-Publicación y comprobación pública: pendientes.
+Publicación y comprobación pública: aprobadas. Se comprobaron estabilidad de CSRF, perfil, API de Precotización y cinco páginas a 1440/768/390 px, sin errores JavaScript ni desbordamiento de página. La organización sintética pública no tenía solicitudes pendientes para comprobar asignaciones; las escrituras se probaron en PostgreSQL aislado, sin crear cargos ni entregas de prueba en producción. [Resultado público](../feedback/evidence/extras1-nov17/public-release.json) y [operación, respaldo y recuperación](../deployment/CONTABO_EXTRAS1_2026-11-18.md).
+
+Se retiraron contenedores, red, imágenes y archivos remotos exclusivos de QA, además de los túneles locales. La revisión automática bloqueó el borrado de la carpeta privada local de QA; permanece fuera del repositorio y no afecta al despliegue. Web y PostgreSQL quedaron saludables y la salud pública respondió HTTP 200.
