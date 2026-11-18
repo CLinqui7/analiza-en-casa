@@ -311,7 +311,7 @@ export default function PrequotesPage() {
             </div>
             {selected.note ? <p className="notice">{selected.note}</p> : null}
             {!selected.assignedQuoteId && selected.itemAvailable && selected.unitPrice === null ? (
-              <label>
+              <label className="fulfillment-price">
                 Precio unitario de esta solicitud (USD)
                 <input
                   type="number"

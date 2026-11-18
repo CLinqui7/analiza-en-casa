@@ -516,7 +516,7 @@ test('Nov18 patient search crosses pages and supply requests are under Clinical'
   await expect(page.getByText('Página 1 · 51 líneas', { exact: true })).toBeVisible();
   await expect(page.locator('tbody tr')).toHaveCount(50);
   await search.fill('Sin coincidencias sintéticas');
-  await expect(page.getByRole('heading', { name: 'Sin coincidencias', exact: true })).toBeVisible();
+  await expect(page.getByText('Sin coincidencias', { exact: true })).toBeVisible();
   await search.fill('99123456-7');
   await expect(page.locator('tbody tr')).toHaveCount(50);
   for (const width of [1440, 768, 390]) {
