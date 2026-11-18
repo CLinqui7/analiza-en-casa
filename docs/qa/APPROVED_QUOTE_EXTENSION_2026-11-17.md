@@ -2,7 +2,7 @@
 
 Fuente: [confirmación literal del usuario](sources/CLIENT_APPROVED_EXTENSION_2026-11-17.txt), recibida el 17/11/2026 en El Salvador. Amplía NOV17-04 sin modificar el documento original ni eliminar las restricciones generales.
 
-Estado: verificación técnica aprobada; listo para publicar y comprobar en la URL pública. Código probado: `05c422d5a47e724d51b9b7197d202503564813f8`, previamente subido a GitHub. No se afirma publicación de este seguimiento todavía.
+Estado: publicado y comprobado en Contabo. Código probado: `05c422d5a47e724d51b9b7197d202503564813f8`; release activo: `e1f0935b5111c78c2769486bda96098e93e8b8e1`, subido a GitHub antes de desplegar. [Evidencia de publicación](../deployment/CONTABO_APPROVED_EXTENSION_2026-11-17.md).
 
 ## Comportamiento
 
@@ -27,5 +27,7 @@ Línea base: preflight y 370 pruebas unitarias/servidor aprobados antes de modif
 La primera ejecución de la prueba nueva detectó que el ingreso sintético no incluía médico principal; se completó la fixture, conservando la validación de la aplicación. La primera regresión clínica perdió su conexión con la base aislada; se repitió tras estabilizar el entorno y los 15 grupos pasaron. No se modificaron los límites ni la autenticación de producción para ejecutar pruebas.
 
 Evidencia: [ampliación PostgreSQL](../feedback/evidence/part1-nov17/approved-extension-postgres.json), [regresión clínica](../feedback/evidence/part1-nov17/extension-clinical-regression.json), [regresión financiera](../feedback/evidence/part1-nov17/extension-billing-regression.json), [captura móvil revisada](../feedback/evidence/part1-nov17/approved-extension-mobile.png).
+
+Comprobación pública: API autenticada y cinco rutas afectadas a 1440/768/390 px, sin desbordamiento de página ni errores JavaScript; salud HTTP 200 y contenedores saludables. La organización sintética pública no tenía solicitudes pendientes con cotizaciones seleccionables, por lo que el alta de una ampliación se certificó en el entorno aislado y no se realizaron escrituras financieras en producción. Se retiró el entorno QA temporal. [Informe público](../feedback/evidence/part1-nov17/approved-extension-public.json).
 
 Este seguimiento no añade dependencias ni DDL, no cambia reglas de cobertura y no modifica el bloqueo general `requireOpenQuote`. Se conserva la evidencia histórica; no se certifica nueva paridad EXACT de video.
