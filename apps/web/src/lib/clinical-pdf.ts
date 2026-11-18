@@ -80,7 +80,9 @@ export async function buildClinicalPdf(blocks: ClinicalPdfBlock[]) {
     const font = block.heading ? bold : regular;
     // Keep non-WinAnsi characters identifiable instead of silently dropping clinical content.
     const printable = [...block.text.normalize('NFC')]
-      .map((char) => {
+      .map((sourceChar) => {
+        // Standard-font equivalents keep common clinical labels and micro units readable.
+        const char = sourceChar === '₂' ? '2' : sourceChar === 'μ' ? 'µ' : sourceChar;
         try {
           font.encodeText(char);
           return char;

@@ -170,6 +170,7 @@ test('PDF download uses the same one, several and all record sections as printin
       expect(text).toContain('Cuidados separados EXTRAS18');
       expect(text).toContain('Medicamento sintético QA Horas de aplicación');
       expect(text).not.toContain('17:00Dilución');
+      expect(text).not.toContain('[U+2082]');
     }
     expect(text).not.toContain('Ver cotización completa');
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
