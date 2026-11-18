@@ -656,19 +656,25 @@ try {
     requestId: pricedRequest.id,
     quoteId: ownerRevision.id,
     expectedRecordVersion: 1,
-    expectedUnitPrice: 7.25,
-    priceSource: 'MANUAL',
+    expectedUnitPrice: 0,
+    priceSource: 'PENDING',
   };
   await assert.rejects(assignSupplyRequest(pool, actor, { ...manual, priceSource: undefined }));
   await assert.rejects(assignSupplyRequest(pool, nurse, manual));
   await assert.rejects(assignSupplyRequest(pool, foreign, manual));
   await assert.rejects(assignSupplyRequest(pool, actor, { ...manual, expectedUnitPrice: -1 }));
-  const manualResult = await assignSupplyRequest(pool, actor, manual);
+  await assert.rejects(assignSupplyRequest(pool, actor, { ...manual, priceSource: 'MANUAL' }));
+  await assert.rejects(assignSupplyRequest(pool, actor, { ...manual, expectedUnitPrice: 7.25 }));
+  const [manualResult, zeroReplay] = await Promise.all([
+    assignSupplyRequest(pool, actor, manual),
+    assignSupplyRequest(pool, actor, manual),
+  ]);
+  assert.equal(manualResult.quoteId, zeroReplay.quoteId);
   assert.equal((await assignSupplyRequest(pool, actor, manual)).alreadyAssigned, true);
   const manualQuote = await storedQuote(manualResult.quoteId);
-  assert.equal(manualQuote.items.at(-1)?.unitPrice, 7.25);
+  assert.equal(manualQuote.items.at(-1)?.unitPrice, 0);
   assert.equal(manualQuote.items.at(-1)?.quantity, 3);
-  assert.equal(manualQuote.total, 37.57); // (20 + 21.75) less the fixture's 10% supplies discount.
+  assert.equal(manualQuote.total, ownerRevision.total);
   assert.deepEqual(await storedQuote(ownerRevision.id), ownerRevision);
   const manualAudit = await transaction(pool, actor, async (c) => {
     const price = (
@@ -680,7 +686,7 @@ try {
     assert.equal(price, undefined);
     return (
       await c.query(
-        "SELECT count(*)::int AS count FROM analiza.audit_events WHERE organization_id=$1 AND resource_id=$2 AND action='SUPPLY_REQUEST_MANUAL_PRICE_CONFIRMED'",
+        "SELECT count(*)::int AS count FROM analiza.audit_events WHERE organization_id=$1 AND resource_id=$2 AND action='SUPPLY_REQUEST_PRICE_PENDING'",
         [actor.organizationId, pricedRequest.id],
       )
     ).rows[0].count;
@@ -692,8 +698,15 @@ try {
       [actor.organizationId, itemId, JSON.stringify(item)],
     );
   });
+  // Registering a sale price later does not silently rewrite an issued snapshot,
+  // nor charge a request twice when the operator repeats the original action.
+  assert.equal((await assignSupplyRequest(pool, actor, manual)).alreadyAssigned, true);
+  assert.deepEqual(await storedQuote(manualResult.quoteId), manualQuote);
+  const inboxAfterPrice = await prequoteInbox(pool, actor, 1, pricedRequest.id);
+  assert.equal(inboxAfterPrice.entries[0].assignedUnitPrice, 0);
+  assert.equal(inboxAfterPrice.entries[0].unitPrice, item.salePriceExcludingTax);
   pass(
-    'explicit missing catalogue price adds quantity and audited amount once, preserves discounts and catalogue',
+    'authorized missing price at zero adds quantity once, audits pending price and preserves snapshots after catalogue update',
   );
 
   // Search applies before pagination, treats wildcard characters literally and stays tenant scoped.

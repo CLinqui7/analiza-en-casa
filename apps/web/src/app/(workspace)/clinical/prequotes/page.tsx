@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { quoteDisplayCode } from '@analiza/domain';
-import { useWorkspace } from '@/components/providers';
+import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
 import type { PrequoteChoice, PrequoteEntry, PrequoteInbox } from '@/lib/quote-fulfillment';
 import { quoteStatusLabels } from '@/lib/quote-workflow';
@@ -12,6 +12,7 @@ const money = (amount: number) =>
   new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(amount);
 export default function PrequotesPage() {
   const { refreshWorkspace } = useWorkspace();
+  const { can } = useAuth();
   const [inbox, setInbox] = useState<PrequoteInbox | null>(null);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<PrequoteEntry | null>(null);
@@ -20,7 +21,6 @@ export default function PrequotesPage() {
   const choiceRequest = useRef<AbortController | null>(null);
   const [quoteId, setQuoteId] = useState('');
   const [extensionReason, setExtensionReason] = useState('');
-  const [manualPrice, setManualPrice] = useState('');
   const [addedQuoteId, setAddedQuoteId] = useState<string | null>(null);
   const [key, setKey] = useState('');
   const [loading, setLoading] = useState(true);
@@ -66,7 +66,6 @@ export default function PrequotesPage() {
     setChoices([]);
     setQuoteId('');
     setExtensionReason('');
-    setManualPrice('');
     setError('');
     try {
       // Scope by request, not inbox page: other requests can move it to another page.
@@ -100,19 +99,9 @@ export default function PrequotesPage() {
     setSelected(null);
   }
   const chosen = choices.find((quote) => quote.id === quoteId);
-  const confirmedPrice = selected?.unitPrice ?? (manualPrice.trim() ? Number(manualPrice) : null);
-  const priceReady =
-    confirmedPrice !== null && Number.isFinite(confirmedPrice) && confirmedPrice >= 0;
+  const confirmedPrice = selected?.unitPrice ?? 0;
   async function assign() {
-    if (
-      !selected ||
-      !chosen ||
-      choiceState !== 'ready' ||
-      !selected.itemAvailable ||
-      !priceReady ||
-      busy
-    )
-      return;
+    if (!selected || !chosen || choiceState !== 'ready' || !selected.itemAvailable || busy) return;
     if (
       chosen.status === 'APPROVED' &&
       (!chosen.approvalDecisionId || extensionReason.trim().length < 5)
@@ -129,7 +118,7 @@ export default function PrequotesPage() {
           quoteId,
           expectedRecordVersion: chosen.recordVersion,
           expectedUnitPrice: confirmedPrice,
-          priceSource: selected.unitPrice === null ? 'MANUAL' : 'CATALOG',
+          priceSource: selected.unitPrice === null ? 'PENDING' : 'CATALOG',
           idempotencyKey: key,
           ...(chosen.status === 'APPROVED'
             ? {
@@ -145,11 +134,14 @@ export default function PrequotesPage() {
       if (!response.ok) throw new Error(payload.error || 'No se pudo asignar la solicitud.');
       setAddedQuoteId(payload.quoteId);
       setMessage(
-        chosen.status === 'APPROVED'
+        (chosen.status === 'APPROVED'
           ? 'Ampliación registrada. Se conservaron la aprobación, el historial y los pagos; la cuenta por cobrar está actualizada.'
           : chosen.status === 'SENT'
             ? 'Solicitud asignada. La cotización y su saldo en Cuentas por cobrar están actualizados.'
-            : 'Solicitud asignada al borrador. Al marcar la cotización como Enviada, aparecerá en Cuentas por cobrar.',
+            : 'Solicitud asignada al borrador. Al marcar la cotización como Enviada, aparecerá en Cuentas por cobrar.') +
+          (selected.unitPrice === null
+            ? ' El insumo se añadió con precio 0; su precio de venta está pendiente de completar.'
+            : ''),
       );
       closeSelection();
       await Promise.all([load(), syncWorkspace()]);
@@ -310,7 +302,6 @@ export default function PrequotesPage() {
                   choiceState !== 'ready' ||
                   !chosen ||
                   !selected.itemAvailable ||
-                  !priceReady ||
                   (chosen.status === 'APPROVED' &&
                     (!chosen.approvalDecisionId || extensionReason.trim().length < 5))
                 }
@@ -331,35 +322,29 @@ export default function PrequotesPage() {
                 {selected.itemName} · {selected.quantity} unidades
               </p>
               <p>
-                {selected.unitPrice === null
-                  ? 'Precio de catálogo pendiente'
-                  : `Precio unitario ${money(selected.unitPrice)} · Importe ${money(selected.unitPrice * selected.quantity)} antes de descuentos de la cotización`}
+                {selected.assignedQuoteId && selected.assignedUnitPrice != null
+                  ? `Precio aplicado ${money(selected.assignedUnitPrice)} · Importe añadido ${money(selected.assignedUnitPrice * selected.quantity)} antes de descuentos de la cotización`
+                  : `Precio unitario ${money(confirmedPrice)} · Importe ${money(confirmedPrice * selected.quantity)} antes de descuentos de la cotización`}
               </p>
             </div>
             {selected.note ? <p className="notice">{selected.note}</p> : null}
             {!selected.assignedQuoteId && selected.itemAvailable && selected.unitPrice === null ? (
-              <label className="fulfillment-price">
-                Precio unitario de esta solicitud (USD)
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={manualPrice}
-                  disabled={busy}
-                  onChange={(event) => setManualPrice(event.target.value)}
-                  placeholder="Ingrese el precio confirmado"
-                />
-                <span className="field-help">
-                  El catálogo no tiene precio de venta. Confirme el importe con el equipo; se
-                  guardará en esta cotización sin cambiar el catálogo.
-                </span>
-                {priceReady ? (
-                  <span className="field-help">
-                    Importe a añadir: {money(confirmedPrice! * selected.quantity)} antes de
-                    descuentos.
-                  </span>
+              <div className="notice warning" role="status">
+                <p>
+                  Precio de venta pendiente. Se añadirá la cantidad solicitada con precio 0.
+                  Complete el precio en el catálogo general para las próximas incorporaciones.
+                </p>
+                {can('catalogs:write') ? (
+                  <Link
+                    className="button button-secondary"
+                    href={`/catalogs?category=${encodeURIComponent(selected.itemCategory ?? 'SUPPLIES')}&search=${encodeURIComponent(selected.itemName)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Completar precio en Catálogos (otra pestaña)
+                  </Link>
                 ) : null}
-              </label>
+              </div>
             ) : null}
             {!selected.itemAvailable && !selected.assignedQuoteId ? (
               <p className="notice warning">

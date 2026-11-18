@@ -1036,11 +1036,13 @@ function QuoteEditor({
                     managerLoadError && !draft.manager?.trim() ? 'quote-manager-help' : undefined
                   }
                   data-action-id="QUOTE-MANAGER"
+                  disabled
                   readOnly
                   aria-readonly="true"
                   value={draft.manager ?? ''}
                 />
               </label>
+              <p className="field-help">Asignado automáticamente. No se puede cambiar.</p>
               {managerLoadError && !draft.manager?.trim() ? (
                 <div className="field-help" id="quote-manager-help" role="status">
                   No se pudo consultar su nombre.

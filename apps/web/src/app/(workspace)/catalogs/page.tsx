@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { CatalogItem } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -43,13 +44,17 @@ const itemSchema = z.object({
 });
 type ItemForm = z.infer<typeof itemSchema>;
 
-export default function CatalogsPage() {
+function CatalogsContent() {
+  const searchParams = useSearchParams();
   const { addCatalogItem, catalogItems } = useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CatalogItem | null>(null);
-  const [activeCategory, setActiveCategory] = useState<Category>('SERVICES');
-  const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<Category>(() => {
+    const requested = searchParams.get('category');
+    return categories.find(([category]) => category === requested)?.[0] ?? 'SERVICES';
+  });
+  const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ItemForm>({
@@ -350,5 +355,13 @@ export default function CatalogsPage() {
         </form>
       </Dialog>
     </div>
+  );
+}
+
+export default function CatalogsPage() {
+  return (
+    <Suspense fallback={<p role="status">Cargando catálogo…</p>}>
+      <CatalogsContent />
+    </Suspense>
   );
 }

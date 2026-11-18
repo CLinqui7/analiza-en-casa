@@ -45,8 +45,9 @@ export async function prequoteInbox(
   return transaction(pool, actor, async (c) => {
     const entries = await c.query(
       `SELECT r.id,r.created_at AS "createdAt",r.patient_id AS "patientId",p.body->>'fullName' AS "patientName",
-      i.body->>'name' AS "itemName",r.quantity,r.note,r.priority,r.requested_by AS "requestedBy",
+      i.body->>'name' AS "itemName",i.body->>'category' AS "itemCategory",r.quantity,r.note,r.priority,r.requested_by AS "requestedBy",
       CASE WHEN i.body->>'status'='ACTIVE' THEN (i.body->>'salePriceExcludingTax')::numeric ELSE NULL END AS "unitPrice",
+      a.unit_price AS "assignedUnitPrice",
       (i.body->>'status'='ACTIVE' AND i.body->>'category' IN ('MEDICATIONS','SUPPLIES','EQUIPMENT')) AS "itemAvailable",
       a.quote_id AS "assignedQuoteId",a.root_quote_id AS "rootQuoteId",latest.id AS "currentQuoteId",
       EXISTS(SELECT 1 FROM jsonb_array_elements(latest.body->'items') line WHERE line->>'id'=a.line_id) AS "assignmentPresent"
@@ -76,6 +77,7 @@ export async function prequoteInbox(
         ...row,
         createdAt: row.createdAt.toISOString(),
         unitPrice: row.unitPrice === null ? null : Number(row.unitPrice),
+        assignedUnitPrice: row.assignedUnitPrice === null ? null : Number(row.assignedUnitPrice),
       })),
       quotes: quotes.rows.map((row) => ({
         ...row,
@@ -183,17 +185,20 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
       throw new MongoInputError(
         'El artículo no está disponible para añadirlo. Revise su estado en Catálogos.',
       );
-    const manualPrice = item.salePriceExcludingTax == null;
-    if (manualPrice && input.priceSource !== 'MANUAL')
-      throw new MongoInputError('Indique y confirme el precio unitario de esta solicitud.');
+    // Client decision, Nov18: missing sale prices enter at zero, never at cost or
+    // an invented/manual price. A later catalogue change cannot reprice a snapshot.
+    const pricePending = item.salePriceExcludingTax == null;
+    const unitPrice = pricePending ? 0 : item.salePriceExcludingTax;
+    if (input.priceSource === 'MANUAL')
+      throw new MongoInputError('Registre el precio de venta en la tabla de insumos.');
     if (
-      !manualPrice &&
-      (input.priceSource === 'MANUAL' || item.salePriceExcludingTax !== input.expectedUnitPrice)
+      input.expectedUnitPrice !== unitPrice ||
+      (pricePending && input.priceSource !== 'PENDING') ||
+      (!pricePending && input.priceSource === 'PENDING')
     )
       throw new MongoInputError(
-        'El precio cambió. Actualice la bandeja y confirme el nuevo importe.',
+        'El precio cambió. Cierre y vuelva a revisar la solicitud para usar el importe vigente.',
       );
-    const unitPrice = manualPrice ? input.expectedUnitPrice : item.salePriceExcludingTax;
     const lineId = `supply-request-${request.id}`;
     const items = [
       ...source.items,
@@ -270,8 +275,8 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
       ],
     );
     await audit(c, actor, 'SUPPLY_REQUEST_ASSIGNED', 'supply_request', request.id);
-    if (manualPrice)
-      await audit(c, actor, 'SUPPLY_REQUEST_MANUAL_PRICE_CONFIRMED', 'supply_request', request.id);
+    if (pricePending)
+      await audit(c, actor, 'SUPPLY_REQUEST_PRICE_PENDING', 'supply_request', request.id);
     await audit(
       c,
       actor,

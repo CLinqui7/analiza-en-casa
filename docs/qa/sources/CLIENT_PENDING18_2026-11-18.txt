@@ -1,0 +1,25 @@
+Fuente: correcionespend_.docx
+SHA256: 4ebe2f36e633a538466a0e7235cda380937be1ee265a0f20bde70f3c634d52d0
+Extracción literal. Original sin modificar; sin imágenes.
+
+Analiza en Casa – Correcciones – 18 de noviembre de 2026
+Pendientes del documento Variaciones del sistema (Flujo nuevo)
+Correcciones
+Clínico → Cotizaciones
+Responsable administrativo: ya aparece por default, pero se puede editar. Debe quedar bloqueado (no editable), para que no se cambie por otro nombre.
+Clínico → Orden de ventanas
+El menú de Clínico debe quedar en este orden:
+Cotizaciones
+Ingresos clínicos
+Agenda
+Expediente clínico
+Órdenes médicas
+Precotización
+Solicitudes de insumos
+Clínico → Precotización
+Ahora se pide el precio unitario de la solicitud; ese campo no debe ir.
+La solicitud de insumos sí llega a Precotización, y al dar "Revisar solicitud" sí permite asignar una cotización. Al seleccionarla aparece "Motivo de la ampliación", que se mantiene.
+Hoy hay dos botones que hacen lo mismo: "Actualizar cotizaciones" y "Guardar ampliación". Dejar solo uno:
+Quitar el botón "Actualizar cotizaciones".
+Cambiar "Guardar ampliación" por "Añadir a cotización".
+Al dar clic en "Añadir a cotización", los productos de la solicitud deben sumarse a la cotización seleccionada. Actualmente no se están sumando.

@@ -261,6 +261,8 @@ test('CH14 lets AUDITOR search the empty supplier surface without mutation', asy
 
 test('CH14 denies DOCTOR direct inventory supplier access', async ({ page }) => {
   await login(page, 'doctor@demo.local', 'demo-doctor');
+  await expect(page).toHaveURL(/\/clinical\/hospitalizations$/);
+  await page.goto('/inventory/suppliers');
   await expect(page.locator('main[role="alert"]')).toContainText('DOCTOR');
   await expect(page.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]')).toHaveCount(0);
 });
@@ -315,6 +317,8 @@ test('CH14 lets AUDITOR search the empty Bodegas surface', async ({ page }) => {
 
 test('CH14 denies DOCTOR direct inventory warehouse access', async ({ page }) => {
   await login(page, 'doctor@demo.local', 'demo-doctor');
+  await expect(page).toHaveURL(/\/clinical\/hospitalizations$/);
+  await page.goto('/inventory');
   await expect(page.locator('main[role="alert"]')).toContainText('DOCTOR');
   await expect(page.locator('[data-action-id="INVENTORY-WAREHOUSES-OPEN"]')).toHaveCount(0);
 });
@@ -393,6 +397,8 @@ test('CH14 lets AUDITOR search the empty Kit de insumos surface', async ({ page 
 
 test('CH14 denies DOCTOR direct inventory kit access', async ({ page }) => {
   await login(page, 'doctor@demo.local', 'demo-doctor');
+  await expect(page).toHaveURL(/\/clinical\/hospitalizations$/);
+  await page.goto('/inventory');
   await expect(page.locator('main[role="alert"]')).toContainText('DOCTOR');
   await expect(page.locator('[data-action-id="INVENTORY-KITS-OPEN"]')).toHaveCount(0);
 });

@@ -387,6 +387,7 @@ test('Extras1 restores empty quote owner and retains it across edits, autosave a
   await page.reload();
   await expect(owner).toHaveValue('Usuario ficticio ADMIN');
   await expect(owner).toHaveAttribute('readonly', '');
+  await expect(owner).toBeDisabled();
   expect(
     (await api(page, url, { ...previous, manager: 'Nombre ajeno recuperado' }, 'PUT')).status,
   ).toBe(200);
@@ -419,6 +420,7 @@ test('Nov18 owner stays locked while profile loads and cannot be replaced', asyn
   const owner = page.getByLabel('Responsable administrativo');
   await expect(page.locator('#quote-editor-form')).toHaveAttribute('aria-busy', 'false');
   await expect(owner).toHaveAttribute('readonly', '');
+  await expect(owner).toBeDisabled();
   const loaded = page.waitForResponse((response) => response.url().endsWith('/api/profile'));
   release();
   await loaded;
@@ -433,7 +435,7 @@ test('Nov18 owner stays locked while profile loads and cannot be replaced', asyn
   await page.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
 });
 
-test('Nov18 unpriced supply can be added once with a confirmed price and the same receivable', async ({
+test('Pending18 unpriced supply adds at zero without price input and keeps the same receivable', async ({
   page,
 }) => {
   test.setTimeout(180000);
@@ -468,13 +470,12 @@ test('Nov18 unpriced supply can be added once with a confirmed price and the sam
   await expect(add).toBeDisabled();
   await dialog
     .getByLabel('Motivo de la ampliación')
-    .fill('Insumos y precio confirmados por el equipo sintético');
-  await expect(add).toBeDisabled();
-  await dialog.getByLabel('Precio unitario de esta solicitud (USD)').fill('7.25');
-  await expect(dialog.getByText('Importe a añadir:', { exact: false })).toContainText('21.75');
+    .fill('Insumos adicionales con precio pendiente, autorización sintética');
+  await expect(dialog.getByLabel('Precio unitario de esta solicitud (USD)')).toHaveCount(0);
+  await expect(dialog.getByText('Precio de venta pendiente.', { exact: false })).toBeVisible();
   await expect(add).toBeEnabled();
   await page.setViewportSize({ width: 390, height: 844 });
-  await saveScreenshot(page, 'nov18-price-mobile');
+  await saveScreenshot(page, 'pending18-zero-price-mobile');
   let writes = 0,
     failedRefresh = false;
   page.on('request', (request) => {
@@ -514,14 +515,73 @@ test('Nov18 unpriced supply can be added once with a confirmed price and the sam
   const after = (await api(page, '/api/quotes')).body.quotes.find(
     (row: { quote: { id: string } }) => row.quote.id === saved.quoteId,
   ).quote;
-  expect(after.total).toBe(41.75);
+  expect(after.total).toBe(20);
   expect(after.items.at(-1).quantity).toBe(3);
+  expect(after.items.at(-1).unitPrice).toBe(0);
   const code = 'COT-' + quote.id.replaceAll('-', '').slice(-8).toUpperCase();
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/receivables');
   const account = page.getByRole('row').filter({ hasText: code });
   await expect(account).toHaveCount(1);
-  await expect(account).toContainText('41.75');
+  await expect(account).toContainText('20.00');
+  // The team configures the reusable sale price in the actual catalogue table.
+  await page.goto(
+    '/catalogs?category=SUPPLIES&search=Insumo%20sin%20precio%20sint%C3%A9tico%20Nov18',
+  );
+  const catalogueRow = page
+    .locator('tbody tr')
+    .filter({ hasText: 'Insumo sin precio sintético Nov18' });
+  await expect(catalogueRow).toHaveCount(1);
+  await catalogueRow.getByRole('button', { name: 'Editar', exact: true }).click();
+  await page.getByRole('dialog').getByLabel('Precio de venta sin IVA').fill('7.25');
+  await page.getByRole('dialog').getByRole('button', { name: 'Guardar', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const original = (await api(page, '/api/quotes')).body.quotes.find(
+    (row: { quote: { id: string } }) => row.quote.id === saved.quoteId,
+  ).quote;
+  expect(original.total).toBe(20);
+  expect(original.items.at(-1).unitPrice).toBe(0);
+  await page.goto('/clinical/prequotes');
+  await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
+  await expect(dialog.getByText('Precio aplicado', { exact: false })).toContainText('$0.00');
+  await expect(
+    dialog.getByRole('button', { name: 'Añadir a cotización', exact: true }),
+  ).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Cerrar', exact: true }).click();
+  // A fresh request uses the registered price automatically; the earlier one stays unique.
+  const nextRequest = await api(page, '/api/supply-requests', {
+    idempotencyKey: randomUUID(),
+    patientId: evidence.patientId,
+    catalogItemId: evidence.unpricedItemId,
+    quantity: 2,
+    priority: 'LOW',
+    note: 'Precio de catálogo ya registrado QA',
+  });
+  expect(nextRequest.status).toBe(201);
+  await page.goto('/clinical/prequotes');
+  await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
+  await dialog.getByLabel('Asignar a una cotización').selectOption(saved.quoteId);
+  await dialog
+    .getByLabel('Motivo de la ampliación')
+    .fill('Segunda solicitud sintética con tarifa del catálogo');
+  await expect(dialog.getByLabel('Precio unitario de esta solicitud (USD)')).toHaveCount(0);
+  const pricedResponse = page.waitForResponse(
+    (r) => r.url().endsWith('/api/prequotes') && r.request().method() === 'POST',
+  );
+  await dialog.getByRole('button', { name: 'Añadir a cotización', exact: true }).click();
+  const priced = await pricedResponse;
+  expect(priced.status()).toBe(200);
+  const pricedId = (await priced.json()).quoteId;
+  const final = (await api(page, '/api/quotes')).body.quotes.find(
+    (row: { quote: { id: string } }) => row.quote.id === pricedId,
+  ).quote;
+  expect(final.total).toBe(34.5);
+  expect(
+    final.items.filter((line: { id: string }) => line.id === `supply-request-${request.body.id}`),
+  ).toHaveLength(1);
+  await page.goto('/receivables');
+  await expect(page.getByRole('row').filter({ hasText: code })).toHaveCount(1);
+  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('34.50');
 });
 
 test('Nov18 patient search crosses pages and supply requests are under Clinical', async ({
@@ -555,6 +615,15 @@ test('Nov18 patient search crosses pages and supply requests are under Clinical'
   await expect(
     clinical.getByRole('link', { name: 'Solicitudes de insumos', exact: true }),
   ).toBeVisible();
+  await expect(clinical.locator('a')).toHaveText([
+    'Cotizaciones',
+    'Ingresos clínicos',
+    'Agenda',
+    'Expediente clínico',
+    'Órdenes médicas',
+    'Precotización',
+    'Solicitudes de insumos',
+  ]);
   const inventory = page.locator('.nav-group').filter({
     has: page.locator('.nav-group-trigger').filter({ hasText: 'Inventario y compras' }),
   });
