@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "checks": [
+    "dependent persistence, private document association, bytes and cross-tenant denial",
+    "concurrent request assignment creates one line/revision, keeps snapshot, discount and prior payment",
+    "assignment rejects missing/changed price, wrong patient, wrong tenant and unauthorized nurse",
+    "delivery is bounded, concurrent-safe, tenant/role scoped, nurse validated and leaves stock unchanged",
+    "sent edit keeps one logical quote/account, prior snapshots and deliveries; stale/removed delivered lines reject",
+    "approved family blocks general edits and requires explicit extension confirmation",
+    "approved extension is atomic/idempotent, keeps approval, admission, snapshots, payments, delivered quantities and stock",
+    "rejected quotes remain excluded and cannot use the approved extension exception",
+    "removed unfulfilled assignment is explicit in both inboxes; empty pagination retains total"
+  ],
+  "patientId": "nov17-p-88082089",
+  "doctorId": "nov17-doctor-88082089",
+  "itemId": "nov17-item-88082089",
+  "quoteId": "1eb3b2ca-912b-43a2-bc76-ee8c156ac454",
+  "originalQuoteId": "nov17-q-88082089"
+}

@@ -4,6 +4,8 @@ Fuente: `docs/qa/sources/CLIENT_PART1_CHANGES_2026-11-17.txt` (transcripción de
 
 Estado: implementado, subido a GitHub, publicado en Contabo y comprobado en la URL pública.
 
+Seguimiento de NOV17-04: el usuario confirmó posteriormente «Permitir ampliación auditada de una aprobada». La excepción y su validación se registran en [APPROVED_QUOTE_EXTENSION_2026-11-17.md](APPROVED_QUOTE_EXTENSION_2026-11-17.md); las cifras y SHA siguientes corresponden a la primera entrega del documento.
+
 Código de aplicación verificado: `0d4990de09b77eba5de07de17c464a888019338b`.
 Release publicado: `2629daaa362d665080de9c52f5ba666d2bd6e7bd` (añade guía, evidencia y ajustes menores de texto/conteo, también comprobados).
 Guía operativa: `../feedback/GUIA_PARTE1_2026-11-17.md`.
@@ -53,7 +55,7 @@ Las primeras ejecuciones de navegador también identificaron selectores de prueb
 - 17/11: «Registrar la entrega a la enfermera, sin descontar existencias». No se crean movimientos de inventario ni conversiones de dosis.
 - Enviada registra una comunicación manual. No envía WhatsApp ni correo al cliente.
 - Se conserva una cotización lógica. Las versiones enviadas anteriores quedan inmutables como evidencia interna; una edición enviada reemplaza el saldo de la misma cuenta, conservando pagos.
-- Precotización permite Borrador/Enviada. Aprobada/Rechazada permanecen cerradas conforme a la misma fuente. Un borrador no se convierte en cuenta por cobrar hasta marcarlo Enviada; no se inventa una entrega al cliente.
+- La primera entrega permitía Precotización en Borrador/Enviada. La confirmación posterior permite ampliar una Aprobada mediante un motivo y versión auditada; sigue cerrada para edición general y Rechazada no se puede ampliar. Un borrador no se convierte en cuenta por cobrar hasta marcarlo Enviada; no se inventa una entrega al cliente.
 - Precio ausente: el usuario configura el catálogo. No se completa con cero por defecto.
 
 ## Línea base y alcance de evidencia

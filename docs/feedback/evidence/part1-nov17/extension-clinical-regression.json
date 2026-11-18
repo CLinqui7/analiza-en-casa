@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "checks": [
+    "isolated synthetic fixtures and restricted PostgreSQL identity",
+    "medical, nursing, balance, laboratory and server-resolved JVPE persistence",
+    "multiple care types include quoted labs server-side and preserve idempotent retry",
+    "all ten scale definitions and persisted arithmetic",
+    "all staff persist discount configuration; scale versions reject stale forms and preserve snapshots",
+    "not-applied and chronic medicines leave inventory untouched",
+    "concurrent retries consume once; concurrent applications cannot overdraw stock",
+    "FEFO consumes released valid lots first and leaves expired or quarantined stock untouched",
+    "administration corrections preserve history, avoid repeated consumption, reconcile lots once, reject stale edits and support assignment outside card",
+    "append-only corrections preserve originals and reject stale updates",
+    "cross-organization write and read isolation plus fail-closed RLS",
+    "receivable returns without clinical disclosure or sent-quote mutation",
+    "all generated inventory movements remain readable through the strict contract",
+    "scheduled applications resolve configured stock, deduplicate retries and concurrent slots, preserve per-slot corrections and reject invalid hours or insufficient stock",
+    "medication stock configuration enforces organization, unique medicine and immutable consumed rule snapshots"
+  ],
+  "records": 38,
+  "syntheticPatientId": "clinical-qa-p-2b09ddc0",
+  "syntheticCaseId": "clinical-qa-c-2b09ddc0"
+}
