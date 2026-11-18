@@ -120,6 +120,20 @@ describe('Nov17 client workflow invariants', () => {
       expectedUnitPrice: 0,
     };
     expect(assignSupplySchema.safeParse(assignment).success).toBe(true);
+    const approvedExtension = {
+      decisionId: dependent.id,
+      reason: 'Insumos adicionales solicitados',
+    };
+    expect(assignSupplySchema.safeParse({ ...assignment, approvedExtension }).success).toBe(true);
+    for (const invalid of [
+      { ...approvedExtension, reason: ' ' },
+      { ...approvedExtension, decisionId: 'foreign' },
+      { ...approvedExtension, reason: 'x'.repeat(1001) },
+    ]) {
+      expect(
+        assignSupplySchema.safeParse({ ...assignment, approvedExtension: invalid }).success,
+      ).toBe(false);
+    }
     expect(
       assignSupplySchema.safeParse({ ...assignment, expectedUnitPrice: undefined }).success,
     ).toBe(false);

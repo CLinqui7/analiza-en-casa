@@ -1,8 +1,8 @@
 # Verificación del repositorio
 
 - Passed: **true**
-- Files: 7543
-- Size: 543.04 MiB
+- Files: 7578
+- Size: 544.32 MiB
 - Chapters: 17
 - Events: 1359
 - Detail crops: 730

@@ -6,6 +6,10 @@ export const assignSupplySchema = z
     quoteId: z.string().min(1),
     expectedRecordVersion: z.number().int().positive(),
     expectedUnitPrice: z.number().finite().nonnegative(),
+    approvedExtension: z
+      .object({ decisionId: z.uuid(), reason: z.string().trim().min(5).max(1000) })
+      .strict()
+      .optional(),
   })
   .strict();
 export const deliverOrderSchema = z
@@ -37,7 +41,8 @@ export type PrequoteChoice = {
   id: string;
   rootId: string;
   patientId: string;
-  status: 'DRAFT' | 'SENT';
+  status: 'DRAFT' | 'SENT' | 'APPROVED';
+  approvalDecisionId?: string | null;
   total: number;
   recordVersion: number;
 };

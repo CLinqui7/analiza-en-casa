@@ -6,6 +6,7 @@ import { quoteDisplayCode } from '@analiza/domain';
 import { useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
 import type { PrequoteEntry, PrequoteInbox } from '@/lib/quote-fulfillment';
+import { quoteStatusLabels } from '@/lib/quote-workflow';
 
 const money = (amount: number) =>
   new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(amount);
@@ -15,6 +16,7 @@ export default function PrequotesPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<PrequoteEntry | null>(null);
   const [quoteId, setQuoteId] = useState('');
+  const [extensionReason, setExtensionReason] = useState('');
   const [key, setKey] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -42,6 +44,11 @@ export default function PrequotesPage() {
   const chosen = choices.find((quote) => quote.id === quoteId);
   async function assign() {
     if (!selected || !chosen || selected.unitPrice === null || busy) return;
+    if (
+      chosen.status === 'APPROVED' &&
+      (!chosen.approvalDecisionId || extensionReason.trim().length < 5)
+    )
+      return;
     setBusy(true);
     setError('');
     try {
@@ -54,14 +61,24 @@ export default function PrequotesPage() {
           expectedRecordVersion: chosen.recordVersion,
           expectedUnitPrice: selected.unitPrice,
           idempotencyKey: key,
+          ...(chosen.status === 'APPROVED'
+            ? {
+                approvedExtension: {
+                  decisionId: chosen.approvalDecisionId,
+                  reason: extensionReason.trim(),
+                },
+              }
+            : {}),
         }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || 'No se pudo asignar la solicitud.');
       setMessage(
-        chosen.status === 'SENT'
-          ? 'Solicitud asignada. La cotización y su saldo en Cuentas por cobrar están actualizados.'
-          : 'Solicitud asignada al borrador. Al marcar la cotización como Enviada, aparecerá en Cuentas por cobrar.',
+        chosen.status === 'APPROVED'
+          ? 'Ampliación registrada. Se conservaron la aprobación, el historial y los pagos; la cuenta por cobrar está actualizada.'
+          : chosen.status === 'SENT'
+            ? 'Solicitud asignada. La cotización y su saldo en Cuentas por cobrar están actualizados.'
+            : 'Solicitud asignada al borrador. Al marcar la cotización como Enviada, aparecerá en Cuentas por cobrar.',
       );
       setSelected(null);
       await Promise.all([load(), refreshWorkspace()]);
@@ -141,6 +158,7 @@ export default function PrequotesPage() {
                         onClick={() => {
                           setSelected(entry);
                           setQuoteId('');
+                          setExtensionReason('');
                           setKey(crypto.randomUUID());
                           setError('');
                         }}
@@ -195,10 +213,20 @@ export default function PrequotesPage() {
             </Button>
             {selected && !selected.assignedQuoteId ? (
               <Button
-                disabled={busy || !chosen || selected.unitPrice === null}
+                disabled={
+                  busy ||
+                  !chosen ||
+                  selected.unitPrice === null ||
+                  (chosen.status === 'APPROVED' &&
+                    (!chosen.approvalDecisionId || extensionReason.trim().length < 5))
+                }
                 onClick={() => void assign()}
               >
-                {busy ? 'Guardando…' : 'Guardar asignación'}
+                {busy
+                  ? 'Guardando…'
+                  : chosen?.status === 'APPROVED'
+                    ? 'Guardar ampliación'
+                    : 'Guardar asignación'}
               </Button>
             ) : null}
           </>
@@ -244,20 +272,49 @@ export default function PrequotesPage() {
               <>
                 <label>
                   Asignar a una cotización
-                  <select value={quoteId} onChange={(event) => setQuoteId(event.target.value)}>
+                  <select
+                    disabled={busy}
+                    value={quoteId}
+                    onChange={(event) => {
+                      setQuoteId(event.target.value);
+                      setExtensionReason('');
+                    }}
+                  >
                     <option value="">Seleccione una cotización del paciente</option>
                     {choices.map((quote) => (
                       <option key={quote.id} value={quote.id}>
-                        {quoteDisplayCode(quote.rootId)} ·{' '}
-                        {quote.status === 'SENT' ? 'Enviada' : 'Borrador'} · {money(quote.total)}
+                        {quoteDisplayCode(quote.rootId)} · {quoteStatusLabels[quote.status]} ·{' '}
+                        {money(quote.total)}
                       </option>
                     ))}
                   </select>
                 </label>
                 <p className="field-help">
-                  Se muestran las cotizaciones en Borrador o Enviada. Las aprobadas y rechazadas
-                  están cerradas para edición.
+                  Puede asignar a Borrador o Enviada, o registrar una ampliación auditada de una
+                  Aprobada. Las rechazadas no admiten ampliaciones.
                 </p>
+                {chosen?.status === 'APPROVED' ? (
+                  <>
+                    <p className="notice">
+                      Se añadirán únicamente los productos de esta solicitud. La aprobación original
+                      y las versiones anteriores se conservarán; se actualizará el saldo de la misma
+                      cuenta, respetando los pagos y descuentos registrados.
+                    </p>
+                    <label>
+                      Motivo de la ampliación
+                      <textarea
+                        value={extensionReason}
+                        disabled={busy}
+                        required
+                        minLength={5}
+                        maxLength={1000}
+                        rows={3}
+                        onChange={(event) => setExtensionReason(event.target.value)}
+                        placeholder="Indique por qué se añaden estos insumos a la cotización aprobada."
+                      />
+                    </label>
+                  </>
+                ) : null}
                 {!choices.length ? (
                   <Link className="button button-secondary" href="/quotes?create=1">
                     Crear cotización

@@ -23,7 +23,8 @@ import {
   receivedOrders,
   deliverReceivedOrder,
 } from '../apps/web/src/server/persistence/postgres-quote-fulfillment';
-import { latestLogicalQuotes } from '../apps/web/src/lib/quote-workflow';
+import { latestLogicalQuotes, quoteWorkflowStatus } from '../apps/web/src/lib/quote-workflow';
+import { caseQuotes } from '../apps/web/src/lib/clinical-queries';
 import { receivableAccounts } from '../apps/web/src/lib/receivables';
 
 assert.equal(process.env.ANALIZA_QA_MODE, '1');
@@ -352,10 +353,23 @@ try {
   pass(
     'sent edit keeps one logical quote/account, prior snapshots and deliveries; stale/removed delivered lines reject',
   );
+  const approvalId = randomUUID();
+  const admission = await backend.hospitalizations.create(actor, {
+    hospitalization: {
+      id: `nov17-admission-${run}`,
+      patientId,
+      startDate: '2026-11-17',
+      status: 'ACTIVE',
+      accountType: 'PARTICULAR',
+      priority: 'MEDIUM',
+      linkedQuoteIds: [third.id],
+      primaryDoctorId: doctorId,
+    },
+  });
   await transaction(pool, actor, async (c) => {
     await c.query(
       'INSERT INTO analiza.quote_decisions(organization_id,id,quote_id,actor_user_id,decision) VALUES($1,$2,$3,$4,$5)',
-      [actor.organizationId, randomUUID(), third.id, actor.userId, 'APPROVED'],
+      [actor.organizationId, approvalId, third.id, actor.userId, 'APPROVED'],
     );
   });
   await assert.rejects(
@@ -377,11 +391,174 @@ try {
       idempotencyKey: randomUUID(),
     }),
   );
+  const approvedChoice = (await prequoteInbox(pool, actor, 1)).quotes.find(
+    (q) => q.rootId === first.id,
+  )!;
+  assert.equal(approvedChoice.status, 'APPROVED');
+  assert.equal(approvedChoice.approvalDecisionId, approvalId);
+  pass('approved family blocks general edits and requires explicit extension confirmation');
+  const extensionRequest = await requestRepo.create(nurse, {
+    idempotencyKey: randomUUID(),
+    patientId,
+    catalogItemId: itemId,
+    quantity: 1,
+    priority: 'LOW',
+    note: '',
+  });
+  const extension = {
+    ...assignment,
+    idempotencyKey: randomUUID(),
+    quoteId: third.id,
+    requestId: extensionRequest.id,
+    expectedRecordVersion: approvedChoice.recordVersion,
+    approvedExtension: {
+      decisionId: approvalId,
+      reason: 'Insumos adicionales solicitados por enfermería QA',
+    },
+  };
+  await assert.rejects(
+    assignSupplyRequest(pool, actor, {
+      ...extension,
+      approvedExtension: { ...extension.approvedExtension, reason: ' ' },
+    }),
+  );
+  await assert.rejects(
+    assignSupplyRequest(pool, actor, {
+      ...extension,
+      approvedExtension: { ...extension.approvedExtension, decisionId: randomUUID() },
+    }),
+  );
+  await assert.rejects(assignSupplyRequest(pool, foreign, extension));
+  await assert.rejects(assignSupplyRequest(pool, nurse, extension));
+  const decisionBefore = await transaction(
+    pool,
+    actor,
+    async (c) =>
+      (
+        await c.query('SELECT * FROM analiza.quote_decisions WHERE organization_id=$1 AND id=$2', [
+          actor.organizationId,
+          approvalId,
+        ])
+      ).rows,
+  );
+  const extended = await Promise.all([
+    assignSupplyRequest(pool, actor, extension),
+    assignSupplyRequest(pool, actor, extension),
+  ]);
+  assert.equal(extended[0].quoteId, extended[1].quoteId);
+  const fourth = await storedQuote(extended[0].quoteId);
+  assert.equal(fourth.total, 63);
+  assert.equal(fourth.caseId, admission.id);
+  assert.equal(fourth.version, third.version + 1);
+  assert.equal(fourth.status, 'SENT');
+  assert.equal(fourth.immutable, true);
+  assert.deepEqual(fourth.items.slice(0, -1), third.items);
+  assert.deepEqual(await storedQuote(third.id), third);
+  assert.deepEqual(await backend.hospitalizations.get(actor, admission.id), admission);
+  assert.deepEqual(
+    await transaction(
+      pool,
+      actor,
+      async (c) =>
+        (
+          await c.query(
+            'SELECT * FROM analiza.quote_decisions WHERE organization_id=$1 AND id=$2',
+            [actor.organizationId, approvalId],
+          )
+        ).rows,
+    ),
+    decisionBefore,
+  );
+  assert.equal(receivableAccounts([first, second, third, fourth], [payment])[0].balance, 58);
+  assert.equal(latestLogicalQuotes([first, second, third, fourth]).length, 1);
   assert.equal(
-    (await prequoteInbox(pool, actor, 1)).quotes.some((q) => q.rootId === first.id),
+    quoteWorkflowStatus(
+      fourth,
+      [first, second, third, fourth],
+      [{ id: approvalId, quoteId: third.id, decision: 'APPROVED', reason: null, createdAt: now }],
+    ),
+    'APPROVED',
+  );
+  assert.equal(caseQuotes([first, second, third, fourth], admission)[0].id, fourth.id);
+  await transaction(pool, actor, async (c) => {
+    const clinical = await c.query(
+      'SELECT id FROM analiza.quotes WHERE organization_id=$1 AND patient_id=$2 AND (case_id=$3 OR id=ANY($4::text[]))',
+      [actor.organizationId, patientId, admission.id, admission.linkedQuoteIds],
+    );
+    assert.ok(clinical.rows.some((row) => row.id === fourth.id));
+    assert.equal(
+      (
+        await c.query(
+          "SELECT count(*)::integer AS count FROM analiza.audit_events WHERE organization_id=$1 AND resource_id=$2 AND action='QUOTE_APPROVED_SUPPLIES_EXTENDED'",
+          [actor.organizationId, fourth.id],
+        )
+      ).rows[0].count,
+      1,
+    );
+    assert.equal(
+      (
+        await c.query(
+          'SELECT count(*)::integer AS count FROM analiza.inventory_movements WHERE organization_id=$1 AND item_id=$2',
+          [actor.organizationId, itemId],
+        )
+      ).rows[0].count,
+      stockBefore,
+    );
+  });
+  assert.equal(
+    (await receivedOrders(pool, actor, 1)).entries.find(
+      (entry) => entry.quoteId === fourth.id && entry.lineId === delivery.lineId,
+    )?.delivered,
+    2,
+  );
+  await assert.rejects(
+    backend.quotes.reviseSent!(actor, fourth.id, {
+      quote: createQuoteRevision(fourth, randomUUID(), 'Edición prohibida'),
+    }),
+  );
+  await assert.rejects(
+    assignSupplyRequest(pool, actor, {
+      ...extension,
+      approvedExtension: {
+        ...extension.approvedExtension,
+        reason: 'Otro motivo no es el mismo reintento',
+      },
+    }),
+  );
+  await assert.rejects(
+    assignSupplyRequest(pool, actor, {
+      ...extension,
+      requestId: nextRequest.id,
+      idempotencyKey: randomUUID(),
+    }),
+  );
+  pass(
+    'approved extension is atomic/idempotent, keeps approval, admission, snapshots, payments, delivered quantities and stock',
+  );
+  const rejected = await backend.quotes.create(actor, {
+    quote: { ...draft, id: `nov17-rejected-${run}`, rootQuoteId: `nov17-rejected-${run}` },
+  });
+  await transaction(pool, actor, async (c) => {
+    await c.query(
+      'INSERT INTO analiza.quote_decisions(organization_id,id,quote_id,actor_user_id,decision,reason) VALUES($1,$2,$3,$4,$5,$6)',
+      [actor.organizationId, randomUUID(), rejected.id, actor.userId, 'NOT_APPROVED', 'Rechazo QA'],
+    );
+  });
+  await assert.rejects(
+    assignSupplyRequest(pool, actor, {
+      ...extension,
+      quoteId: rejected.id,
+      requestId: nextRequest.id,
+      idempotencyKey: randomUUID(),
+      expectedRecordVersion: 1,
+    }),
+  );
+  assert.equal(
+    (await prequoteInbox(pool, actor, 1)).quotes.some((q) => q.id === rejected.id),
     false,
   );
-  pass('approved family cannot be edited through revision, legacy creation or precotization');
+  assert.deepEqual(await storedQuote(rejected.id), rejected);
+  pass('rejected quotes remain excluded and cannot use the approved extension exception');
   const removableDraft = await backend.quotes.create(actor, {
     quote: { ...draft, id: `nov17-remove-${run}`, rootQuoteId: `nov17-remove-${run}` },
   });

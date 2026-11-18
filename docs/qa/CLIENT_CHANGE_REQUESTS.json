@@ -1,4 +1,5 @@
 {
+  "nov17_approved_extension": {"source":"docs/qa/sources/CLIENT_APPROVED_EXTENSION_2026-11-17.txt","report":"docs/qa/APPROVED_QUOTE_EXTENSION_2026-11-17.md","status":"IMPLEMENTED_QA_PENDING","confirmation":"Permitir ampliación auditada de una aprobada","requirement_ids":["NOV17-04"],"test_ids":["vitest:nov17-workflows","postgres:nov17-workflows","Approved extension keeps approval and the same admission, with reason and closed general editing"],"scope":"Append recorded nursing requests to approved quote via immutable version, explicit reason/approval confirmation, same logical account and admission. General editing/rejected quotes stay blocked; no stock movements or new approval."},
   "nov17_part1_regression": {
     "source": "docs/qa/sources/CLIENT_PART1_CHANGES_2026-11-17.txt",
     "report": "docs/qa/CLIENT_PART1_IMPLEMENTATION_2026-11-17.md",

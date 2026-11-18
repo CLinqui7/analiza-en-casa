@@ -16,7 +16,7 @@ import {
   type ServerActor,
 } from '../validation/patients';
 import { transaction } from './postgres-pool';
-import { lockQuoteRoot, requireOpenQuote } from './quote-workflow';
+import { lockQuoteRoot } from './quote-workflow';
 
 async function audit(c: PoolClient, actor: ServerActor, action: string, kind: string, id: string) {
   await c.query(
@@ -60,9 +60,12 @@ export async function prequoteInbox(
       [actor.organizationId],
     );
     const quotes = await c.query(
-      `WITH q AS (${latestQuotes}) SELECT q.id,q.root_quote_id AS "rootId",q.patient_id AS "patientId",q.body->>'status' AS status,
-      (q.body->>'total')::numeric AS total,q.record_version AS "recordVersion" FROM q
-      WHERE q.patient_id=ANY($2::text[]) AND NOT EXISTS (${terminal}) ORDER BY q.created_at DESC`,
+      `WITH q AS (${latestQuotes}) SELECT q.id,q.root_quote_id AS "rootId",q.patient_id AS "patientId",
+      CASE WHEN approval.id IS NOT NULL THEN 'APPROVED' ELSE q.body->>'status' END AS status,
+      approval.id AS "approvalDecisionId",(q.body->>'total')::numeric AS total,q.record_version AS "recordVersion" FROM q
+      LEFT JOIN LATERAL (SELECT d.id FROM analiza.quote_decisions d JOIN analiza.quotes qd ON qd.organization_id=d.organization_id AND qd.id=d.quote_id
+        WHERE qd.organization_id=$1 AND qd.root_quote_id=q.root_quote_id AND d.decision='APPROVED' ORDER BY d.created_at DESC,d.id DESC LIMIT 1) approval ON true
+      WHERE q.patient_id=ANY($2::text[]) AND NOT EXISTS (${terminal} AND d.decision='NOT_APPROVED') ORDER BY q.created_at DESC`,
       [actor.organizationId, [...new Set(entries.rows.map((row) => row.patientId))]],
     );
     return {
@@ -88,6 +91,9 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
   if (!parsed.success)
     throw new MongoInputError('Seleccione una cotización y confirme el precio del catálogo.');
   const input = parsed.data;
+  const revisionReason = input.approvedExtension
+    ? `Ampliación aprobada · aprobación ${input.approvedExtension.decisionId} · solicitud ${input.requestId}: ${input.approvedExtension.reason}`
+    : `Solicitud de insumos ${input.requestId}`;
   return transaction(pool, actor, async (c) => {
     const root = await lockQuoteRoot(c, actor, input.quoteId);
     if (!root) throw new MongoInputError('La cotización no está disponible.');
@@ -115,9 +121,35 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
         Number(existing.unit_price) !== input.expectedUnitPrice
       )
         throw new MongoConflictError();
+      const saved = await c.query(
+        'SELECT body FROM analiza.quotes WHERE organization_id=$1 AND id=$2',
+        [actor.organizationId, existing.quote_id],
+      );
+      const savedReason = saved.rows[0]?.body.revisionReason as string | undefined;
+      if (
+        (input.approvedExtension || savedReason?.startsWith('Ampliación aprobada ·')) &&
+        savedReason !== revisionReason
+      )
+        throw new MongoConflictError();
       return { quoteId: existing.quote_id, rootId: existing.root_quote_id, alreadyAssigned: true };
     }
-    await requireOpenQuote(c, actor, root);
+    // This exception only appends a recorded nursing request. General editing stays closed.
+    const decisions = await c.query<{ id: string; decision: string }>(
+      `SELECT d.id,d.decision FROM analiza.quote_decisions d JOIN analiza.quotes q ON q.organization_id=d.organization_id AND q.id=d.quote_id
+       WHERE q.organization_id=$1 AND q.root_quote_id=$2 ORDER BY d.created_at DESC,d.id DESC`,
+      [actor.organizationId, root],
+    );
+    if (decisions.rows.some((decision) => decision.decision === 'NOT_APPROVED'))
+      throw new MongoInputError('No se pueden ampliar cotizaciones rechazadas.');
+    const approval = decisions.rows.find((decision) => decision.decision === 'APPROVED');
+    if (
+      approval &&
+      (!input.approvedExtension || input.approvedExtension.decisionId !== approval.id)
+    )
+      throw new MongoInputError(
+        'La cotización está aprobada. Actualice la bandeja y confirme el motivo de la ampliación.',
+      );
+    if (!approval && input.approvedExtension) throw new MongoConflictError();
     const current = (
       await c.query(
         'SELECT body,record_version,id FROM analiza.quotes WHERE organization_id=$1 AND root_quote_id=$2 ORDER BY quote_version DESC LIMIT 1',
@@ -130,6 +162,8 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
     )
       throw new MongoConflictError();
     const source = quoteSchema.parse(current.body);
+    if (approval && (!source.immutable || source.status !== 'SENT'))
+      throw new MongoInputError('Revise el estado de la cotización aprobada antes de ampliarla.');
     if (source.patientId !== request.patient_id)
       throw new MongoInputError('La cotización debe pertenecer al paciente de la solicitud.');
     const item = (
@@ -167,11 +201,28 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
     ];
     const totals = calculateQuoteTotals(items, source.discount, source.insurerAmount);
     const now = new Date().toISOString();
+    let caseId = source.caseId;
+    if (approval && !caseId) {
+      // Approval links the original immutable snapshot to the admission. Associate the
+      // new snapshot with that same admission so all existing clinical readers see it.
+      const admissions = await c.query<{ id: string }>(
+        `SELECT h.id FROM analiza.hospitalizations h WHERE h.organization_id=$1 AND h.patient_id=$2 AND EXISTS (
+          SELECT 1 FROM analiza.quotes q WHERE q.organization_id=h.organization_id AND q.root_quote_id=$3
+          AND (q.case_id=h.id OR h.body->'linkedQuoteIds' @> jsonb_build_array(q.id)))`,
+        [actor.organizationId, source.patientId, root],
+      );
+      if (admissions.rows.length > 1)
+        throw new MongoInputError(
+          'La cotización está vinculada a varios ingresos. Revise sus vínculos antes de ampliarla.',
+        );
+      caseId = admissions.rows[0]?.id;
+    }
     // The sent snapshot is preserved; the new version immediately replaces its logical receivable.
     const updated = quoteSchema.parse({
       ...(source.immutable
-        ? createQuoteRevision(source, randomUUID(), `Solicitud de insumos ${request.id}`, now)
+        ? createQuoteRevision(source, randomUUID(), revisionReason, now)
         : source),
+      ...(caseId ? { caseId } : {}),
       items,
       ...totals,
       ...(source.immutable ? { status: 'SENT', immutable: true, sentAt: now } : {}),
@@ -214,7 +265,11 @@ export async function assignSupplyRequest(pool: Pool, actor: ServerActor, raw: u
     await audit(
       c,
       actor,
-      source.immutable ? 'QUOTE_SUPPLIES_VERSION_SENT' : 'QUOTE_SUPPLIES_ADDED',
+      approval
+        ? 'QUOTE_APPROVED_SUPPLIES_EXTENDED'
+        : source.immutable
+          ? 'QUOTE_SUPPLIES_VERSION_SENT'
+          : 'QUOTE_SUPPLIES_ADDED',
       'quote',
       updated.id,
     );

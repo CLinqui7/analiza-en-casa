@@ -4,7 +4,7 @@
 
 Confirmado por el usuario el 17/11: aprobar cualquiera de las tres modalidades crea un ingreso clínico; Entregado registra la enfermera receptora sin descontar existencias. Sustituye la restricción anterior de ingreso automático sólo para hospitalización. No se crean retrospectivamente ingresos sin revisión humana.
 
-Se consultó una ambigüedad del DOCX: si Precotización puede ampliar una cotización aprobada, pese a la prohibición de edición manual en ese mismo documento. Hasta recibir respuesta, sólo se asignan insumos a Borrador/Enviada. Un borrador no constituye un cargo hasta marcarse Enviada. La evidencia y el estado de entrega están en `docs/qa/CLIENT_PART1_IMPLEMENTATION_2026-11-17.md`.
+Ambigüedad resuelta el 17/11: el usuario confirmó «Permitir ampliación auditada de una aprobada». Se habilita únicamente la adición de solicitudes desde Precotización, con motivo, versión inmutable nueva y conservación de la aprobación, pagos y mismo ingreso clínico. La edición general de aprobadas y las rechazadas siguen bloqueadas. Un borrador no constituye un cargo hasta marcarse Enviada. Fuente exacta: `docs/qa/sources/CLIENT_APPROVED_EXTENSION_2026-11-17.txt`; implementación y publicación del seguimiento en `docs/qa/APPROVED_QUOTE_EXTENSION_2026-11-17.md`.
 
 ## CLINICAL-NOV07 · origen y consumo de medicamentos
 

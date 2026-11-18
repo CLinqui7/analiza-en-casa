@@ -306,3 +306,118 @@ test('Nov17 prequote assignment, nurse delivery, supplier CRUD and responsive sc
     await saveScreenshot(page, name);
   }
 });
+
+test('Approved extension keeps approval and the same admission, with reason and closed general editing', async ({
+  page,
+}) => {
+  test.setTimeout(180000);
+  await login(page, '/quotes');
+  const quote = await makeQuote(page, 'HOME_OUTPATIENT');
+  const decision = { id: randomUUID(), decision: 'APPROVED', reason: null };
+  expect((await api(page, `/api/quotes/${quote.id}/decision`, decision)).status).toBe(201);
+  const before = (await api(page, '/api/quotes')).body.quotes.find(
+    (row: { quote: { id: string } }) => row.quote.id === quote.id,
+  ).quote;
+  const admissionBefore = (await api(page, '/api/hospitalizations')).body.hospitalizations.find(
+    (row: { hospitalization: { linkedQuoteIds?: string[] } }) =>
+      row.hospitalization.linkedQuoteIds?.includes(quote.id),
+  );
+  expect(admissionBefore).toBeTruthy();
+  const request = await api(page, '/api/supply-requests', {
+    idempotencyKey: randomUUID(),
+    patientId: evidence.patientId,
+    catalogItemId: evidence.itemId,
+    quantity: 3,
+    priority: 'MEDIUM',
+    note: 'Solicitud posterior a aprobación QA',
+  });
+  expect(request.status).toBe(201);
+  await page.goto('/clinical/prequotes');
+  await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Asignar a una cotización').selectOption(quote.id);
+  await expect(dialog.locator('option:checked')).toContainText('Aprobada');
+  const save = dialog.getByRole('button', { name: 'Guardar ampliación', exact: true });
+  await expect(save).toBeDisabled();
+  await dialog
+    .getByLabel('Motivo de la ampliación')
+    .fill('Solicitud posterior a aprobación, validada para QA');
+  await expect(save).toBeEnabled();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await saveScreenshot(page, 'approved-extension-mobile');
+  const pending = page.waitForResponse(
+    (response) =>
+      response.url().endsWith('/api/prequotes') && response.request().method() === 'POST',
+  );
+  await save.click();
+  const response = await pending;
+  expect(response.status(), await response.text()).toBe(200);
+  const result = await response.json();
+  const submitted = response.request().postDataJSON();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: 'Ampliación registrada' })).toBeVisible();
+  expect((await api(page, '/api/prequotes', submitted)).body.alreadyAssigned).toBe(true);
+  const after = (await api(page, '/api/quotes')).body.quotes.map(
+    (row: { quote: unknown }) => row.quote,
+  );
+  const original = after.find((q: { id: string }) => q.id === quote.id);
+  const extended = after.find((q: { id: string }) => q.id === result.quoteId);
+  expect(original).toEqual(before);
+  expect(extended.total).toBe(50);
+  expect(extended.items.slice(0, -1)).toEqual(before.items);
+  expect(extended.caseId).toBe(admissionBefore.hospitalization.id);
+  expect(extended.revisionReason).toContain(submitted.approvedExtension.reason);
+  expect((await api(page, `/api/quotes/${extended.id}/decision`)).body.decisions).toHaveLength(1);
+  expect((await api(page, `/api/quotes/${extended.id}/decision`, decision)).status).toBe(409);
+  expect(
+    (
+      await api(page, `/api/quotes/${extended.id}/revision`, {
+        quote: {
+          ...extended,
+          id: randomUUID(),
+          version: extended.version + 1,
+          status: 'DRAFT',
+          immutable: false,
+          revisionReason: 'Intento de editar una aprobada',
+        },
+      })
+    ).status,
+  ).toBe(400);
+  const admissionAfter = (await api(page, '/api/hospitalizations')).body.hospitalizations.filter(
+    (row: { hospitalization: { id: string } }) =>
+      row.hospitalization.id === admissionBefore.hospitalization.id,
+  );
+  expect(admissionAfter).toEqual([admissionBefore]);
+  const code = 'COT-' + quote.id.replaceAll('-', '').slice(-8).toUpperCase();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/quotes?search=' + code);
+  await expect(page.locator('tbody tr')).toHaveCount(1);
+  await expect(page.locator('tbody tr')).toContainText('Aprobada');
+  await expect(page.locator('tbody tr')).toContainText('50.00');
+  await expect(
+    page.locator('tbody tr').getByRole('link', { name: 'Editar', exact: true }),
+  ).toHaveCount(0);
+  await page.goto('/hospitalizations/' + admissionBefore.hospitalization.id);
+  await expect(page.locator(`a[href="/quotes/${extended.id}"]`)).toBeVisible();
+  const order = (await api(page, '/api/received-orders')).body.entries.find(
+    (entry: { quoteId: string; lineId: string }) =>
+      entry.quoteId === extended.id && entry.lineId === extended.items.at(-1).id,
+  );
+  expect(order.quantity).toBe(3);
+  expect(order.delivered).toBe(0);
+  expect(
+    (
+      await api(page, '/api/received-orders', {
+        idempotencyKey: randomUUID(),
+        quoteId: extended.id,
+        lineId: order.lineId,
+        nursingResourceId: 'qa-resource',
+        quantity: 1,
+      })
+    ).status,
+  ).toBe(200);
+  await page.goto('/inventory/received-orders');
+  await expect(
+    page.locator('tbody tr').filter({ hasText: code }).filter({ hasText: 'Entrega parcial' }),
+  ).toHaveCount(1);
+});
