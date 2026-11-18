@@ -2,7 +2,7 @@
 
 Fuente: [texto literal](sources/CLIENT_EXTRAS1_2026-11-17.txt). SHA256 del DOCX: `312251e0d04734dacee22dcb9891367aaa769f8818246297025e70cf7e6ac316`. El original no se modificó. No contiene imágenes.
 
-Estado: implementación y verificaciones locales aprobadas; prueba de navegador conectada y publicación pendientes.
+Estado: implementación, pruebas conectadas y revisión visual aprobadas; publicación pendiente. Código funcional comprobado: `3e2080cb71340449d2379f36a134c7d4f8be7936`; ajuste visual final comprobado: `de81fbcbd6e1cddfb30b3a5e10688488e6938cdb`.
 
 | ID | Corrección solicitada | Implementación y criterio de aceptación |
 | --- | --- | --- |
@@ -28,4 +28,15 @@ La corrección devuelve un token estable por sesión mediante HMAC-SHA256, con s
 
 Se añadieron pruebas de concurrencia, separación entre sesiones, token ausente/incorrecto, compatibilidad con formularios anteriores, expiración, revocación, fallo del almacenamiento y consulta cross-site. Las 376 pruebas unitarias/servidor resultantes pasaron. Dos fallos iniciales del nuevo test de formulario se debieron al selector de la etiqueta «Prioridad»; se corrigió para utilizar el identificador estable del control, manteniendo las mismas aserciones de persistencia. Una devolución accidental de un mock desde `beforeEach` también se corrigió en la nueva prueba HTTP.
 
-Verificación conectada final, revisión visual, SHA publicado y resultados del VPS: pendientes de ejecución.
+## Resultado final antes de publicar
+
+- 376 pruebas unitarias/servidor en 73 archivos; TypeScript, ESLint, formato y compilaciones de producción aprobados.
+- Diez grupos PostgreSQL del flujo y seis financieros, con rol runtime sin bypass de RLS. Incluyen consulta por solicitud independiente de la paginación, aislamiento por paciente/organización/rol, versiones, precios, pagos e idempotencia. [Flujo](../feedback/evidence/extras1-nov17/postgres-workflows.json), [finanzas](../feedback/evidence/extras1-nov17/billing-regression.json).
+- 54 escenarios mock iniciales; después del ajuste de sesión/formulario se repitieron los 31 de CH01–CH03 y cotizaciones con éxito.
+- Seis escenarios de navegador contra la compilación de producción conectada a PostgreSQL aislado. El formulario conserva el responsable al recuperar un borrador vacío, editar otros campos, abrir otra pestaña y recargar; un nombre manual no se sustituye por una respuesta tardía del perfil. Precotización incorpora cotizaciones creadas después de abrir la página, permite actualizar dentro del diálogo, se recupera de HTTP 503 y mantiene una sola fila/código/saldo en Cotizaciones y Cuentas por cobrar. Alta y edición de proveedor persisten.
+- Tras detectar una columna recortada en la primera revisión visual, se ajustó la anchura y se repitió el escenario de asignación/entrega/proveedores. Pasó a 1440/1280/768/390 px, sin desbordamiento de página y con todas las columnas completas a partir de 1280 px. Se abrieron y revisaron las capturas finales de escritorio y móvil.
+- 144 pruebas legacy, 76 controles QA, auditoría de ledgers, 210 requisitos trazados, 32 cambios de cliente, espejo de matrices, fronteras React y secretos aprobados. No se cambian estados históricos EXACT ni se declara una nueva auditoría completa de los 17 videos.
+
+La repetición focalizada alcanzó el límite de inicios de sesión de la cuenta sintética; pasó al reintentar. Hubo también una conexión reiniciada del túnel PostgreSQL de QA. No se modificaron límites ni autenticación de producción. El entorno y las capturas sólo contienen datos ficticios.
+
+Publicación y comprobación pública: pendientes.

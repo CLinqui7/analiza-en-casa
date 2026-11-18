@@ -19,7 +19,12 @@ try {
     data: { email: account.email, password: account.password },
   });
   assert.equal(login.status(), 200);
-  assert.equal((await login.json()).userId, account.userId);
+  const session = await login.json();
+  assert.equal(session.userId, account.userId);
+  const csrfReads = await Promise.all([api.get('/api/auth/csrf'), api.get('/api/auth/csrf')]);
+  assert.ok(csrfReads.every(response => response.status() === 200));
+  const tokens = await Promise.all(csrfReads.map(response => response.json()));
+  assert.ok(tokens.every(value => value.csrfToken === session.csrfToken), 'Session CSRF must remain stable across concurrent reads');
   const response = await api.get('/api/prequotes');
   assert.equal(response.status(), 200);
   const inbox = await response.json();
@@ -63,7 +68,7 @@ try {
   }
   assert.deepEqual(errors, []);
   assert.equal((await api.get('/api/health')).status(), 200);
-  const result = { status: 'PASS', sha, syntheticOnly: true, businessWrites: false, routes, errors, checkedRequests,
+  const result = { status: 'PASS', sha, syntheticOnly: true, businessWrites: false, csrfStable: true, routes, errors, checkedRequests,
     scope: 'Public read-only API and responsive checks. Owner recovery, supplier CRUD and assignment writes certified in isolated PostgreSQL/browser QA.' };
   fs.writeFileSync(`${output}/report.json`, JSON.stringify(result, null, 2) + '\n');
   console.log(JSON.stringify(result));
