@@ -61,7 +61,7 @@ test('medical and nursing entry points expose usable manual forms and preserve p
     await dialog
       .getByRole('combobox', { name: 'Hospitalización', exact: true })
       .fill('case-demo-001');
-    await dialog.getByRole('option').first().click();
+    await dialog.getByRole('listbox').getByRole('option').first().click();
     await dialog.getByLabel('Resumen', { exact: true }).fill('Observación sintética de QA');
     await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
     await expect(dialog.getByRole('alert')).toContainText('conexión segura');
@@ -91,7 +91,7 @@ test('medical and nursing entry points expose usable manual forms and preserve p
     await dialog
       .getByRole('combobox', { name: 'Hospitalización', exact: true })
       .fill('case-demo-001');
-    await dialog.getByRole('option').first().click();
+    await dialog.getByRole('listbox').getByRole('option').first().click();
     if (kind === 'Signos vitales' || kind === 'Nota de enfermería') {
       const add = dialog.getByRole('button', { name: 'Agregar registro' });
       const before = await add.boundingBox();
@@ -123,7 +123,7 @@ test('all ten scales show numerical options with source-specific totals', async 
   await dialog
     .getByRole('combobox', { name: 'Hospitalización', exact: true })
     .fill('case-demo-001');
-  await dialog.getByRole('option').first().click();
+  await dialog.getByRole('listbox').getByRole('option').first().click();
   for (const [scale, score] of [
     ['EVA', 0],
     ['GLASGOW', 15],
@@ -179,7 +179,18 @@ for (const width of [1440, 390])
   });
 
 // test-id: playwright:clinical-configuration-all-users
-for (const role of ['nurse', 'doctor', 'finance', 'inventory', 'auditor'])
+test('restricted Doctor cannot configure clinical rules or discounts', async ({ page }) => {
+  await login(page, '/clinical/hospitalizations', 'doctor');
+  for (const path of ['/catalogs/clinical', '/catalogs/discounts']) {
+    await page.goto(path);
+    await expect(page.locator('main[role=alert]')).toContainText('Acceso restringido');
+    await expect(
+      page.getByRole('button', { name: /Agregar diagnóstico|Agregar perfil/ }),
+    ).toHaveCount(0);
+  }
+});
+
+for (const role of ['nurse', 'finance', 'inventory', 'auditor'])
   test(`${role} can configure the client-authorized clinical and discount inputs`, async ({
     page,
   }) => {

@@ -68,7 +68,7 @@ async function editor(page: Page, label: string, nursing = false) {
     .click();
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('combobox', { name: 'Hospitalización', exact: true }).fill(caseId);
-  await dialog.getByRole('option').first().click();
+  await dialog.getByRole('listbox').getByRole('option').first().click();
   return dialog;
 }
 async function persist(page: Page) {
@@ -211,13 +211,17 @@ test('card edit and mixed administration record each medicine without changing c
 }) => {
   await login(page, '/clinical/orders');
   const dialog = await editor(page, 'Tarjeta de medicamentos', true);
-  await dialog.getByLabel(/^Hora 1/).fill('09:00');
-  await dialog.getByRole('button', { name: 'Agregar hora' }).click();
-  await dialog.getByLabel(/^Hora 2/).fill('17:00');
-  await dialog.getByLabel(/^Dilución/).fill('Dilución manual sintética de navegador');
+  await dialog.getByLabel('Hora 1 · Medicamento sintético QA', { exact: true }).fill('09:00');
+  const medicineRow = dialog.getByRole('group', { name: 'Medicamento sintético QA', exact: true });
+  await medicineRow.getByRole('button', { name: 'Agregar hora' }).click();
+  await dialog.getByLabel('Hora 2 · Medicamento sintético QA', { exact: true }).fill('17:00');
+  await dialog
+    .getByLabel('Dilución · Medicamento sintético QA', { exact: true })
+    .fill('Dilución manual sintética de navegador');
+  await dialog.getByLabel('Hora 1 · Solución sintética QA', { exact: true }).fill('09:00');
   await dialog.getByLabel('Crónicos', { exact: true }).fill('Crónico sintético navegador');
   const card = await persist(page);
-  expect(card.medications).toHaveLength(2);
+  expect(card.medications).toHaveLength(3);
   const administration = await editor(page, 'Administración de medicamentos', true);
   const itemsTop = (await administration
     .getByRole('region', { name: 'Medicamentos de la administración' })
@@ -234,7 +238,13 @@ test('card edit and mixed administration record each medicine without changing c
   await administration
     .getByRole('combobox', { name: 'Vía de administración', exact: true })
     .selectOption('Oral');
-  const med = card.medications.find((m: { chronic: boolean }) => !m.chronic);
+  const med = card.medications.find((m: { name: string }) => m.name === 'Medicamento sintético QA');
+  await administration
+    .getByRole('combobox', { name: 'Aplicación · Solución sintética QA · 09:00', exact: true })
+    .selectOption('no');
+  await administration
+    .getByLabel('Motivo de no aplicación · Solución sintética QA · 09:00')
+    .fill('Solución no aplicada en QA');
   await administration
     .getByRole('combobox', { name: 'Aplicación · ' + med.name + ' · 09:00', exact: true })
     .selectOption('no');
@@ -252,13 +262,13 @@ test('card edit and mixed administration record each medicine without changing c
     .getByRole('combobox', { name: 'Aplicación · Crónico sintético navegador', exact: true })
     .selectOption('yes');
   const result = await persist(page);
-  expect(result.payload.items).toHaveLength(3);
+  expect(result.payload.items).toHaveLength(4);
   expect(result.stockMovementIds).toHaveLength(1);
   expect(result.payload.stock[0].unitsPerApplication).toBe(2);
   await page.reload();
   const repeat = await editor(page, 'Administración de medicamentos', true);
   await expect(repeat.getByText('Aplicación registrada', { exact: true })).toHaveCount(1);
-  await expect(repeat.getByText('No aplicación registrada', { exact: true })).toHaveCount(1);
+  await expect(repeat.getByText('No aplicación registrada', { exact: true })).toHaveCount(2);
   await repeat.getByRole('button', { name: 'Cancelar', exact: true }).click();
   await page.goto('/reports/returns');
   await expect(page.getByText('No aplicado en QA de navegador').first()).toBeVisible();
@@ -464,9 +474,18 @@ test('medication card correction preserves its original and prints only the sele
   );
   await block.getByRole('button', { name: 'Editar tarjeta', exact: true }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByLabel(/^Hora 1/)).toHaveValue('09:00');
-  await expect(dialog.getByLabel(/^Hora 2/)).toHaveValue('17:00');
-  await expect(dialog.getByLabel(/^Dilución/)).toHaveValue(before.payload.schedule[0].dilution);
+  await expect(dialog.getByLabel('Hora 1 · Medicamento sintético QA', { exact: true })).toHaveValue(
+    '09:00',
+  );
+  await expect(dialog.getByLabel('Hora 2 · Medicamento sintético QA', { exact: true })).toHaveValue(
+    '17:00',
+  );
+  await expect(
+    dialog.getByLabel('Dilución · Medicamento sintético QA', { exact: true }),
+  ).toHaveValue(
+    before.payload.schedule.find((entry: { times: string[] }) => entry.times.includes('17:00'))
+      .dilution,
+  );
   await dialog.getByLabel('Motivo de actualización').fill('Comprobación sintética de corrección');
   const chronic = 'Crónico sintético actualizado ' + Date.now();
   await expect(dialog.locator('[name="instructions"]')).toHaveCount(0);
@@ -475,9 +494,24 @@ test('medication card correction preserves its original and prints only the sele
   expect(saved.version).toBe(before.version + 1);
   expect(saved.rootId).toBe(before.rootId);
   expect(saved.payload.instructions).toBe(before.payload.instructions);
-  expect(saved.payload.schedule[0].times).toEqual(['09:00', '17:00']);
-  expect(saved.payload.schedule[0].dilution).toBe(before.payload.schedule[0].dilution);
-  expect(saved.payload.schedule[0].medicationId).not.toBe(before.payload.schedule[0].medicationId);
+  expect(
+    saved.payload.schedule.find((entry: { times: string[] }) => entry.times.includes('17:00'))
+      .times,
+  ).toEqual(['09:00', '17:00']);
+  expect(
+    saved.payload.schedule.find((entry: { times: string[] }) => entry.times.includes('17:00'))
+      .dilution,
+  ).toBe(
+    before.payload.schedule.find((entry: { times: string[] }) => entry.times.includes('17:00'))
+      .dilution,
+  );
+  expect(
+    saved.payload.schedule.find((entry: { times: string[] }) => entry.times.includes('17:00'))
+      .medicationId,
+  ).not.toBe(
+    before.payload.schedule.find((entry: { times: string[] }) => entry.times.includes('17:00'))
+      .medicationId,
+  );
   const snapshot = await getJson(page, '/api/operations');
   expect(snapshot.clinicalRecords.find((r: { id: string }) => r.id === originalId)).toEqual(before);
   const recorded = snapshot.clinicalRecords.find(
@@ -487,8 +521,10 @@ test('medication card correction preserves its original and prints only the sele
       r.payload.kind === 'ADMINISTRATION' &&
       r.payload.items?.some(
         (item) =>
-          item.medicationId === before.payload.schedule[0].medicationId &&
-          item.scheduledTime === '17:00',
+          item.medicationId ===
+            before.payload.schedule.find((entry: { times: string[] }) =>
+              entry.times.includes('17:00'),
+            ).medicationId && item.scheduledTime === '17:00',
       ),
   );
   expect(recorded).toBeTruthy();
@@ -512,7 +548,9 @@ test('medication card correction preserves its original and prints only the sele
           route: 'Oral',
           items: [
             {
-              medicationId: saved.payload.schedule[0].medicationId,
+              medicationId: saved.payload.schedule.find((entry: { times: string[] }) =>
+                entry.times.includes('17:00'),
+              ).medicationId,
               scheduledTime: '17:00',
               applied: true,
               reason: '',

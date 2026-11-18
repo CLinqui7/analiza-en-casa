@@ -12,6 +12,7 @@ async function login(page: Page, path: string, role = 'admin') {
   await page.getByLabel('Usuario o correo').fill(`qa-${role}@example.test`);
   await page.getByLabel('Clave').fill(process.env.ANALIZA_QA_PASSWORD!);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await expect(page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'));
   await expect(page.locator('main h1')).toBeVisible();
 }
 async function api(page: Page, path: string, data?: unknown) {
@@ -33,11 +34,23 @@ test('searchable case context and separate care descriptions persist, preserving
 }) => {
   await login(page, '/clinical/orders');
   const extraCase = `HOS-444-${Date.now()}`;
+  const workspace = await api(page, '/api/workspace');
+  const sourceCase = workspace.body.hospitalizations.find(
+    (item: { id: string }) => item.id === fixture.caseId,
+  );
+  expect(sourceCase).toBeTruthy();
   expect(
     (
       await api(page, '/api/hospitalizations', {
         hospitalization: {
+          ...sourceCase,
           id: extraCase,
+          primaryDoctorId: workspace.body.doctors[0].id,
+          assignedNursingResourceIds: [
+            workspace.body.nursingResources.find((item: { userId?: string }) => item.userId).id,
+          ],
+          assignedNurseUserIds: [],
+          linkedQuoteIds: [],
           patientId: fixture.patientId,
           startDate: '2026-11-18',
           status: 'ACTIVE',
@@ -70,7 +83,7 @@ test('searchable case context and separate care descriptions persist, preserving
   await combo.fill('no-case-matches');
   await expect(dialog.getByText('Sin resultados', { exact: true })).toBeVisible();
   await combo.fill(fixture.caseId);
-  await dialog.getByRole('option').first().click();
+  await dialog.getByRole('listbox').getByRole('option').first().click();
   await dialog.getByRole('checkbox', { name: 'Dieta', exact: true }).check();
   await dialog.getByLabel('Descripción de dieta', { exact: true }).fill('Dieta separada EXTRAS18');
   await dialog.getByRole('checkbox', { name: 'Cuidado de enfermería', exact: true }).check();
@@ -164,14 +177,14 @@ test('Doctor has four clinical pages, reads solution context and cannot access f
   );
   expect(quote).not.toHaveProperty('total');
   expect(quote.items[0]).not.toHaveProperty('unitPrice');
-  expect((await api(page, `/api/quotes/${fixture.solutionQuoteId}`)).status).toBe(403);
+  expect((await api(page, '/api/quotes')).status).toBe(403);
   expect((await api(page, '/api/prequotes')).status).toBe(403);
   for (const path of ['/clinical', '/clinical/orders', '/agenda', '/clinical/hospitalizations']) {
     await page.goto(path);
     await expect(page.locator('main h1')).toBeVisible();
   }
   await page.goto('/quotes');
-  await expect(page.getByRole('alert')).toContainText('Acceso restringido');
+  await expect(page.locator('main[role=alert]')).toContainText('Acceso restringido');
   await page.goto('/clinical/orders');
   await page.getByRole('button', { name: 'Acciones de enfermería', exact: true }).click();
   await page
@@ -183,6 +196,6 @@ test('Doctor has four clinical pages, reads solution context and cannot access f
     .click();
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('combobox', { name: 'Hospitalización', exact: true }).fill(fixture.caseId);
-  await dialog.getByRole('option').first().click();
+  await dialog.getByRole('listbox').getByRole('option').first().click();
   await expect(dialog).toContainText('Solución sintética QA');
 });

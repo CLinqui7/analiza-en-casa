@@ -138,7 +138,10 @@ export function ClinicalRecordEditor({
         )?.scaleDefinition ?? scale,
     )
     .filter(
-      (scale) => !diagnosisConfig?.scaleIds?.length || diagnosisConfig.scaleIds.includes(scale.id),
+      (scale) =>
+        !diagnosisConfig?.scaleIds?.length ||
+        diagnosisConfig.scaleIds.includes(scale.id) ||
+        (original?.payload.kind === 'SCALE' && original.payload.scaleId === scale.id),
     );
   const selectedScale = scales.find((scale) => scale.id === scaleId) ?? scales[0];
   const cards = currentClinicalRecords(operations.clinicalRecords).filter(

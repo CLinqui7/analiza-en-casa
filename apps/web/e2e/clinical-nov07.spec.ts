@@ -84,7 +84,7 @@ for (const width of [1440, 390])
     await dialog
       .getByRole('combobox', { name: 'Hospitalización', exact: true })
       .fill('case-demo-001');
-    await dialog.getByRole('option').first().click();
+    await dialog.getByRole('listbox').getByRole('option').first().click();
     await dialog.getByLabel(/^Hora 1/).fill('08:00');
     await dialog.getByRole('button', { name: 'Agregar hora' }).click();
     await dialog.getByLabel(/^Hora 2/).fill('16:00');

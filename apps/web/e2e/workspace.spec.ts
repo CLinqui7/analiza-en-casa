@@ -9,7 +9,13 @@ async function loginAs(page: import('@playwright/test').Page, email: string, pas
   await page.getByLabel('Usuario o correo').fill(email);
   await page.getByLabel('Clave').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(email === 'nurse@demo.local' ? /\/patients$/ : /\/dashboard$/);
+  await expect(page).toHaveURL(
+    email === 'nurse@demo.local'
+      ? /\/patients$/
+      : email === 'doctor@demo.local'
+        ? /\/clinical\/hospitalizations$/
+        : /\/dashboard$/,
+  );
 }
 
 async function login(page: import('@playwright/test').Page) {
@@ -722,10 +728,7 @@ test('hospitalization route retains listing and limits case editing to clinical 
   await createDialog.getByLabel('Paciente').selectOption('patient-demo-001');
   await createDialog.getByLabel('Médico tratante principal').selectOption({ index: 1 });
   await createDialog.getByLabel('Tipo de cuenta').selectOption('EMPRESA');
-  await expect(createDialog.getByLabel('Responsable administrativo')).toHaveAttribute(
-    'readonly',
-    '',
-  );
+  await createDialog.getByLabel('Responsable administrativo').fill('Responsable QA');
   await createDialog.getByLabel('Próxima acción').fill('Confirmar visita de QA');
   await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
   await expect(page.getByRole('status')).toContainText(
@@ -784,7 +787,9 @@ test('hospitalization permissions preserve read-only roles and deny inventory', 
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'doctor@demo.local', 'demo-doctor');
   await page.goto('/hospitalizations');
-  await expect(page.locator('[data-action-id="HOSPITALIZATION-CREATE"]')).toBeVisible();
+  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido');
+  await page.goto('/clinical/hospitalizations');
+  await expect(page.locator('main h1')).toContainText('Ingresos clínicos');
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'finance@demo.local', 'demo-finance');
   await page.goto('/hospitalizations');
