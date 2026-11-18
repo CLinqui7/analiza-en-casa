@@ -440,6 +440,14 @@ test('Pending18 unpriced supply adds at zero without price input and keeps the s
 }) => {
   test.setTimeout(180000);
   await login(page, '/quotes');
+  const catalogueItem = (await api(page, '/api/workspace')).body.catalogItems.find(
+    (item: { id: string }) => item.id === evidence.unpricedItemId,
+  );
+  expect(catalogueItem.id).toMatch(/^nov18-unpriced-/);
+  delete catalogueItem.salePriceExcludingTax;
+  expect(
+    (await api(page, '/api/operations', { command: 'catalog.save', item: catalogueItem })).status,
+  ).toBe(200);
   const quote = await makeQuote(page);
   expect(quote.manager).toBe('Usuario ficticio ADMIN');
   expect(
@@ -474,7 +482,15 @@ test('Pending18 unpriced supply adds at zero without price input and keeps the s
   await expect(dialog.getByLabel('Precio unitario de esta solicitud (USD)')).toHaveCount(0);
   await expect(dialog.getByText('Precio de venta pendiente.', { exact: false })).toBeVisible();
   await expect(add).toBeEnabled();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await saveScreenshot(page, 'pending18-zero-price-desktop');
   await page.setViewportSize({ width: 390, height: 844 });
+  const catalogueLink = dialog.getByRole('link', {
+    name: 'Completar precio en Catálogos (otra pestaña)',
+  });
+  await catalogueLink.scrollIntoViewIfNeeded();
+  expect(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+  expect(await catalogueLink.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
   await saveScreenshot(page, 'pending18-zero-price-mobile');
   let writes = 0,
     failedRefresh = false;

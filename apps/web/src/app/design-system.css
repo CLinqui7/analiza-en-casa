@@ -3431,3 +3431,19 @@ button:disabled {
   display: grid;
   gap: 7px;
 }
+.notice.fulfillment-notice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+.fulfillment-notice p {
+  margin: 0;
+}
+.fulfillment-notice .button {
+  justify-self: start;
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

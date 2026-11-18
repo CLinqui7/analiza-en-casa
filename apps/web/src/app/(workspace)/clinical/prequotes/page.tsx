@@ -165,7 +165,7 @@ export default function PrequotesPage() {
         </div>
       </header>
       {message ? (
-        <div className="notice success" role="status">
+        <div className="notice success fulfillment-notice" role="status">
           <p>{message}</p>
           {addedQuoteId ? (
             <Link className="button button-secondary" href={`/quotes/${addedQuoteId}`}>
@@ -180,7 +180,7 @@ export default function PrequotesPage() {
         </p>
       ) : null}
       {syncPending ? (
-        <div className="notice warning" role="status">
+        <div className="notice warning fulfillment-notice" role="status">
           <p>
             Los insumos ya se guardaron. No se pudo actualizar la vista de Cuentas por cobrar;
             actualícela para consultar el saldo confirmado.
@@ -329,7 +329,7 @@ export default function PrequotesPage() {
             </div>
             {selected.note ? <p className="notice">{selected.note}</p> : null}
             {!selected.assignedQuoteId && selected.itemAvailable && selected.unitPrice === null ? (
-              <div className="notice warning" role="status">
+              <div className="notice warning fulfillment-notice" role="status">
                 <p>
                   Precio de venta pendiente. Se añadirá la cantidad solicitada con precio 0.
                   Complete el precio en el catálogo general para las próximas incorporaciones.
@@ -340,8 +340,9 @@ export default function PrequotesPage() {
                     href={`/catalogs?category=${encodeURIComponent(selected.itemCategory ?? 'SUPPLIES')}&search=${encodeURIComponent(selected.itemName)}`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="Completar precio en Catálogos (otra pestaña)"
                   >
-                    Completar precio en Catálogos (otra pestaña)
+                    Abrir catálogo ↗
                   </Link>
                 ) : null}
               </div>
