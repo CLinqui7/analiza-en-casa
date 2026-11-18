@@ -2,7 +2,7 @@
 
 Fuente: `extras18denov_.docx`, SHA256 `21a4a415bce02be3c24358ab73c1bd3b177b6294902d159a826c217b751fc825`. [Texto fuente](sources/CLIENT_EXTRAS18_2026-11-18.txt); correo operativo conservado en el original privado. El usuario autorizó elegir el nombre de la cuenta; se utilizará el nombre de presentación Dr. Carlos Sorto, con las cuatro pantallas expresamente indicadas.
 
-Estado: verificación técnica aprobada; despliegue público pendiente. Base Git `6ba3d88`, producción previa `cc009b1`. Implementación `808d10d`, corrección de escala histórica `7d1a440`, separación de texto PDF `56e44f0` y símbolos clínicos `71672e5`. Preflight y 376 pruebas de la línea base pasaron antes de editar. No se añadieron dependencias ni migraciones.
+Estado: publicado y verificado en Contabo, release `9f8307d99ec4647d1ded9f1656c4fb9e5fddb016`. Base Git `6ba3d88`, producción previa `cc009b1`. Implementación `808d10d`, corrección de escala histórica `7d1a440`, separación de texto PDF `56e44f0` y símbolos clínicos `71672e5`. Preflight y 376 pruebas de la línea base pasaron antes de editar. No se añadieron dependencias ni migraciones. [Despliegue, cuenta y conciliación pública](../deployment/CONTABO_EXTRAS18_2026-11-18.md).
 
 | ID | Cambio solicitado | Implementación y regresión necesaria |
 |---|---|---|
@@ -11,8 +11,8 @@ Estado: verificación técnica aprobada; despliegue público pendiente. Base Git
 | EX18-03 | Una descripción por tipo de cuidado | Dieta y cuidados separados; texto conservado al alternar selección; servidor conserva campos y legado. Corrección agrega versión. |
 | EX18-04 | PDF por una, varias o todas las secciones | Descarga PDF real usando la misma selección renderizada para imprimir; filtros de paciente, caso y versiones compartidos. |
 | EX18-05 | Añadir soluciones a la tarjeta | Predicado compartido para medicamentos o palabras Solución/Soluciones, sin distinguir tildes/mayúsculas; configuración y consumo también aceptan esos productos. No inventa dosis/unidades. |
-| EX18-06 | Cuenta Doctor con cuatro pantallas clínicas | Rol existente restringido, entrada a Ingresos clínicos; Agenda, Expediente y Órdenes médicas. Contexto de cotización proyectado sin importes ni pagadores. API financiera/decisiones/configuración rechaza al rol; directorio mínimo y pacientes son dependencias clínicas. |
-| EX18-07 | Insumos y cuenta sin duplicación en VPS | Revisión de transacciones/idempotencia y pruebas concurrentes. Tras POST confirmado, fallo de refresco advierte sincronización pendiente y reintenta sólo lectura. Falta verificación de escritura con organización sintética pública. |
+| EX18-06 | Cuenta Doctor con cuatro pantallas clínicas | Cuenta creada como Dr. Carlos Sorto y verificada en la organización principal. Entrada a Ingresos clínicos; Agenda, Expediente y Órdenes médicas. Contexto de cotización sin importes/pagadores. API financiera/decisiones/configuración rechaza al rol; directorio mínimo y pacientes son dependencias clínicas. |
+| EX18-07 | Insumos y cuenta sin duplicación en VPS | Prueba pública sintética aprobada: 18.00 → 37.57, pago 5.00 conservado, saldo 29.57, una cuenta, dos versiones y una línea añadida. Replay concurrente/recarga aprobados. Fallo de refresco advierte sincronización pendiente y reintenta sólo lectura. |
 
 Se preservan los estados históricos de las matrices. No hay nueva declaración EXACT ni revisión completa de los 17 capítulos. Las revisiones delegadas de CH08/CH14 y CH09/CH10/CH17 fueron de sólo lectura y focalizadas. Se abrieron CH08-E0087, CH14-E0017, CH09-E0126, CH10-E0013, CH17-E0008 y CH17-E0026; sus conclusiones protegen saldo/pagos, separación de inventario, historial y selección de impresión.
 
