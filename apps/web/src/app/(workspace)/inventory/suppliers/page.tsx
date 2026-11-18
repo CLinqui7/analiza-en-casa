@@ -84,7 +84,9 @@ export default function SuppliersPage() {
               placeholder="Empresa, código, contacto o correo"
             />
           </label>
-          <StatusTag>{visible.length} proveedores</StatusTag>
+          <StatusTag>
+            {visible.length} {visible.length === 1 ? 'proveedor' : 'proveedores'}
+          </StatusTag>
         </div>
       </Panel>
       {visible.length ? (
@@ -159,6 +161,9 @@ export default function SuppliersPage() {
               </tbody>
             </table>
           </div>
+          <p className="supplier-table-hint">
+            Deslice la tabla horizontalmente para ver todos los datos.
+          </p>
         </Panel>
       ) : (
         <EmptyState title="Sin proveedores" detail="Registre un proveedor o ajuste su búsqueda." />

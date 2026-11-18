@@ -326,6 +326,20 @@ test('Nov17 prequote refresh, assignment, nurse delivery, supplier table CRUD an
   await expect(page.getByRole('row').filter({ hasText: name })).toContainText('0000-0000');
   await page.getByLabel('Buscar proveedor').fill(name);
   await expect(page.locator('.supplier-table tbody tr')).toHaveCount(1);
+  for (const width of [1440, 1280, 768, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
+      true,
+    );
+    if (width >= 1280) {
+      expect(
+        await page
+          .locator('.supplier-table-wrap')
+          .evaluate((element) => element.scrollWidth <= element.clientWidth + 1),
+      ).toBe(true);
+    }
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
   await saveScreenshot(page, 'suppliers-table-desktop');
   await page.setViewportSize({ width: 390, height: 844 });
   await saveScreenshot(page, 'suppliers-mobile');

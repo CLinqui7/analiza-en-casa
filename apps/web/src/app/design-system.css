@@ -27,7 +27,7 @@
 }
 .supplier-table {
   width: 100%;
-  min-width: 920px;
+  min-width: 860px;
   table-layout: fixed;
 }
 .supplier-table th,
@@ -44,6 +44,20 @@
 }
 .supplier-table th:nth-child(6) {
   width: 9%;
+}
+.supplier-table th:nth-child(7) {
+  width: 130px;
+}
+.supplier-table-hint {
+  display: none;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+@media (max-width: 1200px) {
+  .supplier-table-hint {
+    display: block;
+  }
 }
 .supplier-table tbody th {
   text-align: left;
