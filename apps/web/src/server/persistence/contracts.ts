@@ -88,7 +88,7 @@ export interface Persistence {
   };
   auth: Pick<
     AuthService,
-    'login' | 'register' | 'requireSession' | 'requireCsrf' | 'rotateCsrf' | 'logout'
+    'login' | 'register' | 'requireSession' | 'requireCsrf' | 'getCsrf' | 'logout'
   >;
   patients: EntityRepository<Patient, 'patient'>;
   doctors: EntityRepository<Doctor, 'doctor'>;

@@ -135,7 +135,11 @@ test('Nov17 quote owner, manual Enviada, edit one logical quote and approve all 
   page,
 }) => {
   test.setTimeout(180000);
-  await login(page, '/quotes?create=1');
+  await login(page, '/quotes');
+  expect(
+    (await api(page, '/api/quotes/form-draft?key=quote.create.new', {}, 'DELETE')).status,
+  ).toBe(200);
+  await page.goto('/quotes?create=1');
   await expect(page.getByLabel('Responsable administrativo')).toHaveValue('Usuario ficticio ADMIN');
   await page.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
   const quote = await makeQuote(page);
@@ -355,9 +359,13 @@ test('Extras1 restores empty quote owner and retains it across edits, autosave a
     page.getByText('Se recuperó el formulario pendiente.', { exact: false }),
   ).toBeVisible();
   await expect(owner).toHaveValue('Usuario ficticio ADMIN');
+  const otherTab = await page.context().newPage();
+  await otherTab.goto('/inventory/suppliers');
+  await expect(otherTab.getByRole('heading', { name: 'Proveedores', exact: true })).toBeVisible();
+  await otherTab.close();
   await page.getByLabel('Buscar paciente', { exact: true }).fill('Paciente sintético');
   await page.getByLabel('Fecha de ingreso', { exact: true }).fill('2026-11-18');
-  await page.getByLabel('Prioridad', { exact: true }).selectOption('HIGH');
+  await page.locator('[data-action-id="QUOTE-PRIORITY"]').selectOption('HIGH');
   await expect(owner).toHaveValue('Usuario ficticio ADMIN');
   await expect.poll(async () => (await api(page, url)).body.draft?.priority).toBe('HIGH');
   await page.reload();
@@ -376,6 +384,9 @@ test('Extras1 late profile response does not replace a name entered by the user'
   page,
 }) => {
   await login(page, '/quotes');
+  expect(
+    (await api(page, '/api/quotes/form-draft?key=quote.create.new', {}, 'DELETE')).status,
+  ).toBe(200);
   let release: () => void = () => {};
   const gate = new Promise<void>((resolve) => {
     release = resolve;
@@ -392,7 +403,7 @@ test('Extras1 late profile response does not replace a name entered by the user'
   const loaded = page.waitForResponse((response) => response.url().endsWith('/api/profile'));
   release();
   await loaded;
-  await page.getByLabel('Prioridad', { exact: true }).selectOption('LOW');
+  await page.locator('[data-action-id="QUOTE-PRIORITY"]').selectOption('LOW');
   await expect(owner).toHaveValue('Responsable manual con perfil pendiente');
   await expect
     .poll(

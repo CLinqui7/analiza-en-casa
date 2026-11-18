@@ -1033,20 +1033,22 @@ function QuoteEditor({
               ) : null}
             </label>
             <div>
-              <label htmlFor="quote-manager">Responsable administrativo</label>
-              <input
-                id="quote-manager"
-                aria-describedby={
-                  managerLoadError && !draft.manager?.trim() ? 'quote-manager-help' : undefined
-                }
-                data-action-id="QUOTE-MANAGER"
-                onChange={(event) => {
-                  managerEdited.current = true;
-                  const manager = event.target.value;
-                  setDraft((current) => ({ ...current, manager }));
-                }}
-                value={draft.manager ?? ''}
-              />
+              <label htmlFor="quote-manager">
+                Responsable administrativo
+                <input
+                  id="quote-manager"
+                  aria-describedby={
+                    managerLoadError && !draft.manager?.trim() ? 'quote-manager-help' : undefined
+                  }
+                  data-action-id="QUOTE-MANAGER"
+                  onChange={(event) => {
+                    managerEdited.current = true;
+                    const manager = event.target.value;
+                    setDraft((current) => ({ ...current, manager }));
+                  }}
+                  value={draft.manager ?? ''}
+                />
+              </label>
               {managerLoadError && !draft.manager?.trim() ? (
                 <div className="field-help" id="quote-manager-help" role="status">
                   No se pudo consultar su nombre. Puede escribirlo o{' '}

@@ -20,4 +20,12 @@ La comprobación de cambios detectó hashes desactualizados en CR-011/CR-012 al 
 
 Revisión del cambio: autorización y RLS se mantienen en servidor; la consulta específica no admite escoger otra organización y obtiene las cotizaciones sólo del paciente de la solicitud. El diálogo cancela consultas anteriores, bloquea Guardar mientras carga y diferencia un fallo de conexión de una lista vacía. No se añaden dependencias, migraciones ni reglas clínicas o de cobertura.
 
+## Hallazgo durante la regresión conectada
+
+La primera ejecución detectó HTTP 403 al asignar después de consultar CSRF otra vez con la misma sesión. El GET de CSRF rotaba el token guardado y dejaba inválido el que una pestaña abierta mantenía en memoria. Era reproducible también al abrir otra pestaña, por lo que podía afectar el guardado temporal de formularios.
+
+La corrección devuelve un token estable por sesión mediante HMAC-SHA256, con separación de dominio y el secreto aleatorio de la cookie HttpOnly como clave; nunca devuelve la cookie de sesión. El servidor sigue exigiendo el encabezado explícito, comparando en tiempo constante y comprobando vigencia/revocación. Las sesiones anteriores conservan su último token emitido hasta su vencimiento normal y también pueden obtener el token estable. No se guarda un token nuevo en cookies ni se actualiza la base al consultar CSRF. Se rechazan consultas explícitamente cross-site. Se siguió el criterio de tokens por sesión y encabezados de [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#synchronizer-token-pattern).
+
+Se añadieron pruebas de concurrencia, separación entre sesiones, token ausente/incorrecto, compatibilidad con formularios anteriores, expiración, revocación, fallo del almacenamiento y consulta cross-site. Las 376 pruebas unitarias/servidor resultantes pasaron. Dos fallos iniciales del nuevo test de formulario se debieron al selector de la etiqueta «Prioridad»; se corrigió para utilizar el identificador estable del control, manteniendo las mismas aserciones de persistencia. Una devolución accidental de un mock desde `beforeEach` también se corrigió en la nueva prueba HTTP.
+
 Verificación conectada final, revisión visual, SHA publicado y resultados del VPS: pendientes de ejecución.
