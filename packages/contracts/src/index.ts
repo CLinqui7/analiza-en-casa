@@ -198,6 +198,8 @@ export const inventoryMovementSchema = z
     transferId: z.string().trim().min(1).optional(),
     transferDirection: z.enum(['IN', 'OUT']).optional(),
     counterpartWarehouseId: z.string().trim().min(1).optional(),
+    patientId: z.string().trim().min(1).optional(),
+    purchaseDocumentNumber: z.string().trim().min(1).max(120).optional(),
     traceRecordId: z.string().trim().min(1).optional(),
     traceNumber: z.string().trim().min(1).max(120).optional(),
   })
@@ -459,6 +461,7 @@ export const catalogItemSchema = z.object({
     ])
     .optional(),
   contactName: z.string().trim().max(200).optional(),
+  address: z.string().trim().max(2000).optional(),
   landlinePhone: z.string().trim().max(50).optional(),
   mobilePhone: z.string().trim().max(50).optional(),
   email: z.email().optional().or(z.literal('')),
@@ -476,11 +479,13 @@ export const purchaseSchema = z.object({
   warehouseId: z.string().trim().min(1).optional(),
   reference: z.string().trim().min(1),
   invoiceNumber: z.string().trim().max(100).optional(),
+  providerDocumentKind: z.enum(['INVOICE', 'CREDIT_NOTE', 'FISCAL_CREDIT']).optional(),
   invoiceGroupId: z.string().trim().min(1).max(120).optional(),
   note: z.string().trim().optional(),
   usefulLife: z.string().trim().max(120).optional(),
   isFixedAsset: z.boolean().optional(),
   purchaseOrderId: z.string().uuid().optional(),
+  purchaseOrderLineIndex: z.number().int().nonnegative().optional(),
   quantity: z.number().positive().optional(),
   unitCost: z.number().nonnegative().optional(),
   /** Client-requested arithmetic snapshot; this is an internal purchase record, not a fiscal DTE. */

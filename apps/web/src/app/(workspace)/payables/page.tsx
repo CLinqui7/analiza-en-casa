@@ -6,7 +6,11 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
-import { purchaseOrderSchema, type PurchaseOrder } from '@/lib/purchase-order';
+import {
+  receiptDocumentNames,
+  purchaseOrderSchema,
+  type PurchaseOrder,
+} from '@/lib/purchase-order';
 import { purchaseTotals } from '@/lib/purchase-totals';
 
 type Approval = {
@@ -61,7 +65,9 @@ export default function PayablesPage() {
     for (const purchase of purchases) {
       if (!purchase.invoiceNumber || purchase.invoiceVoidedAt) continue;
       const id = purchase.invoiceGroupId ?? purchase.id;
-      groups.set(id, [...(groups.get(id) ?? []), purchase]);
+      const lines = groups.get(id);
+      if (lines) lines.push(purchase);
+      else groups.set(id, [purchase]);
     }
     return [...groups].map(([id, lines]) => ({
       id,
@@ -75,6 +81,18 @@ export default function PayablesPage() {
     () => new Map(approvals.map((item) => [item.invoiceGroupId, item])),
     [approvals],
   );
+  const orderById = useMemo(() => new Map(orders.map((order) => [order.id, order])), [orders]);
+  const invoicesByOrder = useMemo(() => {
+    const index = new Map<string, typeof invoices>();
+    for (const invoice of invoices) {
+      const id = invoice.first.purchaseOrderId;
+      if (!id) continue;
+      const linked = index.get(id);
+      if (linked) linked.push(invoice);
+      else index.set(id, [invoice]);
+    }
+    return index;
+  }, [invoices]);
   const approvedTotal = approvals.reduce((sum, item) => sum + item.total, 0);
   const matchingOrders = orders.filter((order) =>
     `${order.orderNumber} ${order.supplierName}`
@@ -123,8 +141,8 @@ export default function PayablesPage() {
           <p className="eyebrow">Financiero</p>
           <h1>Cuentas por pagar</h1>
           <p>
-            Las órdenes se muestran desde su emisión. Una factura entra al saldo por pagar al
-            recibirse y aprobarse.
+            Los documentos recibidos se muestran para revisión financiera. Una factura entra al
+            saldo por pagar al recibirse y aprobarse.
           </p>
         </div>
       </header>
@@ -166,20 +184,23 @@ export default function PayablesPage() {
             </thead>
             <tbody>
               {matchingOrders.map((order) => {
-                const linked = invoices.filter(
-                  (invoice) => invoice.first.purchaseOrderId === order.id,
-                );
+                const linked = invoicesByOrder.get(order.id) ?? [];
                 const approved = linked.reduce(
                   (sum, invoice) => sum + (approvedByGroup.get(invoice.id)?.total ?? 0),
                   0,
                 );
-                const status = linked.some((invoice) => approvedByGroup.has(invoice.id))
-                  ? 'Factura aprobada'
-                  : linked.some((invoice) => invoice.total !== null)
-                    ? 'Factura recibida · pendiente de aprobación'
-                    : linked.length
-                      ? 'Factura pendiente de recepción'
-                      : 'Sin factura recibida';
+                const status =
+                  order.status === 'CANCELLED'
+                    ? 'Orden anulada'
+                    : order.receipt?.kind === 'CREDIT_NOTE'
+                      ? 'Nota de crédito · pendiente de conciliación'
+                      : linked.some((invoice) => approvedByGroup.has(invoice.id))
+                        ? 'Factura aprobada'
+                        : linked.some((invoice) => invoice.total !== null)
+                          ? 'Factura recibida · pendiente de aprobación'
+                          : linked.length
+                            ? 'Factura pendiente de recepción'
+                            : 'Sin factura recibida';
                 return (
                   <tr key={order.id}>
                     <td>{order.orderNumber}</td>
@@ -223,26 +244,30 @@ export default function PayablesPage() {
             <tbody>
               {matchingInvoices.map((invoice) => {
                 const approval = approvedByGroup.get(invoice.id);
-                const status = approval
-                  ? 'Aprobada'
-                  : invoice.total === null
-                    ? 'Pendiente de recepción'
-                    : 'Recibida · pendiente de aprobación';
+                const order = orderById.get(invoice.first.purchaseOrderId ?? '');
+                const isCredit = order?.receipt?.kind === 'CREDIT_NOTE';
+                const status = isCredit
+                  ? 'Nota de crédito · pendiente de conciliación'
+                  : approval
+                    ? 'Aprobada'
+                    : invoice.total === null
+                      ? 'Pendiente de recepción'
+                      : 'Recibida · pendiente de aprobación';
                 return (
                   <tr key={invoice.id}>
-                    <td>{invoice.first.invoiceNumber}</td>
+                    <td>
+                      {order?.receipt ? receiptDocumentNames[order.receipt.kind] : 'Factura'} ·{' '}
+                      {invoice.first.invoiceNumber}
+                    </td>
                     <td>
                       {supplierNames.get(invoice.first.supplierCatalogItemId ?? '') ??
                         'Proveedor registrado'}
                     </td>
-                    <td>
-                      {orders.find((order) => order.id === invoice.first.purchaseOrderId)
-                        ?.orderNumber ?? 'Sin vincular'}
-                    </td>
+                    <td>{order?.orderNumber ?? 'Sin vincular'}</td>
                     <td>{invoice.total === null ? '—' : money(invoice.total)}</td>
                     <td>{status}</td>
                     <td>
-                      {!approval && invoice.total !== null && can('payments:write') ? (
+                      {!isCredit && !approval && invoice.total !== null && can('payments:write') ? (
                         <Button
                           disabled={busyGroup !== null}
                           onClick={() => void approve(invoice.id)}

@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       );
     const data = await transaction(postgresPool(), actor, async (client) => {
       const rows = await client.query<{ body: unknown }>(
-        "SELECT body FROM analiza.purchases WHERE organization_id=$1 AND (body->>'invoiceGroupId'=$2 OR (id=$2 AND body->>'invoiceGroupId' IS NULL)) ORDER BY created_at,id LIMIT 100",
+        "SELECT body FROM analiza.purchases WHERE organization_id=$1 AND (body->>'invoiceGroupId'=$2 OR (id=$2 AND body->>'invoiceGroupId' IS NULL)) ORDER BY created_at,id",
         [actor.organizationId, id],
       );
       const lines = rows.rows.map((row) => purchaseSchema.parse(row.body));

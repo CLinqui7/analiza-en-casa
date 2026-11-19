@@ -1,17 +1,52 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { quoteDisplayCode } from '@analiza/domain';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
 import type { PrequoteChoice, PrequoteEntry, PrequoteInbox } from '@/lib/quote-fulfillment';
+import {
+  RequestProductsEditor,
+  readProductRows,
+  type RequestProductDraft,
+} from '@/components/clinical/request-products-editor';
+import {
+  productKey,
+  requestQuoteCategories,
+  type SupplyRequestCatalogItem,
+} from '@/lib/supply-requests';
+import styles from '@/components/clinical/request-products-editor.module.css';
 import { quoteStatusLabels } from '@/lib/quote-workflow';
 
 const money = (amount: number) =>
   new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(amount);
 export default function PrequotesPage() {
-  const { refreshWorkspace } = useWorkspace();
+  const { refreshWorkspace, catalogItems } = useWorkspace();
+  const [extraRows, setExtraRows] = useState<RequestProductDraft[]>([]);
+  const selectableCatalog = useMemo(
+    () =>
+      catalogItems.flatMap((item) =>
+        item.status === 'ACTIVE' &&
+        item.category &&
+        Object.hasOwn(requestQuoteCategories, item.category)
+          ? [
+              {
+                id: item.id,
+                sku: item.sku,
+                name: item.name,
+                category: item.category as SupplyRequestCatalogItem['category'],
+                salePriceExcludingTax: item.salePriceExcludingTax,
+              },
+            ]
+          : [],
+      ),
+    [catalogItems],
+  );
+  const catalogById = useMemo(
+    () => new Map(selectableCatalog.map((item) => [item.id, item])),
+    [selectableCatalog],
+  );
   const { can } = useAuth();
   const [inbox, setInbox] = useState<PrequoteInbox | null>(null);
   const [page, setPage] = useState(1);
@@ -97,9 +132,13 @@ export default function PrequotesPage() {
   function closeSelection() {
     choiceRequest.current?.abort();
     setSelected(null);
+    setExtraRows([]);
   }
   const chosen = choices.find((quote) => quote.id === quoteId);
   const confirmedPrice = selected?.unitPrice ?? 0;
+  const selectedProducts =
+    selected?.products ?? (selected ? [{ ...selected, catalogItemId: null }] : []);
+  const pendingPrice = selectedProducts.find((product) => product.unitPrice === null);
   async function assign() {
     if (!selected || !chosen || choiceState !== 'ready' || !selected.itemAvailable || busy) return;
     if (
@@ -110,6 +149,30 @@ export default function PrequotesPage() {
     setBusy(true);
     setError('');
     try {
+      let extras;
+      try {
+        const products = readProductRows(extraRows);
+        const keys = new Set(
+          selectedProducts.map((line) =>
+            line.catalogItemId ? 'catalog:' + line.catalogItemId : 'fee:' + line.itemName,
+          ),
+        );
+        extras = products.map((product) => {
+          if (keys.has(productKey(product))) throw Error();
+          keys.add(productKey(product));
+          return {
+            product,
+            expectedPrice:
+              'feeAmount' in product
+                ? product.feeAmount
+                : (catalogById.get(product.catalogItemId)?.salePriceExcludingTax ?? null),
+          };
+        });
+      } catch {
+        throw Error(
+          'Revise los conceptos adicionales. Indique la cantidad, seleccione el honorario si corresponde y evite repetir un concepto.',
+        );
+      }
       const response = await fetch('/api/prequotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
@@ -118,6 +181,13 @@ export default function PrequotesPage() {
           quoteId,
           expectedRecordVersion: chosen.recordVersion,
           expectedUnitPrice: confirmedPrice,
+          ...(selected.products && {
+            expectedProducts: selected.products.map((line) => ({
+              id: line.id,
+              unitPrice: line.unitPrice,
+            })),
+          }),
+          ...(extras.length ? { additions: extras } : {}),
           priceSource: selected.unitPrice === null ? 'PENDING' : 'CATALOG',
           idempotencyKey: key,
           ...(chosen.status === 'APPROVED'
@@ -139,8 +209,8 @@ export default function PrequotesPage() {
           : chosen.status === 'SENT'
             ? 'Solicitud asignada. La cotización y su saldo en Cuentas por cobrar están actualizados.'
             : 'Solicitud asignada al borrador. Al marcar la cotización como Enviada, aparecerá en Cuentas por cobrar.') +
-          (selected.unitPrice === null
-            ? ' El insumo se añadió con precio 0; su precio de venta está pendiente de completar.'
+          (pendingPrice || extras.some((line) => line.expectedPrice === null)
+            ? ' Los conceptos con precio pendiente se registraron en cero.'
             : ''),
       );
       closeSelection();
@@ -223,8 +293,11 @@ export default function PrequotesPage() {
                       <strong>{entry.patientName}</strong>
                     </td>
                     <td data-label="Ítems">
-                      {entry.itemName}
-                      <small className="cell-secondary">Cantidad: {entry.quantity}</small>
+                      {(entry.products ?? [entry]).map((product) => (
+                        <div key={product.id}>
+                          {product.itemName} <small>× {product.quantity}</small>
+                        </div>
+                      ))}
                     </td>
                     <td data-label="Estado">
                       <StatusTag tone={entry.assignmentPresent ? 'success' : 'warning'}>
@@ -318,26 +391,56 @@ export default function PrequotesPage() {
             <div className="fulfillment-summary">
               <span>Paciente</span>
               <h3>{selected.patientName}</h3>
+              <ul className={styles.summary}>
+                {selectedProducts.map((product) => {
+                  const price =
+                    selected.assignedQuoteId && product.assignedUnitPrice != null
+                      ? product.assignedUnitPrice
+                      : (product.unitPrice ?? 0);
+                  return (
+                    <li key={product.id}>
+                      <strong>{product.itemName}</strong>
+                      <span>
+                        {' '}
+                        {product.quantity} × {money(price)} · {money(price * product.quantity)}
+                      </span>
+                      {price === 0 && (
+                        <small className="cell-secondary">
+                          {(product.pricePending ?? product.unitPrice === null)
+                            ? 'Precio pendiente de catálogo'
+                            : 'Precio cero confirmado'}
+                        </small>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
               <p>
-                {selected.itemName} · {selected.quantity} unidades
-              </p>
-              <p>
-                {selected.assignedQuoteId && selected.assignedUnitPrice != null
-                  ? `Precio aplicado ${money(selected.assignedUnitPrice)} · Importe añadido ${money(selected.assignedUnitPrice * selected.quantity)} antes de descuentos de la cotización`
-                  : `Precio unitario ${money(confirmedPrice)} · Importe ${money(confirmedPrice * selected.quantity)} antes de descuentos de la cotización`}
+                {selected.assignedQuoteId ? 'Importe añadido' : 'Importe solicitado'} antes de
+                descuentos ·{' '}
+                {money(
+                  selectedProducts.reduce(
+                    (sum, line) =>
+                      sum +
+                      line.quantity *
+                        ((selected.assignedQuoteId ? line.assignedUnitPrice : line.unitPrice) ?? 0),
+                    0,
+                  ),
+                )}
               </p>
             </div>
             {selected.note ? <p className="notice">{selected.note}</p> : null}
-            {!selected.assignedQuoteId && selected.itemAvailable && selected.unitPrice === null ? (
+            {!selected.assignedQuoteId && selected.itemAvailable && pendingPrice ? (
               <div className="notice warning fulfillment-notice" role="status">
                 <p>
-                  Precio de venta pendiente. Se añadirá la cantidad solicitada con precio 0.
-                  Complete el precio en el catálogo general para las próximas incorporaciones.
+                  Precio de venta pendiente. Se añadirá la cantidad solicitada con precio 0. Al
+                  completar el precio en el catálogo general, se actualizarán la cotización y su
+                  saldo.
                 </p>
                 {can('catalogs:write') ? (
                   <Link
                     className="button button-secondary"
-                    href={`/catalogs?category=${encodeURIComponent(selected.itemCategory ?? 'SUPPLIES')}&search=${encodeURIComponent(selected.itemName)}`}
+                    href={`/catalogs?category=${encodeURIComponent(pendingPrice.itemCategory ?? 'SUPPLIES')}&search=${encodeURIComponent(pendingPrice.itemName)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Completar precio en Catálogos (otra pestaña)"
@@ -361,8 +464,9 @@ export default function PrequotesPage() {
               <>
                 {!selected.assignmentPresent ? (
                   <p className="notice warning">
-                    La línea se retiró en una edición posterior. La asignación original se conserva
-                    en el historial; revise la cotización vigente antes de generar otra solicitud.
+                    Uno o más conceptos se retiraron en una edición posterior. La asignación
+                    original se conserva en el historial; revise la cotización vigente antes de
+                    generar otra solicitud.
                   </p>
                 ) : null}
                 <Link
@@ -409,10 +513,38 @@ export default function PrequotesPage() {
                   Puede asignar a Borrador o Enviada, o registrar una ampliación auditada de una
                   Aprobada. Las rechazadas no admiten ampliaciones.
                 </p>
+                {chosen && (
+                  <section className="page-stack">
+                    <h3>Conceptos adicionales</h3>
+                    <RequestProductsEditor
+                      rows={extraRows}
+                      onChange={setExtraRows}
+                      catalog={selectableCatalog}
+                      maximum={50 - selectedProducts.length}
+                      busy={busy}
+                    />
+                    {extraRows.length > 0 && (
+                      <p className="field-help">
+                        Importe adicional antes de descuentos ·{' '}
+                        {money(
+                          extraRows.reduce(
+                            (sum, row) =>
+                              sum +
+                              Number(row.quantity || 0) *
+                                (row.category === 'FEES'
+                                  ? Number(row.fee || 0)
+                                  : (catalogById.get(row.item)?.salePriceExcludingTax ?? 0)),
+                            0,
+                          ),
+                        )}
+                      </p>
+                    )}
+                  </section>
+                )}
                 {chosen?.status === 'APPROVED' ? (
                   <>
                     <p className="notice">
-                      Se añadirán únicamente los productos de esta solicitud. La aprobación original
+                      Los conceptos se añadirán juntos en una nueva versión. La aprobación original
                       y las versiones anteriores se conservarán; se actualizará el saldo de la misma
                       cuenta, respetando los pagos y descuentos registrados.
                     </p>

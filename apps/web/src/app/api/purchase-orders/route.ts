@@ -1,12 +1,10 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { catalogItemSchema } from '@analiza/contracts';
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { can } from '@/lib/permissions';
 import {
   purchaseOrderInputSchema,
-  purchaseOrderLineTotal,
-  purchaseOrderTotals,
+  orderActionSchema,
   purchaseOrderSchema,
 } from '@/lib/purchase-order';
 import { boundedJson, privateHeaders } from '@/server/auth-http';
@@ -14,12 +12,19 @@ import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 import { authorizationStatus } from '@/server/http-auth';
 import { persistence } from '@/server/persistence';
 import { postgresPool, transaction } from '@/server/persistence/postgres-pool';
-import { MongoAccessError } from '@/server/validation/patients';
+import {
+  changePurchaseOrder,
+  snapshotPurchaseOrder,
+} from '@/server/persistence/postgres-purchase-orders';
+import {
+  MongoAccessError,
+  MongoInputError,
+  MongoConflictError,
+} from '@/server/validation/patients';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-class InvalidOrder extends Error {}
 class OrderConflict extends Error {}
 
 async function actorFor(request: NextRequest, write: boolean) {
@@ -35,18 +40,22 @@ async function actorFor(request: NextRequest, write: boolean) {
 
 function failure(error: unknown) {
   const status =
-    error instanceof InvalidOrder || error instanceof z.ZodError || error instanceof SyntaxError
+    error instanceof MongoInputError || error instanceof z.ZodError || error instanceof SyntaxError
       ? 400
-      : error instanceof OrderConflict
+      : error instanceof OrderConflict ||
+          error instanceof MongoConflictError ||
+          (error instanceof Error && 'code' in error && error.code === '23505')
         ? 409
         : authorizationStatus(error);
   return NextResponse.json(
     {
       error:
         status === 400
-          ? 'Revise los datos de la orden y los artículos activos.'
+          ? error instanceof MongoInputError
+            ? error.message
+            : 'Revise los datos de la orden y los artículos activos.'
           : status === 409
-            ? 'El número de solicitud ya pertenece a otra orden.'
+            ? 'La orden cambió o el documento o serie ya está registrado. Actualice el listado.'
             : status === 401
               ? 'Inicie sesión para continuar.'
               : status === 403
@@ -63,7 +72,10 @@ export async function GET(request: NextRequest) {
     const orders = await transaction(postgresPool(), actor, async (client) =>
       (
         await client.query<{ body: unknown }>(
-          'SELECT body FROM analiza.purchase_orders WHERE organization_id=$1 ORDER BY created_at DESC',
+          `SELECT CASE WHEN o.body->>'status' IS NULL AND EXISTS
+              (SELECT 1 FROM analiza.purchases p WHERE p.organization_id=o.organization_id AND p.body ? 'purchaseOrderId' AND p.body->>'purchaseOrderId'=o.id::text)
+              THEN o.body || '{"status":"LINKED"}'::jsonb ELSE o.body END AS body
+              FROM analiza.purchase_orders o WHERE o.organization_id=$1 ORDER BY o.created_at DESC`,
           [actor.organizationId],
         )
       ).rows.map((row) => purchaseOrderSchema.parse(row.body)),
@@ -89,39 +101,13 @@ export async function POST(request: NextRequest) {
         if (order.fingerprint !== fingerprint) throw new OrderConflict();
         return { order, created: false };
       }
-      const ids = [
-        ...new Set([input.supplierCatalogItemId, ...input.items.map((item) => item.catalogItemId)]),
-      ];
-      const catalog = await client.query<{ id: string; body: unknown }>(
-        'SELECT id,body FROM analiza.catalog_items WHERE organization_id=$1 AND id=ANY($2::text[])',
-        [actor.organizationId, ids],
-      );
-      const items = new Map(catalog.rows.map((row) => [row.id, catalogItemSchema.parse(row.body)]));
-      const supplier = items.get(input.supplierCatalogItemId);
-      if (supplier?.status !== 'ACTIVE' || supplier.category !== 'PROVIDERS')
-        throw new InvalidOrder();
-      const lines = input.items.map((item) => {
-        const catalogItem = items.get(item.catalogItemId);
-        if (
-          catalogItem?.status !== 'ACTIVE' ||
-          !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(catalogItem.category ?? '')
-        )
-          throw new InvalidOrder();
-        return {
-          ...item,
-          sku: catalogItem.sku,
-          name: catalogItem.name,
-          lineTotal: purchaseOrderLineTotal(item.quantity, item.referenceUnitPrice),
-        };
-      });
+      const snapshot = await snapshotPurchaseOrder(client, actor, input);
       const order = purchaseOrderSchema.parse({
-        ...input,
+        ...snapshot,
         orderNumber: `OC-${input.id}`,
         issuedAt: new Date().toISOString(),
-        supplierName: supplier.name,
-        items: lines,
-        ...purchaseOrderTotals(lines, input.applyPerception === true),
         fingerprint,
+        workflowVersion: 1,
       });
       const inserted = await client.query(
         'INSERT INTO analiza.purchase_orders (organization_id,id,created_by,body) VALUES($1,$2,$3,$4::jsonb) ON CONFLICT DO NOTHING',
@@ -153,6 +139,22 @@ export async function POST(request: NextRequest) {
       status: result.created ? 201 : 200,
       headers: privateHeaders,
     });
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const actor = await actorFor(request, true);
+    const id = z.string().uuid().parse(request.nextUrl.searchParams.get('id'));
+    const input = orderActionSchema.parse(await boundedJson(request, 262144));
+    if (input.action === 'receive' && !can(actor.role, 'inventory:write'))
+      throw new MongoAccessError();
+    const order = await transaction(postgresPool(), actor, (client) =>
+      changePurchaseOrder(client, actor, id, input),
+    );
+    return NextResponse.json(order, { headers: privateHeaders });
   } catch (error) {
     return failure(error);
   }

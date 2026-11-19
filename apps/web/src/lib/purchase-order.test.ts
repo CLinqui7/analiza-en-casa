@@ -50,6 +50,8 @@ describe('supplier purchase orders', () => {
   it('creates a printable multi-item PDF from an immutable order snapshot', async () => {
     const bytes = await buildPurchaseOrderPdf({
       ...input,
+      revision: 1,
+      status: 'DRAFT',
       orderNumber: `OC-${input.id}`,
       issuedAt: '2026-10-14T00:00:00.000Z',
       supplierName: 'Proveedor ficticio',

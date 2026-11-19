@@ -23,6 +23,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
+import { QuoteLineOrigin } from '@/components/quote-line-origin';
 import { quoteMedicalFeeOptions } from '@/lib/quote-medical-fees';
 import { doctorSelectionLabels, searchDoctors } from '@/lib/doctor-search';
 import { mongoMutationHeaders } from '@/lib/auth';
@@ -1404,6 +1405,7 @@ function QuoteEditor({
                   <th>Descuento de línea</th>
                   <th>Importe base</th>
                   <th>Acción</th>
+                  <th>Motivo</th>
                 </tr>
               </thead>
               <tbody>
@@ -1459,11 +1461,14 @@ function QuoteEditor({
                         </Button>
                       </div>
                     </td>
+                    <td>
+                      <QuoteLineOrigin id={candidate.id} />
+                    </td>
                   </tr>
                 ))}
                 {!draft.items.length ? (
                   <tr>
-                    <td colSpan={7}>Aún no hay ítems anexados a la cotización.</td>
+                    <td colSpan={8}>Aún no hay ítems anexados a la cotización.</td>
                   </tr>
                 ) : null}
               </tbody>

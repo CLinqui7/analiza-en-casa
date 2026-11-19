@@ -11,7 +11,13 @@ import { useAuth, useWorkspace } from '@/components/providers';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 import { invoiceVoidSource } from '@/lib/purchase-invoice-groups';
 import { purchaseTotals } from '@/lib/purchase-totals';
-import { purchaseOrderSchema, type PurchaseOrder } from '@/lib/purchase-order';
+import {
+  receiptDocumentNames,
+  purchaseOrderSchema,
+  type PurchaseOrder,
+} from '@/lib/purchase-order';
+import { updatePurchaseOrder } from '@/lib/purchase-order-client';
+import { ApprovedOrders } from './approved-orders';
 import { useOperations } from '@/lib/use-operations';
 const schema = z.object({
   catalogItemId: z.string().min(1, 'Seleccione un ítem de catálogo.'),
@@ -125,7 +131,12 @@ export default function PurchasesPage() {
         const payload = (await response.json()) as { orders: unknown[] };
         if (active) setOrders(payload.orders.map((entry) => purchaseOrderSchema.parse(entry)));
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (active)
+          setMessage(
+            'No se pudieron cargar las órdenes aprobadas. Actualice la página para reintentar.',
+          );
+      });
     return () => {
       active = false;
     };
@@ -486,6 +497,31 @@ export default function PurchasesPage() {
       setCancelError('Explique por qué se anula la factura.');
       return;
     }
+    if (voidingInvoice.providerDocumentKind) {
+      const order = orders.find((o) => o.id === voidingInvoice.purchaseOrderId);
+      if (!order) {
+        setCancelError('Actualice la lista para cargar la orden.');
+        return;
+      }
+      try {
+        const updated = await updatePurchaseOrder(order.id, {
+          action: 'cancel',
+          revision: order.revision,
+          reason,
+        });
+        setOrders((current) => current.map((o) => (o.id === updated.id ? updated : o)));
+        setVoidingInvoice(null);
+        const synced = await refreshWorkspace();
+        setMessage(
+          synced
+            ? 'Orden anulada con motivo. Se conserva la recepción física.'
+            : 'Orden anulada. Actualice la página para cargar el historial.',
+        );
+      } catch (cause) {
+        setCancelError(cause instanceof Error ? cause.message : 'No se pudo anular.');
+      }
+      return;
+    }
     if (!(await voidPurchaseInvoice(voidingInvoice.id, reason))) {
       setCancelError('No se pudo anular la factura. Revise su estado e inténtelo de nuevo.');
       return;
@@ -553,36 +589,26 @@ export default function PurchasesPage() {
         <div>
           <p className="eyebrow">Inventario</p>
           <h1>Compras</h1>
-          <p>
-            Registra borradores de compra con proveedor, bodega de destino y trazabilidad de lote,
-            vencimiento o serie. La recepción física se confirma desde el borrador y queda visible
-            en Lotes y series. El listado agrupa las líneas que comparten una factura; abra una fila
-            para consultar y gestionar cada producto.
-          </p>
+          <p>Reciba los productos de una orden aprobada y consulte los documentos por proveedor.</p>
         </div>
         {can('purchases:write') ? (
           <div className="action-row">
             <Link className="action-link-button action-link-button--inline" href="/purchase-orders">
-              Órdenes a proveedores
+              Órdenes de compra
             </Link>
-            <Button
-              data-action-id="PURCHASE-CREATE"
-              disabled={!purchasableItems.length || !suppliers.length || !activeWarehouses.length}
-              onClick={() => {
-                setMessage(null);
-                setEditing(null);
-                setQueuedLines([]);
-                setInvoiceGroupId(crypto.randomUUID());
-                form.reset();
-                setOpen(true);
-              }}
-              type="button"
-            >
-              Nueva compra
-            </Button>
           </div>
         ) : null}
       </header>
+      <ApprovedOrders
+        orders={orders}
+        catalog={catalogItems}
+        canReceive={can('purchases:write') && can('inventory:write')}
+        canCancel={can('purchases:write')}
+        onSaved={async (order) => {
+          setOrders((current) => current.map((row) => (row.id === order.id ? order : row)));
+          return refreshWorkspace();
+        }}
+      />
       {message ? (
         <p className="notice success" role="status">
           {message}
@@ -617,7 +643,7 @@ export default function PurchasesPage() {
       <Panel>
         <div className="table-heading">
           <div>
-            <h2>Listado</h2>
+            <h2>Historial de compras</h2>
             <p className="field-help">
               Las columnas visibles sin datos fuente se muestran como No documentado.
             </p>
@@ -677,7 +703,7 @@ export default function PurchasesPage() {
                   'Ubicación / referencia',
                   'Proveedor',
                   'Total de compra',
-                  'Número de factura',
+                  'Documento del proveedor',
                   'Fecha',
                   'Estado',
                 ].map((header) => (
@@ -707,7 +733,15 @@ export default function PurchasesPage() {
                           data-action-id="PURCHASE-INVOICE-PDF"
                           href={`/api/purchases/${encodeURIComponent(purchase.invoiceGroupId ?? purchase.id)}/pdf`}
                         >
-                          PDF
+                          Descargar PDF
+                        </a>
+                        <a
+                          className="action-link-button action-link-button--inline"
+                          href={`/api/purchases/${encodeURIComponent(purchase.invoiceGroupId ?? purchase.id)}/pdf?inline=1`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Imprimir
                         </a>
                         {lines.length === 1 &&
                         can('purchases:write') &&
@@ -755,7 +789,7 @@ export default function PurchasesPage() {
                             }}
                             type="button"
                           >
-                            Anular factura
+                            {purchase.providerDocumentKind ? 'Anular orden' : 'Anular factura'}
                           </Button>
                         ) : null}
                         {lines.length === 1 &&
@@ -818,7 +852,7 @@ export default function PurchasesPage() {
                     </td>
                     <td>
                       {purchase.invoiceNumber
-                        ? `${purchase.invoiceNumber}${lines.every((line) => line.invoiceVoidedAt) ? ' · Anulada' : ''}`
+                        ? `${purchase.providerDocumentKind ? receiptDocumentNames[purchase.providerDocumentKind] + ' · ' : ''}${purchase.invoiceNumber}${lines.every((line) => line.invoiceVoidedAt) ? ' · Anulada' : ''}`
                         : 'No registrado'}
                     </td>
                     <td>{new Date(purchase.createdAt).toLocaleDateString('es-SV')}</td>
@@ -1156,7 +1190,11 @@ export default function PurchasesPage() {
                 <dd>{selected.reference}</dd>
               </div>
               <div>
-                <dt>Número de factura</dt>
+                <dt>
+                  {selected.providerDocumentKind
+                    ? receiptDocumentNames[selected.providerDocumentKind]
+                    : 'Número de factura'}
+                </dt>
                 <dd>
                   {selected.invoiceNumber || 'No registrado'}
                   {selected.invoiceVoidedAt ? ' · Anulada' : ''}
@@ -1420,7 +1458,7 @@ export default function PurchasesPage() {
         }
         onClose={() => setVoidingInvoice(null)}
         open={Boolean(voidingInvoice)}
-        title="Anular factura"
+        title={voidingInvoice?.providerDocumentKind ? 'Anular orden recibida' : 'Anular factura'}
       >
         <form action={confirmInvoiceVoid} id="purchase-invoice-void-form">
           <label>

@@ -1,0 +1,70 @@
+.editor {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+.line {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.75rem;
+  align-items: start;
+  min-width: 0;
+  margin: 0;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 1rem;
+  background: #fff;
+}
+.line legend {
+  padding: 0 0.4rem;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+.line > button,
+.editor > button {
+  width: fit-content;
+  align-self: end;
+  justify-self: start;
+}
+.line label {
+  min-width: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .line {
+    animation: appear 160ms ease-out;
+  }
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateY(0.2rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.summary {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.summary li {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.summary li > span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

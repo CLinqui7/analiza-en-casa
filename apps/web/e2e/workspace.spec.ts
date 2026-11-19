@@ -1178,18 +1178,18 @@ test('catalog items receive unique automatic codes and persist after refresh', a
   expect(secondCode).not.toBe(firstCode);
 });
 
-test('purchase drafts persist without changing inventory', async ({ page }) => {
+test('historical purchase drafts retain their inventory status after reload', async ({ page }) => {
   await login(page);
   await page.goto('/purchases');
-  await page.getByRole('button', { name: 'Nueva compra' }).click();
-  await page.getByLabel('Referencia de compra').fill('PURCHASE-QA-001');
-  await page.getByLabel('Número de serie').fill('SERIE-QA-001');
-  await page.getByLabel('Nota (opcional)').fill('Borrador sintético de QA.');
-  await page.getByRole('button', { name: 'Guardar borrador' }).click();
-  await expect(page.getByRole('status')).toContainText('guardada como borrador');
+  const {loadLegacyPurchases}=await import('./fixtures/legacy-purchases');
+  await loadLegacyPurchases(page,'PURCHASE-QA-001','FACT-HIST-QA',['SERIE-QA-001'],'Borrador sintético de QA.');
+  await expect(page.getByRole('button', {name:'Nueva compra'})).toHaveCount(0);
+  const row=page.getByRole('row').filter({hasText:'PURCHASE-QA-001'});
+  await expect(row).toContainText('Borrador');
+  await row.getByRole('button',{name:'Abrir',exact:true}).click();
+  await expect(page.getByRole('dialog')).toContainText('Borrador sintético de QA.');
   await page.reload();
-  await expect(page.getByText('PURCHASE-QA-001')).toBeVisible();
-  await expect(page.getByText('Borrador sintético de QA.')).toBeVisible();
+  await expect(row).toContainText('Borrador');
 });
 
 test('patient portal requires a second factor and keeps invalid access generic', async ({

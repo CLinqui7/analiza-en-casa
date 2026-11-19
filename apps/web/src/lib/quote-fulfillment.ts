@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { supplyRequestProduct } from './supply-requests';
 export const assignSupplySchema = z
   .object({
     idempotencyKey: z.uuid(),
@@ -6,6 +7,28 @@ export const assignSupplySchema = z
     quoteId: z.string().min(1),
     expectedRecordVersion: z.number().int().positive(),
     expectedUnitPrice: z.number().finite().nonnegative(),
+    expectedProducts: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1),
+            unitPrice: z.number().finite().nonnegative().nullable(),
+          })
+          .strict(),
+      )
+      .max(50)
+      .optional(),
+    additions: z
+      .array(
+        z
+          .object({
+            product: supplyRequestProduct,
+            expectedPrice: z.number().finite().nonnegative().nullable(),
+          })
+          .strict(),
+      )
+      .max(50)
+      .optional(),
     // MANUAL remains readable only for retries of assignments saved before Nov18.
     priceSource: z.enum(['CATALOG', 'MANUAL', 'PENDING']).optional(),
     approvedExtension: z
@@ -23,7 +46,21 @@ export const deliverOrderSchema = z
     quantity: z.number().finite().positive(),
   })
   .strict();
+export type PrequoteProduct = {
+  pricePending?: boolean;
+  id: string;
+  itemName: string;
+  itemCategory: string;
+  catalogItemId: string | null;
+  quantity: number;
+  unitPrice: number | null;
+  assignedUnitPrice: number | null;
+  itemAvailable: boolean;
+  assignmentPresent: boolean;
+};
 export type PrequoteEntry = {
+  pricePending?: boolean;
+  products?: PrequoteProduct[];
   id: string;
   createdAt: string;
   patientId: string;

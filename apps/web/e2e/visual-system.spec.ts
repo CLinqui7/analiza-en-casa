@@ -110,7 +110,7 @@ test('shared controls retain readable dimensions, font and reduced-motion behavi
   }
   await page.goto('/inventory');
   await expect(
-    page.getByRole('main').getByRole('link', { name: 'Movimientos', exact: true }),
+    page.getByRole('main').getByRole('link', { name: 'Proveedores', exact: true }),
   ).toHaveCSS('text-decoration-line', 'none');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/patients');

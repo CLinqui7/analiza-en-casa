@@ -39,7 +39,7 @@ export async function quoteFulfillmentHttp(
     const pool = postgresPool();
     const result = write
       ? kind === 'prequotes'
-        ? await assignSupplyRequest(pool, actor, await boundedJson(request))
+        ? await assignSupplyRequest(pool, actor, await boundedJson(request, 48_000))
         : await deliverReceivedOrder(pool, actor, await boundedJson(request))
       : kind === 'prequotes'
         ? await prequoteInbox(pool, actor, page, requestId ?? undefined)

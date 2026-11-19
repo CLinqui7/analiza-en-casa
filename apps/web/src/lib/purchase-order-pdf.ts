@@ -37,7 +37,12 @@ export async function buildPurchaseOrderPdf(order: PurchaseOrder): Promise<Uint8
   const header = () => {
     draw('Analiza en Casa', 42, 17, true);
     y -= 30;
-    draw('Orden de compra a proveedor', 42, 15, true);
+    draw(
+      order.status === 'CANCELLED' ? 'Orden de compra anulada' : 'Orden de compra a proveedor',
+      42,
+      15,
+      true,
+    );
     y -= 26;
     draw(`Numero de orden: ${order.orderNumber}`, 42);
     y -= 18;

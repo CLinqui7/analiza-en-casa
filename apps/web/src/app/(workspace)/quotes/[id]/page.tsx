@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
+import { QuoteLineOrigin } from '@/components/quote-line-origin';
 import { usdAmountInSpanishWords } from '@/lib/money-in-words';
 import { balanceForQuote, receivableAccounts } from '@/lib/receivables';
 import {
@@ -334,6 +335,7 @@ export default function QuoteDetailPage() {
                       <th>Precio</th>
                       <th>Descuento</th>
                       <th>Subtotal</th>
+                      <th>Motivo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -366,6 +368,9 @@ export default function QuoteDetailPage() {
                         <td>{money(item.unitPrice)}</td>
                         <td>{money(item.discountAmount)}</td>
                         <td>{money(item.quantity * item.unitPrice - item.discountAmount)}</td>
+                        <td>
+                          <QuoteLineOrigin id={item.id} />
+                        </td>
                       </tr>
                     ))}
                   </tbody>

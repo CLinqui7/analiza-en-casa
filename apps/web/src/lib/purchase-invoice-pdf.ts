@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import type { Purchase } from '@analiza/contracts';
-import { purchaseTotals } from './purchase-totals';
+import { receiptDocumentNames } from './purchase-order';
+import { invoicedPurchaseLines, purchaseTotals } from './purchase-totals';
 
 const printable = (value: string) =>
   value
@@ -41,10 +42,13 @@ export async function buildPurchaseInvoicePdf(
   const header = () => {
     draw('Analiza en Casa', 42, 17, true);
     y -= 32;
-    draw('Registro interno de factura de compra', 42, 14, true);
+    draw('Registro interno de compra', 42, 14, true);
     y -= 24;
     draw(
-      `Numero de factura de proveedor: ${lines[0].invoiceNumber || 'No registrado'}`.slice(0, 95),
+      `${receiptDocumentNames[lines[0].providerDocumentKind ?? 'INVOICE']} de proveedor: ${lines[0].invoiceNumber || 'No registrado'}`.slice(
+        0,
+        95,
+      ),
       42,
     );
     y -= 16;
@@ -69,7 +73,7 @@ export async function buildPurchaseInvoicePdf(
     y -= 17;
   };
   header();
-  for (const line of lines) {
+  for (const line of invoicedPurchaseLines(lines)) {
     if (y < 130) {
       page = document.addPage([612, 792]);
       y = 744;

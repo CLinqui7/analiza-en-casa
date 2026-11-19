@@ -1,3 +1,4 @@
+import { loadLegacyPurchases } from './fixtures/legacy-purchases';
 import { expect, test } from '@playwright/test';
 import { PDFDocument } from 'pdf-lib';
 
@@ -27,12 +28,7 @@ test('catalog filters find items by name and status', async ({ page }) => {
 
 test('purchase invoice, edit and cancellation persist before receipt', async ({ page }) => {
   await login(page, '/purchases');
-  await page.getByRole('button', { name: 'Nueva compra' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Nueva compra' });
-  await dialog.getByLabel('Referencia de compra').fill('COMPRA-AUDIT-QA');
-  await dialog.getByLabel('Número de factura (opcional)').fill('FACT-QA-001');
-  await dialog.getByLabel('Número de serie').fill('SERIE-AUDIT-QA');
-  await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
+  await loadLegacyPurchases(page, 'COMPRA-AUDIT-QA', 'FACT-QA-001', ['SERIE-AUDIT-QA']);
   const row = page.getByRole('row').filter({ hasText: 'COMPRA-AUDIT-QA' });
   await expect(row).toContainText('FACT-QA-001');
   await row.getByRole('button', { name: 'Editar' }).click();
@@ -52,19 +48,14 @@ test('purchase invoice, edit and cancellation persist before receipt', async ({ 
   await expect(cancelled.getByRole('button', { name: 'Recibir' })).toHaveCount(0);
 });
 
-test('one purchase invoice saves multiple product lines together', async ({ page }) => {
+test('historical multi-line invoices preserve their grouping and editing controls', async ({
+  page,
+}) => {
   await login(page, '/purchases');
-  await page.getByRole('button', { name: 'Nueva compra' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Nueva compra' });
-  await dialog.getByLabel('Referencia de compra').fill('COMPRA-MULTI-QA');
-  await dialog.getByLabel('Número de factura (opcional)').fill('FACT-MULTI-QA');
-  await dialog.getByLabel('Número de serie').fill('SERIE-MULTI-A');
-  await dialog.getByRole('button', { name: 'Añadir línea' }).click();
-  await expect(dialog.getByText('Factura FACT-MULTI-QA: 1 línea(s) listas.')).toBeVisible();
-  await dialog.getByLabel('Número de serie').fill('SERIE-MULTI-B');
-  await dialog.getByRole('button', { name: 'Añadir línea' }).click();
-  await dialog.getByRole('button', { name: 'Guardar factura (2)' }).click();
-  await expect(page.getByRole('status')).toContainText('Factura guardada con 2 línea(s)');
+  await loadLegacyPurchases(page, 'COMPRA-MULTI-QA', 'FACT-MULTI-QA', [
+    'SERIE-MULTI-A',
+    'SERIE-MULTI-B',
+  ]);
   await page.getByLabel('Buscar compras').fill('COMPRA-MULTI-QA');
   const invoice = page.getByRole('row').filter({ hasText: 'COMPRA-MULTI-QA' });
   await expect(invoice).toHaveCount(1);

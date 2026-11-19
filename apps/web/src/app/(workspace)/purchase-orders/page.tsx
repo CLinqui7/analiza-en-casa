@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { updatePurchaseOrder } from '@/lib/purchase-order-client';
 import { mongoMutationHeaders } from '@/lib/auth';
 import {
   purchaseOrderInputSchema,
@@ -21,6 +22,7 @@ const unitPrice = (value: number) => `USD ${value.toFixed(4)}`;
 export default function PurchaseOrdersPage() {
   const { session, can } = useAuth();
   const { catalogItems } = useWorkspace();
+  const [editing, setEditing] = useState<PurchaseOrder | null>(null);
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [supplierId, setSupplierId] = useState('');
   const [productId, setProductId] = useState('');
@@ -82,6 +84,7 @@ export default function PurchaseOrdersPage() {
       return;
     }
     setLines((current) => [...current, valid.data]);
+    setProductId('');
     setQuantity('1');
     setPrice('');
     setError(null);
@@ -102,18 +105,28 @@ export default function PurchaseOrdersPage() {
     setBusy(true);
     setError(null);
     try {
-      const response = await fetch('/api/purchase-orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
-        body: JSON.stringify(parsed.data),
-      });
-      if (!response.ok)
-        throw new Error(
-          response.status === 409
-            ? 'La solicitud ya pertenece a otra orden.'
-            : 'No se pudo emitir la orden. Conserve los datos e inténtelo de nuevo.',
-        );
-      const order = purchaseOrderSchema.parse(await response.json());
+      let order: PurchaseOrder;
+      if (editing) {
+        order = await updatePurchaseOrder(editing.id, {
+          action: 'edit',
+          revision: editing.revision,
+          order: parsed.data,
+        });
+      } else {
+        const response = await fetch('/api/purchase-orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+          body: JSON.stringify(parsed.data),
+        });
+        if (!response.ok)
+          throw new Error(
+            response.status === 409
+              ? 'La solicitud ya pertenece a otra orden.'
+              : 'No se pudo emitir la orden. Conserve los datos e inténtelo de nuevo.',
+          );
+        order = purchaseOrderSchema.parse(await response.json());
+      }
+      setEditing(null);
       setOrders((current) => [order, ...current.filter((item) => item.id !== order.id)]);
       setMessage(`Orden ${order.orderNumber} guardada. Puede descargar su PDF.`);
       setLines([]);
@@ -132,14 +145,14 @@ export default function PurchaseOrdersPage() {
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Inventario y compras</p>
-          <h1>Órdenes a proveedores</h1>
+          <h1>Órdenes de compra</h1>
           <p>
             Solicite insumos, medicamentos y equipos con varios productos en una orden y descargue
             el PDF. Esta orden no recibe inventario ni sustituye una factura.
           </p>
         </div>
         <Link className="action-link-button" href="/purchases">
-          Ver compras recibidas
+          Ver compras
         </Link>
       </header>
       {session?.mode !== 'postgresql' ? (
@@ -157,11 +170,11 @@ export default function PurchaseOrdersPage() {
       ) : null}
       {can('purchases:write') && session?.mode === 'postgresql' ? (
         <Panel>
-          <h2>Nueva orden</h2>
+          <h2 id="order-editor">{editing ? 'Editar orden de compra' : 'Nueva orden'}</h2>
           <p className="field-help">
-            El número y la fecha se asignan al guardar. Los precios son referencias ingresadas por
-            usted, sin IVA. Se calcula el IVA solicitado del 13%; la percepción del 1% se activa
-            manualmente cuando corresponda.
+            El precio de referencia se carga del catálogo y puede ajustarse antes de aprobar la
+            orden. Los importes se ingresan sin IVA. Se calcula el IVA solicitado del 13%; la
+            percepción del 1% se activa manualmente cuando corresponda.
           </p>
           <div className="form-grid">
             <label>
@@ -178,7 +191,11 @@ export default function PurchaseOrdersPage() {
               Producto
               <SearchableSelect
                 ariaLabel="Producto de la orden"
-                onChange={setProductId}
+                onChange={(id) => {
+                  setProductId(id);
+                  const cost = products.find((item) => item.id === id)?.costPrice;
+                  setPrice(cost && cost > 0 ? String(cost) : '');
+                }}
                 options={products.map((item) => ({
                   value: item.id,
                   label: `${item.sku} · ${item.name}`,
@@ -272,12 +289,30 @@ export default function PurchaseOrdersPage() {
             onClick={() => void issue()}
             type="button"
           >
-            {busy ? 'Guardando…' : 'Guardar orden'}
+            {busy ? 'Guardando…' : editing ? 'Guardar cambios' : 'Guardar orden'}
           </Button>
+          {editing ? (
+            <Button
+              type="button"
+              className="button-secondary"
+              disabled={busy}
+              onClick={() => {
+                setEditing(null);
+                setRequestId(crypto.randomUUID());
+                setLines([]);
+                setProductId('');
+                setPrice('');
+                setSupplierId('');
+                setApplyPerception(false);
+              }}
+            >
+              Cancelar edición
+            </Button>
+          ) : null}
         </Panel>
       ) : null}
       <Panel>
-        <h2>Últimas 100 órdenes emitidas</h2>
+        <h2>Órdenes registradas</h2>
         {orders.length ? (
           <div className="table-wrap">
             <table>
@@ -288,7 +323,8 @@ export default function PurchaseOrdersPage() {
                   <th>Proveedor</th>
                   <th>Productos</th>
                   <th>Total</th>
-                  <th>PDF</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -297,23 +333,95 @@ export default function PurchaseOrdersPage() {
                     <td>{order.orderNumber}</td>
                     <td>{new Date(order.issuedAt).toLocaleDateString('es-SV')}</td>
                     <td>{order.supplierName}</td>
-                    <td>{order.items.length}</td>
+                    <td>{order.items.map((item) => item.name).join(', ')}</td>
                     <td>{money(order.total)}</td>
                     <td>
-                      <a
-                        className="action-link-button action-link-button--inline"
-                        href={`/api/purchase-orders/${order.id}/pdf`}
-                      >
-                        Descargar PDF
-                      </a>{' '}
-                      <a
-                        className="action-link-button action-link-button--inline"
-                        href={`/api/purchase-orders/${order.id}/pdf?inline=1`}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        Abrir para imprimir
-                      </a>
+                      {
+                        {
+                          DRAFT: 'Por aprobar',
+                          APPROVED: 'Aprobada',
+                          RECEIVED: 'Recibida',
+                          CANCELLED: 'Anulada',
+                          LINKED: 'Compra vinculada',
+                        }[order.status]
+                      }
+                    </td>
+                    <td>
+                      <div className="action-row">
+                        {order.status === 'DRAFT' && can('purchases:write') ? (
+                          <>
+                            <Button
+                              type="button"
+                              className="button-secondary"
+                              disabled={busy}
+                              onClick={() => {
+                                setEditing(order);
+                                setRequestId(order.id);
+                                setSupplierId(order.supplierCatalogItemId);
+                                setProductId('');
+                                setPrice('');
+                                setLines(
+                                  order.items.map(
+                                    ({ catalogItemId, quantity, referenceUnitPrice }) => ({
+                                      catalogItemId,
+                                      quantity,
+                                      referenceUnitPrice,
+                                    }),
+                                  ),
+                                );
+                                setApplyPerception(Boolean(order.applyPerception));
+                                setMessage(null);
+                                setError(null);
+                                document
+                                  .getElementById('order-editor')
+                                  ?.scrollIntoView({ block: 'start' });
+                              }}
+                            >
+                              Editar orden
+                            </Button>
+                            <Button
+                              type="button"
+                              disabled={busy || editing?.id === order.id}
+                              onClick={async () => {
+                                setBusy(true);
+                                setError(null);
+                                try {
+                                  const result = await updatePurchaseOrder(order.id, {
+                                    action: 'approve',
+                                    revision: order.revision,
+                                  });
+                                  setOrders((current) =>
+                                    current.map((row) => (row.id === order.id ? result : row)),
+                                  );
+                                  setMessage('Orden aprobada. Ya puede recibirla en Compras.');
+                                } catch (cause) {
+                                  setError(
+                                    cause instanceof Error ? cause.message : 'No se pudo aprobar.',
+                                  );
+                                } finally {
+                                  setBusy(false);
+                                }
+                              }}
+                            >
+                              Aprobar
+                            </Button>
+                          </>
+                        ) : null}
+                        <a
+                          className="action-link-button action-link-button--inline"
+                          href={`/api/purchase-orders/${order.id}/pdf`}
+                        >
+                          Descargar PDF
+                        </a>{' '}
+                        <a
+                          className="action-link-button action-link-button--inline"
+                          href={`/api/purchase-orders/${order.id}/pdf?inline=1`}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          Abrir para imprimir
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 ))}

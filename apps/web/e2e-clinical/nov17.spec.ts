@@ -552,14 +552,21 @@ test('Pending18 unpriced supply adds at zero without price input and keeps the s
   await page.getByRole('dialog').getByLabel('Precio de venta sin IVA').fill('7.25');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  const original = (await api(page, '/api/quotes')).body.quotes.find(
+  const versionsAfterPrice = (await api(page, '/api/quotes')).body.quotes;
+  const original = versionsAfterPrice.find(
     (row: { quote: { id: string } }) => row.quote.id === saved.quoteId,
   ).quote;
   expect(original.total).toBe(20);
   expect(original.items.at(-1).unitPrice).toBe(0);
+  const revised = versionsAfterPrice.find(
+    (row: { quote: { rootQuoteId: string; version: number } }) =>
+      row.quote.rootQuoteId === quote.id && row.quote.version === original.version + 1,
+  ).quote;
+  expect(revised.total).toBe(41.75);
+  expect(revised.items.at(-1).unitPrice).toBe(7.25);
   await page.goto('/clinical/prequotes');
   await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
-  await expect(dialog.getByText('Precio aplicado', { exact: false })).toContainText('$0.00');
+  await expect(dialog.getByRole('listitem').filter({hasText:'Insumo sin precio sintético Nov18'})).toContainText('$7.25');
   await expect(
     dialog.getByRole('button', { name: 'Añadir a cotización', exact: true }),
   ).toHaveCount(0);
@@ -576,7 +583,7 @@ test('Pending18 unpriced supply adds at zero without price input and keeps the s
   expect(nextRequest.status).toBe(201);
   await page.goto('/clinical/prequotes');
   await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
-  await dialog.getByLabel('Asignar a una cotización').selectOption(saved.quoteId);
+  await dialog.getByLabel('Asignar a una cotización').selectOption(revised.id);
   await dialog
     .getByLabel('Motivo de la ampliación')
     .fill('Segunda solicitud sintética con tarifa del catálogo');
@@ -591,13 +598,13 @@ test('Pending18 unpriced supply adds at zero without price input and keeps the s
   const final = (await api(page, '/api/quotes')).body.quotes.find(
     (row: { quote: { id: string } }) => row.quote.id === pricedId,
   ).quote;
-  expect(final.total).toBe(34.5);
+  expect(final.total).toBe(56.25);
   expect(
     final.items.filter((line: { id: string }) => line.id === `supply-request-${request.body.id}`),
   ).toHaveLength(1);
   await page.goto('/receivables');
   await expect(page.getByRole('row').filter({ hasText: code })).toHaveCount(1);
-  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('34.50');
+  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('56.25');
 });
 
 test('Nov18 patient search crosses pages and supply requests are under Clinical', async ({

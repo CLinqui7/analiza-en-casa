@@ -41,7 +41,7 @@ export default function SuppliersPage() {
     setError('');
     try {
       if (!(await addCatalogItem(parsed.data))) throw new Error();
-      setMessage('Proveedor guardado. Ya está disponible en compras y órdenes a proveedores.');
+      setMessage('Proveedor guardado. Ya está disponible en compras y órdenes de compra.');
       setDraft(null);
     } catch {
       setError('No se pudo guardar el proveedor. Revise la conexión y reintente.');
@@ -108,7 +108,7 @@ export default function SuppliersPage() {
                   <th scope="col">Contacto</th>
                   <th scope="col">Teléfonos</th>
                   <th scope="col">Correo</th>
-                  <th scope="col">Dirección y notas</th>
+                  <th scope="col">Dirección</th>
                   <th scope="col">Estado</th>
                   {can('catalogs:write') ? <th scope="col">Acciones</th> : null}
                 </tr>
@@ -137,7 +137,10 @@ export default function SuppliersPage() {
                       {!item.landlinePhone && !item.mobilePhone ? 'Sin registrar' : null}
                     </td>
                     <td>{item.email || 'Sin registrar'}</td>
-                    <td>{item.notes || 'Sin registrar'}</td>
+                    <td>
+                      {item.address || 'Sin registrar'}
+                      {item.notes && <small className="cell-secondary">Notas: {item.notes}</small>}
+                    </td>
                     <td>
                       <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
@@ -204,7 +207,7 @@ export default function SuppliersPage() {
               </p>
             ) : null}
             <label className="full-field">
-              Empresa / nombre
+              Nombre de la empresa
               <input
                 required
                 value={draft.name}
@@ -241,7 +244,16 @@ export default function SuppliersPage() {
               </select>
             </label>
             <label className="full-field">
-              Dirección y notas
+              Dirección
+              <input
+                value={draft.address ?? ''}
+                maxLength={2000}
+                autoComplete="street-address"
+                onChange={(event) => setDraft({ ...draft, address: event.target.value })}
+              />
+            </label>
+            <label className="full-field">
+              Notas
               <textarea
                 maxLength={2000}
                 rows={3}

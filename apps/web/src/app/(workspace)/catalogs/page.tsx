@@ -339,6 +339,7 @@ function CatalogsContent() {
           <label>
             Precio de venta sin IVA
             <input
+              aria-describedby="catalog-price-help"
               min="0"
               step="any"
               type="number"
@@ -352,6 +353,10 @@ function CatalogsContent() {
               </span>
             ) : null}
           </label>
+          <p className="field-help full" id="catalog-price-help">
+            Al guardar el precio de venta se actualizan las líneas de precotización pendientes de
+            precio y el saldo de la cuenta correspondiente. Los abonos ya registrados se conservan.
+          </p>
         </form>
       </Dialog>
     </div>

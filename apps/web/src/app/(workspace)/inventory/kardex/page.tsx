@@ -2,11 +2,13 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type InventoryMovement } from '@analiza/contracts';
-import { canRecordMovement, deriveKardex } from '@analiza/domain';
+import { canRecordMovement } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
-import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import '../stock.css';
+import { inventoryLedger } from '@/lib/inventory-ledger';
 import { useMemo, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { useOperations } from '@/lib/use-operations';
@@ -22,11 +24,8 @@ const demoWarehouses: Record<string, string> = {
 const movementFormSchema = z.object({
   itemId: z.string().min(1, 'Seleccione un ítem.'),
   warehouseId: z.string().min(1, 'Seleccione una bodega.'),
-  kind: z.enum(['ENTRY', 'EXIT', 'RETURN', 'ADJUSTMENT']),
-  adjustmentDirection: z.enum(['IN', 'OUT']).optional(),
+  kind: z.enum(['ENTRY', 'EXIT', 'RETURN']),
   quantity: z.coerce.number().int().positive('La cantidad debe ser un entero positivo.'),
-  reference: z.string().trim(),
-  reason: z.string().trim().min(1, 'Indique el motivo del movimiento.'),
 });
 type MovementFormInput = z.input<typeof movementFormSchema>;
 type MovementForm = z.output<typeof movementFormSchema>;
@@ -55,8 +54,14 @@ function direction(movement: InventoryMovement) {
 }
 
 export default function KardexPage() {
-  const pathname = usePathname();
-  const { addInventoryMovement, inventoryMovements, catalogItems, providerMode } = useWorkspace();
+  const {
+    addInventoryMovement,
+    inventoryMovements,
+    catalogItems,
+    patients,
+    purchases,
+    providerMode,
+  } = useWorkspace();
   const operations = useOperations();
   const itemCatalog = useMemo(
     () => ({
@@ -91,7 +96,11 @@ export default function KardexPage() {
     (warehouse) => warehouse.status === 'ACTIVE',
   );
   const { can, session } = useAuth();
-  const isMovementView = pathname.endsWith('/movements');
+  const [page, setPage] = useState(0);
+  const [request, setRequest] = useState(() => ({
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+  }));
   const [isOpen, setOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
@@ -102,25 +111,34 @@ export default function KardexPage() {
     kind: '',
     reference: '',
   });
-  const itemIds = useMemo(
-    () => [
-      ...new Set([
-        ...Object.keys(itemCatalog),
-        ...inventoryMovements.map((movement) => movement.itemId),
-      ]),
-    ],
-    [inventoryMovements, itemCatalog],
+  const names = useMemo(
+    () => new Map([...patients, ...operations.deliveryPatients].map((p) => [p.id, p.fullName])),
+    [patients, operations.deliveryPatients],
   );
   const allRows = useMemo(
     () =>
-      itemIds
-        .flatMap((itemId) => deriveKardex(inventoryMovements, itemId))
-        .sort(
-          (left, right) =>
-            right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id),
-        ),
-    [inventoryMovements, itemIds],
+      inventoryLedger(
+        inventoryMovements,
+        operations.traceRecords,
+        operations.inventoryLedgerReceipts,
+        purchases,
+        operations.homeCustodies,
+        operations.clinicalRecords,
+      ),
+    [
+      inventoryMovements,
+      operations.traceRecords,
+      operations.inventoryLedgerReceipts,
+      purchases,
+      operations.homeCustodies,
+      operations.clinicalRecords,
+    ],
   );
+  const itemIds = useMemo(
+    () => [...new Set([...Object.keys(itemCatalog), ...allRows.map((m) => m.itemId)])],
+    [allRows, itemCatalog],
+  );
+  const activeItemIds = Object.keys(itemCatalog);
   const rows = allRows.filter((row) => {
     const date = row.createdAt.slice(0, 10);
     return (
@@ -130,7 +148,7 @@ export default function KardexPage() {
       (!filters.warehouseId || row.warehouseId === filters.warehouseId) &&
       (!filters.kind || row.kind === filters.kind) &&
       (!filters.reference ||
-        `${row.reference ?? ''} ${row.reason}`
+        `${row.purchaseDocumentNumber ?? ''} ${row.reference ?? ''} ${row.reason} ${names.get(row.patientId ?? '') ?? ''}`
           .toLocaleLowerCase('es')
           .includes(filters.reference.toLocaleLowerCase('es')))
     );
@@ -138,13 +156,11 @@ export default function KardexPage() {
   const summary = useMemo(() => {
     let incoming = 0;
     let outgoing = 0;
-    const latestBalanceByItem = new Map<string, number>();
     for (const row of allRows) {
-      if (direction(row) === 'in') incoming += row.quantity;
-      else outgoing += row.quantity;
-      if (!latestBalanceByItem.has(row.itemId)) latestBalanceByItem.set(row.itemId, row.balance);
+      if (row.delta >= 0) incoming += row.delta;
+      else outgoing -= row.delta;
     }
-    const balance = [...latestBalanceByItem.values()].reduce((total, value) => total + value, 0);
+    const balance = incoming - outgoing;
     return { incoming, outgoing, balance };
   }, [allRows]);
   const form = useForm<MovementFormInput, unknown, MovementForm>({
@@ -155,35 +171,32 @@ export default function KardexPage() {
         providerMode === 'mock' ? Object.keys(demoWarehouses)[0] : (activeWarehouses[0]?.id ?? ''),
       kind: 'ENTRY',
       quantity: 1,
-      reference: '',
-      reason: '',
     },
   });
-  const kind = useWatch({ control: form.control, name: 'kind' });
+  const lastPage = Math.max(0, Math.ceil(rows.length / 50) - 1);
+  const visiblePage = Math.min(page, lastPage);
 
   function closeDialog() {
     setOpen(false);
     form.reset();
   }
   function updateFilter(name: keyof Filters, value: string) {
+    setPage(0);
     setFilters((current) => ({ ...current, [name]: value }));
   }
   function resetFilters() {
+    setPage(0);
     setFilters({ itemId: '', from: '', to: '', warehouseId: '', kind: '', reference: '' });
   }
   async function submit(values: MovementForm) {
     const movement: InventoryMovement = {
-      id: crypto.randomUUID(),
+      ...request,
       itemId: values.itemId,
       warehouseId: values.warehouseId,
       kind: values.kind,
-      adjustmentDirection:
-        values.kind === 'ADJUSTMENT' ? (values.adjustmentDirection ?? 'IN') : undefined,
       quantity: values.quantity,
-      reference: values.reference || undefined,
-      reason: values.reason,
+      reason: `${kindLabel[values.kind]} manual`,
       user: session?.role ?? 'Sistema demo',
-      createdAt: new Date().toISOString(),
     };
     if (!canRecordMovement(inventoryMovements, movement)) {
       form.setError('quantity', {
@@ -208,36 +221,40 @@ export default function KardexPage() {
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Analiza en Casa · Inventario</p>
-          <h1>{isMovementView ? 'Movimientos de inventario' : 'Kárdex de inventario'}</h1>
+          <h1>Kárdex de inventario</h1>
           <p>
-            {isMovementView
-              ? 'Entradas, salidas, devoluciones, ajustes y traslados con responsable, referencia y doble asiento auditable.'
-              : 'Saldo cronológico reproducible por ítem y bodega, sin edición directa de existencias.'}
+            Consulte las recepciones físicas, las salidas y el saldo disponible por ítem y bodega.
           </p>
         </div>
-        {can('inventory:write') ? (
-          <Button
-            data-action-id="INVENTORY-MOVEMENT-CREATE"
-            disabled={
-              !itemIds.length ||
-              (providerMode !== 'mock' && (!operations.connected || !activeWarehouses.length))
-            }
-            onClick={() => {
-              setResult(null);
-              form.setValue('itemId', itemIds[0] ?? '');
-              form.setValue(
-                'warehouseId',
-                providerMode === 'mock'
-                  ? Object.keys(demoWarehouses)[0]
-                  : (activeWarehouses[0]?.id ?? ''),
-              );
-              setOpen(true);
-            }}
-            type="button"
-          >
-            <span aria-hidden="true">＋</span> Registrar movimiento
-          </Button>
-        ) : null}
+        <div className="action-row">
+          <Link className="button button-secondary" href="/inventory/traceability">
+            Control de lotes y series
+          </Link>
+          {can('inventory:write') ? (
+            <Button
+              data-action-id="INVENTORY-MOVEMENT-CREATE"
+              disabled={
+                !activeItemIds.length ||
+                (providerMode !== 'mock' && (!operations.connected || !activeWarehouses.length))
+              }
+              onClick={() => {
+                setResult(null);
+                setRequest({ id: crypto.randomUUID(), createdAt: new Date().toISOString() });
+                form.setValue('itemId', activeItemIds[0] ?? '');
+                form.setValue(
+                  'warehouseId',
+                  providerMode === 'mock'
+                    ? Object.keys(demoWarehouses)[0]
+                    : (activeWarehouses[0]?.id ?? ''),
+                );
+                setOpen(true);
+              }}
+              type="button"
+            >
+              <span aria-hidden="true">＋</span> Registrar movimiento
+            </Button>
+          ) : null}
+        </div>
       </header>
       {result ? (
         <p className="notice success" role="status">
@@ -250,7 +267,7 @@ export default function KardexPage() {
             ↙
           </span>
           <div>
-            <small>Entradas acumuladas</small>
+            <small>Entradas a disponible</small>
             <strong>{summary.incoming}</strong>
             <span>unidades registradas</span>
           </div>
@@ -260,7 +277,7 @@ export default function KardexPage() {
             ↗
           </span>
           <div>
-            <small>Salidas acumuladas</small>
+            <small>Salidas de disponible</small>
             <strong>{summary.outgoing}</strong>
             <span>unidades registradas</span>
           </div>
@@ -270,7 +287,7 @@ export default function KardexPage() {
             ≋
           </span>
           <div>
-            <small>Existencia calculada</small>
+            <small>Saldo disponible</small>
             <strong>{summary.balance}</strong>
             <span>en todos los ítems</span>
           </div>
@@ -290,7 +307,7 @@ export default function KardexPage() {
         <div className="table-heading inventory-ledger-filter-heading">
           <div>
             <h2>Filtros del historial</h2>
-            <p>Combine ítem, fechas, bodega, tipo o referencia.</p>
+            <p>Filtre por ítem, fecha, bodega, tipo, documento o paciente.</p>
           </div>
           <StatusTag>{rows.length} visibles</StatusTag>
         </div>
@@ -359,11 +376,11 @@ export default function KardexPage() {
             </select>
           </label>
           <label>
-            Referencia
+            Documento o paciente
             <input
               data-action-id="KARDEX-FILTER-REFERENCE"
               onChange={(event) => updateFilter('reference', event.target.value)}
-              placeholder="Buscar referencia o motivo"
+              placeholder="Número o nombre"
               type="search"
               value={filters.reference}
             />
@@ -381,11 +398,9 @@ export default function KardexPage() {
       <Panel className="inventory-ledger-table-panel">
         <div className="table-heading">
           <div>
-            <h2>{isMovementView ? 'Historial de movimientos' : 'Detalle del kárdex'}</h2>
+            <h2>Detalle del Kárdex</h2>
             <p>
-              {isMovementView
-                ? 'Cada operación conserva fecha, referencia y responsable.'
-                : 'Las entradas y salidas explican el saldo resultante de cada ítem.'}
+              Una recepción en cuarentena se suma al disponible cuando se libera el lote o la serie.
             </p>
           </div>
           <span className="inventory-ledger-live">
@@ -394,35 +409,22 @@ export default function KardexPage() {
         </div>
         {rows.length ? (
           <div className="table-wrap">
-            <table className="inventory-ledger-table">
+            <table className="inventory-ledger-table stock-cards">
               <thead>
                 <tr>
-                  {isMovementView ? (
-                    <>
-                      <th>Fecha / movimiento</th>
-                      <th>Ítem</th>
-                      <th>Tipo</th>
-                      <th>Cantidad</th>
-                      <th>Bodega</th>
-                      <th>Referencia / motivo</th>
-                      <th>Responsable</th>
-                    </>
-                  ) : (
-                    <>
-                      <th>Fecha / hora</th>
-                      <th>Ítem</th>
-                      <th>Bodega</th>
-                      <th>Referencia</th>
-                      <th>Entrada</th>
-                      <th>Salida</th>
-                      <th>Saldo</th>
-                      <th>Responsable</th>
-                    </>
-                  )}
+                  <th>Fecha / hora</th>
+                  <th>Ítem</th>
+                  <th>Bodega</th>
+                  <th>Paciente</th>
+                  <th>Movimiento</th>
+                  <th>Entrada disponible</th>
+                  <th>Salida disponible</th>
+                  <th>Saldo disponible</th>
+                  <th>Responsable</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => {
+                {rows.slice(visiblePage * 50, (visiblePage + 1) * 50).map((row) => {
                   const rowDirection = direction(row);
                   const date = new Date(row.createdAt);
                   const movementLabel = `${kindLabel[row.kind]}${
@@ -432,82 +434,50 @@ export default function KardexPage() {
                   }`;
                   return (
                     <tr key={row.id}>
-                      {isMovementView ? (
-                        <>
-                          <td>
-                            <strong>{date.toLocaleDateString('es-SV')}</strong>
-                            <small>
-                              {date.toLocaleTimeString('es-SV', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}{' '}
-                              · {row.id}
-                            </small>
-                          </td>
-                          <td>
-                            <strong>{itemCatalog[row.itemId]?.name ?? row.itemId}</strong>
-                            <small>{itemCatalog[row.itemId]?.sku ?? 'Sin SKU'}</small>
-                          </td>
-                          <td>
-                            <StatusTag tone={rowDirection === 'in' ? 'success' : 'warning'}>
-                              {movementLabel}
-                            </StatusTag>
-                          </td>
-                          <td>
-                            <strong className={`inventory-ledger-quantity ${rowDirection}`}>
-                              {rowDirection === 'in' ? '+' : '−'}
-                              {row.quantity}
-                            </strong>
-                          </td>
-                          <td>
-                            {warehouses[row.warehouseId ?? ''] ?? row.warehouseId ?? 'Sin bodega'}
-                          </td>
-                          <td>
-                            <strong>{row.reference ?? 'Sin referencia'}</strong>
-                            <small>{row.reason}</small>
-                          </td>
-                          <td>{row.user ?? 'Sistema'}</td>
-                        </>
-                      ) : (
-                        <>
-                          <td>
-                            <strong>{date.toLocaleDateString('es-SV')}</strong>
-                            <small>
-                              {date.toLocaleTimeString('es-SV', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </small>
-                          </td>
-                          <td>
-                            <strong>{itemCatalog[row.itemId]?.name ?? row.itemId}</strong>
-                            <small>{itemCatalog[row.itemId]?.sku ?? 'Sin SKU'}</small>
-                          </td>
-                          <td>
-                            {warehouses[row.warehouseId ?? ''] ?? row.warehouseId ?? 'Sin bodega'}
-                          </td>
-                          <td>
-                            <strong>{row.reference ?? 'Sin referencia'}</strong>
-                            <small>
-                              {movementLabel} · {row.reason}
-                            </small>
-                          </td>
-                          <td>
-                            <span className="inventory-ledger-in">
-                              {rowDirection === 'in' ? `+${row.quantity}` : '—'}
-                            </span>
-                          </td>
-                          <td>
-                            <span className="inventory-ledger-out">
-                              {rowDirection === 'out' ? `−${row.quantity}` : '—'}
-                            </span>
-                          </td>
-                          <td>
-                            <strong className="inventory-ledger-balance">{row.balance}</strong>
-                          </td>
-                          <td>{row.user ?? 'Sistema'}</td>
-                        </>
-                      )}
+                      <td data-stock-label="Fecha">
+                        <strong>{date.toLocaleDateString('es-SV')}</strong>
+                        <small>
+                          {date.toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' })}
+                        </small>
+                      </td>
+                      <td data-stock-label="Ítem">
+                        <strong>{itemCatalog[row.itemId]?.name ?? row.itemId}</strong>
+                        <small>{row.traceNumber ?? itemCatalog[row.itemId]?.sku}</small>
+                      </td>
+                      <td data-stock-label="Bodega">
+                        {warehouses[row.warehouseId ?? ''] ??
+                          row.warehouseId ??
+                          'Sin bodega registrada'}
+                      </td>
+                      <td data-stock-label="Paciente">
+                        {row.patientId ? (names.get(row.patientId) ?? 'Paciente vinculado') : '—'}
+                      </td>
+                      <td data-stock-label="Movimiento">
+                        <StatusTag
+                          tone={
+                            row.heldReceipt
+                              ? 'warning'
+                              : rowDirection === 'in'
+                                ? 'success'
+                                : 'neutral'
+                          }
+                        >
+                          {row.heldReceipt ? row.reason : movementLabel}
+                        </StatusTag>
+                        {row.heldReceipt && <small>{row.quantity} unidades recibidas</small>}
+                      </td>
+                      <td data-stock-label="Entrada disponible" className="inventory-ledger-in">
+                        {row.delta > 0 ? '+' + row.delta : '—'}
+                      </td>
+                      <td data-stock-label="Salida disponible" className="inventory-ledger-out">
+                        {row.delta < 0 ? '−' + Math.abs(row.delta) : '—'}
+                      </td>
+                      <td data-stock-label="Saldo disponible">
+                        <strong>{row.balance}</strong>
+                      </td>
+                      <td data-stock-label="Responsable">
+                        {row.purchaseDocumentNumber ?? row.user ?? '—'}
+                      </td>
                     </tr>
                   );
                 })}
@@ -519,6 +489,27 @@ export default function KardexPage() {
             detail="Ajuste los filtros o registre un movimiento."
             title="Sin movimientos"
           />
+        )}
+        {lastPage > 0 && (
+          <nav className="action-row" aria-label="Páginas del Kárdex">
+            <Button
+              className="button-secondary"
+              disabled={!visiblePage}
+              onClick={() => setPage(visiblePage - 1)}
+            >
+              Anterior
+            </Button>
+            <span>
+              Página {visiblePage + 1} de {lastPage + 1}
+            </span>
+            <Button
+              className="button-secondary"
+              disabled={visiblePage >= lastPage}
+              onClick={() => setPage(visiblePage + 1)}
+            >
+              Siguiente
+            </Button>
+          </nav>
         )}
       </Panel>
       <Dialog
@@ -546,7 +537,7 @@ export default function KardexPage() {
           <label>
             Ítem
             <select {...form.register('itemId')}>
-              {itemIds.map((id) => (
+              {activeItemIds.map((id) => (
                 <option key={id} value={id}>
                   {itemCatalog[id]?.name ?? id}
                 </option>
@@ -572,34 +563,13 @@ export default function KardexPage() {
               <option value="ENTRY">Entrada</option>
               <option value="EXIT">Salida</option>
               <option value="RETURN">Devolución</option>
-              <option value="ADJUSTMENT">Ajuste</option>
             </select>
           </label>
-          {kind === 'ADJUSTMENT' ? (
-            <label>
-              Dirección del ajuste
-              <select {...form.register('adjustmentDirection')}>
-                <option value="IN">Ajuste +</option>
-                <option value="OUT">Ajuste −</option>
-              </select>
-            </label>
-          ) : null}
           <label>
             Cantidad
             <input {...form.register('quantity')} min="1" type="number" />
             {form.formState.errors.quantity ? (
               <span className="field-error">{form.formState.errors.quantity.message}</span>
-            ) : null}
-          </label>
-          <label>
-            Referencia
-            <input {...form.register('reference')} />
-          </label>
-          <label className="full-field">
-            Motivo
-            <input {...form.register('reason')} />
-            {form.formState.errors.reason ? (
-              <span className="field-error">{form.formState.errors.reason.message}</span>
             ) : null}
           </label>
         </form>

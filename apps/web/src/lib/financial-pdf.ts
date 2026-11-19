@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import type { Patient, Payment, Quote } from '@analiza/contracts';
 import { quoteCategories, quoteDisplayCode } from '@analiza/domain';
 import { usdAmountInSpanishWords } from './money-in-words';
+import { quoteLineOrigin } from './quote-line-origin';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 const safe = (value: string) =>
@@ -137,6 +138,7 @@ async function documentWithWriter(title: string, logoBytes?: Uint8Array) {
       } else line = next;
     }
     lines.push(line);
+    lines.push(`Motivo: ${quoteLineOrigin(item.id)}`);
     const height = Math.max(28, lines.length * 12 + 12);
     if (ensureSpace(height)) quoteTableHeader();
     if (index % 2 === 1)

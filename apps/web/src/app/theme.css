@@ -1305,3 +1305,21 @@ main details[open]:not(.clinical-row-menu, .patient-more-actions) > summary {
     break-inside: avoid;
   }
 }
+.quote-line-origin {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #cbd8dd;
+  border-radius: 999px;
+  color: #415b67;
+  background: #f6f9fa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.quote-line-origin[data-additional='true'] {
+  border-color: #a7cfc4;
+  background: #e7f6f0;
+  color: #145c47;
+}

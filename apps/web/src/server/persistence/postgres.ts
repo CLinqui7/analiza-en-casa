@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import { lockQuoteRoot } from './quote-workflow';
+import { lockSupplyCatalogPrices, reconcileSupplyCatalogPrice } from './postgres-catalog-repricing';
 import { z } from 'zod';
 import {
   patientSchema,
@@ -93,6 +94,7 @@ import {
   commercialScope,
   executeFieldCommand,
   isFieldCommand,
+  listInventoryMovements,
   populateFieldOperations,
 } from './postgres-field-operations';
 
@@ -117,7 +119,15 @@ async function assertPurchaseOrderLink(client: PoolClient, actor: ServerActor, p
     'SELECT body FROM analiza.purchase_orders WHERE organization_id=$1 AND id=$2',
     [actor.organizationId, purchase.purchaseOrderId],
   );
-  const order = row.rows[0] ? purchaseOrderSchema.parse(row.rows[0].body) : null;
+  const rawOrder = row.rows[0]?.body;
+  if (
+    rawOrder &&
+    typeof rawOrder === 'object' &&
+    'workflowVersion' in rawOrder &&
+    rawOrder.workflowVersion === 1
+  )
+    throw new MongoInputError('Reciba la orden aprobada desde Compras.');
+  const order = rawOrder ? purchaseOrderSchema.parse(rawOrder) : null;
   if (
     !order ||
     order.supplierCatalogItemId !== purchase.supplierCatalogItemId ||
@@ -1532,6 +1542,7 @@ export function postgresPersistence(): Persistence {
           .strict()
           .parse(input);
         return transaction(pool, actor, async (c) => {
+          await lockSupplyCatalogPrices(c, actor.organizationId, [item.id]);
           const duplicate = await c.query(
             "SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND upper(body->>'sku')=upper($2) AND id<>$3",
             [actor.organizationId, item.sku, item.id],
@@ -1560,6 +1571,9 @@ export function postgresPersistence(): Persistence {
                 'Confirme la moneda USD de la fuente importada mediante conciliación antes de guardar precio o costo.',
               );
           }
+          // Price validation in quote editors takes row locks after the quote root.
+          // Take all affected roots before the catalogue row lock to use the same order.
+          await reconcileSupplyCatalogPrice(c, actor, item);
           await c.query(
             'INSERT INTO analiza.catalog_items(organization_id,id,body) VALUES($1,$2,$3) ON CONFLICT(organization_id,id) DO UPDATE SET body=EXCLUDED.body',
             [actor.organizationId, item.id, JSON.stringify(item)],
@@ -1568,104 +1582,22 @@ export function postgresPersistence(): Persistence {
           return item;
         });
       }
-      if (command.command === 'purchase.batch.create') {
+      if (command.command === 'purchase.create' || command.command === 'purchase.batch.create') {
         authorize(actor, 'purchases:write');
-        const { purchases } = z
-          .object({
-            command: z.literal('purchase.batch.create'),
-            purchases: z.array(purchaseSchema.strict()).min(2).max(50),
-          })
-          .strict()
-          .parse(input);
-        const first = purchases[0];
-        if (
-          !first.invoiceNumber ||
-          !first.invoiceGroupId ||
-          new Set(purchases.map((purchase) => purchase.id)).size !== purchases.length ||
-          purchases.some(
-            (purchase) =>
-              !purchase.taxRates ||
-              purchase.status !== 'DRAFT' ||
-              purchase.receivedAt ||
-              purchase.traceRecordId ||
-              purchase.cancelledAt ||
-              purchase.cancelReason ||
-              purchase.invoiceVoidedAt ||
-              purchase.invoiceVoidReason ||
-              purchase.invoiceNumber !== first.invoiceNumber ||
-              purchase.invoiceGroupId !== first.invoiceGroupId ||
-              purchase.reference !== first.reference ||
-              purchase.supplierCatalogItemId !== first.supplierCatalogItemId ||
-              purchase.purchaseOrderId !== first.purchaseOrderId ||
-              purchase.warehouseId !== first.warehouseId ||
-              !samePurchaseTaxRates(purchase.taxRates, first.taxRates),
-          )
-        )
-          throw new MongoInputError(
-            'Todas las líneas deben tener la misma factura, referencia, proveedor y bodega, con identificadores únicos.',
-          );
-        return transaction(pool, actor, async (c) => {
-          const supplier = await c.query(
-            "SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE' AND body->>'category'='PROVIDERS'",
-            [actor.organizationId, first.supplierCatalogItemId],
-          );
-          if (!supplier.rowCount) throw new MongoInputError('Seleccione un proveedor activo.');
-          const warehouse = await c.query(
-            "SELECT id FROM analiza.warehouses WHERE organization_id=$1 AND id=$2 AND status='ACTIVE'",
-            [actor.organizationId, first.warehouseId],
-          );
-          if (!warehouse.rowCount) throw new MongoInputError('Seleccione una bodega activa.');
-          for (const purchase of purchases) {
-            await assertPurchaseOrderLink(c, actor, purchase);
-            const item = await c.query<{ category: string | null }>(
-              "SELECT body->>'category' AS category FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'",
-              [actor.organizationId, purchase.catalogItemId],
-            );
-            const category = item.rows[0]?.category;
-            if (!category || !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(category))
-              throw new MongoInputError('Seleccione un medicamento, insumo o equipo activo.');
-            if (
-              ['MEDICATIONS', 'SUPPLIES'].includes(category) &&
-              (!purchase.expirationDate || !purchase.lotNumber)
-            )
-              throw new MongoInputError('Indique fecha de vencimiento y lote en cada línea.');
-            if (category === 'EQUIPMENT' && !purchase.serialNumber)
-              throw new MongoInputError('Indique el número de serie de cada equipo.');
-            if (
-              !Number.isInteger(purchase.quantity) ||
-              !purchase.quantity ||
-              purchase.quantity < 1 ||
-              (category === 'EQUIPMENT' && purchase.quantity !== 1)
-            )
-              throw new MongoInputError(
-                'La cantidad de cada línea debe ser un entero positivo; cada equipo usa una serie.',
-              );
-            const normalized = normalizePurchaseTraceability(purchase, category);
-            await c.query(
-              'INSERT INTO analiza.purchases(organization_id,id,warehouse_id,body) VALUES($1,$2,$3,$4::jsonb)',
-              [
-                actor.organizationId,
-                normalized.id,
-                normalized.warehouseId,
-                JSON.stringify(normalized),
-              ],
-            );
-            await audit(c, actor, 'PURCHASE_DRAFT_CREATED', 'purchase', normalized.id);
-          }
-          return { ids: purchases.map((purchase) => purchase.id) };
-        });
+        throw new MongoInputError(
+          'Apruebe la orden de compra y registre la recepción desde Compras.',
+        );
       }
-      if (command.command === 'purchase.create' || command.command === 'purchase.update') {
+      if (command.command === 'purchase.update') {
         authorize(actor, 'purchases:write');
         const { purchase } = z
           .object({
-            command: z.enum(['purchase.create', 'purchase.update']),
+            command: z.literal('purchase.update'),
             purchase: purchaseSchema.strict(),
           })
           .strict()
           .parse(input);
         if (
-          (command.command === 'purchase.create' && !purchase.taxRates) ||
           purchase.status !== 'DRAFT' ||
           purchase.receivedAt ||
           purchase.traceRecordId ||
@@ -1676,27 +1608,22 @@ export function postgresPersistence(): Persistence {
         )
           throw new MongoInputError('Sólo se puede guardar un borrador sin recepción.');
         return transaction(pool, actor, async (c) => {
-          const previous =
-            command.command === 'purchase.update'
-              ? await c.query<{ body: unknown }>(
-                  'SELECT body FROM analiza.purchases WHERE organization_id=$1 AND id=$2 FOR UPDATE',
-                  [actor.organizationId, purchase.id],
-                )
-              : null;
-          const oldPurchase = previous?.rows[0]
-            ? purchaseSchema.parse(previous.rows[0].body)
-            : null;
-          if (command.command === 'purchase.update' && oldPurchase?.status !== 'DRAFT')
-            throw new MongoConflictError();
+          const previous = await c.query<{ body: unknown }>(
+            'SELECT body FROM analiza.purchases WHERE organization_id=$1 AND id=$2 FOR UPDATE',
+            [actor.organizationId, purchase.id],
+          );
+          const oldPurchase = previous.rows[0] && purchaseSchema.parse(previous.rows[0].body);
           if (
-            command.command === 'purchase.update' &&
-            oldPurchase &&
-            !samePurchaseTaxRates(purchase.taxRates, oldPurchase.taxRates)
+            oldPurchase?.status !== 'DRAFT' ||
+            oldPurchase.providerDocumentKind ||
+            purchase.providerDocumentKind
           )
+            throw new MongoConflictError();
+          if (!samePurchaseTaxRates(purchase.taxRates, oldPurchase.taxRates))
             throw new MongoInputError(
               'Los impuestos de una compra registrada no se cambian al editarla.',
             );
-          if (command.command === 'purchase.update' && oldPurchase?.invoiceGroupId) {
+          if (oldPurchase.invoiceGroupId) {
             const linked = await c.query<{ count: string }>(
               "SELECT count(*)::text AS count FROM analiza.purchases WHERE organization_id=$1 AND body->>'invoiceGroupId'=$2",
               [actor.organizationId, oldPurchase.invoiceGroupId],
@@ -1755,37 +1682,16 @@ export function postgresPersistence(): Persistence {
             { ...purchase, createdAt: oldPurchase?.createdAt ?? purchase.createdAt },
             category ?? undefined,
           );
-          if (command.command === 'purchase.create') {
-            await c.query(
-              `INSERT INTO analiza.purchases(organization_id,id,warehouse_id,body)
-               VALUES($1,$2,$3,$4::jsonb)`,
-              [
-                actor.organizationId,
-                purchase.id,
-                purchase.warehouseId,
-                JSON.stringify(normalizedPurchase),
-              ],
-            );
-          } else {
-            await c.query(
-              'UPDATE analiza.purchases SET warehouse_id=$3,body=$4::jsonb WHERE organization_id=$1 AND id=$2',
-              [
-                actor.organizationId,
-                purchase.id,
-                purchase.warehouseId,
-                JSON.stringify(normalizedPurchase),
-              ],
-            );
-          }
-          await audit(
-            c,
-            actor,
-            command.command === 'purchase.create'
-              ? 'PURCHASE_DRAFT_CREATED'
-              : 'PURCHASE_DRAFT_UPDATED',
-            'purchase',
-            purchase.id,
+          await c.query(
+            'UPDATE analiza.purchases SET warehouse_id=$3,body=$4::jsonb WHERE organization_id=$1 AND id=$2',
+            [
+              actor.organizationId,
+              purchase.id,
+              purchase.warehouseId,
+              JSON.stringify(normalizedPurchase),
+            ],
           );
+          await audit(c, actor, 'PURCHASE_DRAFT_UPDATED', 'purchase', purchase.id);
           return normalizedPurchase;
         });
       }
@@ -1838,6 +1744,8 @@ export function postgresPersistence(): Persistence {
           );
           if (!previous.rows[0]) throw new MongoAccessError();
           const purchase = purchaseSchema.parse(previous.rows[0].body);
+          if (purchase.providerDocumentKind)
+            throw new MongoInputError('Gestione la orden desde Compras.');
           const draftGroup = purchase.status === 'DRAFT' && Boolean(purchase.invoiceGroupId);
           const approvedInvoice = await c.query(
             'SELECT 1 FROM analiza.purchase_invoice_approvals WHERE organization_id=$1 AND invoice_group_id=$2',
@@ -1913,6 +1821,10 @@ export function postgresPersistence(): Persistence {
         if (parsed.movement.kind === 'TRANSFER')
           throw new MongoInputError(
             'Un traslado necesita bodega de origen y destino. Regístrelo cuando estén definidas ambas.',
+          );
+        if (parsed.movement.patientId || parsed.movement.purchaseDocumentNumber)
+          throw new MongoInputError(
+            'Registre el préstamo o el documento de compra desde su pantalla de origen.',
           );
         if (parsed.movement.kind === 'ADJUSTMENT' && !parsed.movement.adjustmentDirection)
           throw new MongoInputError('Indique la dirección del ajuste.');
@@ -2775,15 +2687,7 @@ export function postgresPersistence(): Persistence {
             )
           : [],
         can(actor.role, 'inventory:read')
-          ? transaction(pool, actor, async (c) =>
-              (
-                await c.query(
-                  `SELECT body FROM analiza.inventory_movements
-                   WHERE organization_id=$1 ORDER BY created_at,id`,
-                  [actor.organizationId],
-                )
-              ).rows.map((row) => inventoryMovementSchema.parse(row.body)),
-            )
+          ? transaction(pool, actor, (c) => listInventoryMovements(c, actor))
           : [],
         can(actor.role, 'catalogs:read')
           ? transaction(pool, actor, async (c) =>

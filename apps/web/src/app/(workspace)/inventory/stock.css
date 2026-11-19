@@ -1,0 +1,91 @@
+.stock-workspace .table-wrap td:first-child {
+  min-width: 9rem;
+}
+.stock-workspace .table-wrap td .button {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+}
+.stock-workspace .table-wrap td .button + .button {
+  margin-block-start: 0.35rem;
+}
+.stock-workspace .tabs {
+  flex-wrap: wrap;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stock-workspace .panel,
+  .equipment-locations .panel {
+    animation: stock-arrive 140ms ease-out both;
+  }
+  @keyframes stock-arrive {
+    from {
+      opacity: 0.65;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (max-width: 720px) {
+  .table-wrap:has(> .stock-cards) {
+    overflow: visible;
+  }
+  .table-wrap > .stock-cards {
+    display: block;
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+  .stock-cards thead {
+    position: absolute;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .stock-cards tbody {
+    display: grid;
+    gap: 0.7rem;
+  }
+  .stock-cards tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem 1rem;
+    padding: 0.9rem;
+    border: 1px solid var(--line, #d4e1e3);
+    border-radius: 0.85rem;
+    background: var(--surface, white);
+  }
+  .stock-cards tbody td[data-stock-label] {
+    display: block;
+    min-width: 0;
+    width: auto;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    padding: 0;
+    border: 0;
+  }
+  .stock-cards tbody td[data-stock-label]::before {
+    content: attr(data-stock-label);
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted, #465f69);
+  }
+  .stock-cards tbody td[data-stock-label='Acciones'] {
+    grid-column: 1/-1;
+    order: 1;
+  }
+  .stock-cards tbody td[data-stock-label='Acciones'] .button {
+    display: inline-flex;
+    width: auto;
+    margin: 0.1rem 0.3rem 0.1rem 0;
+  }
+  .stock-cards tbody td[colspan] {
+    grid-column: 1/-1;
+  }
+}

@@ -25,9 +25,12 @@ import {
   type ServerActor,
 } from '../validation/patients';
 import { transaction } from './postgres-pool';
+import { applyEquipmentReturn, equipmentReturnSchema } from '../equipment-returns';
 
 const fieldCommands = new Set([
   'home.dispatch',
+  'home.equipment.loan',
+  'home.equipment.return',
   'home.close',
   'commercial.visit.record',
   'commercial.admission.link',
@@ -97,6 +100,7 @@ async function movementOut(
   const movement = inventoryMovementSchema.parse({
     id: `${dispatch.id}:out:${suffix}`,
     itemId: dispatch.itemId,
+    patientId: dispatch.patientId,
     warehouseId: dispatch.warehouseId,
     kind: 'EXIT',
     quantity,
@@ -124,6 +128,24 @@ async function movementOut(
   );
 }
 
+/** Older clinical stock movements link to their signed record without carrying patientId.
+ * Project only its patient key and verify the movement binding, never the clinical body. */
+export async function listInventoryMovements(client: PoolClient, actor: ServerActor) {
+  requirePermission(actor, 'inventory:read');
+  const result = await client.query<{body:unknown}>(`
+    SELECT CASE WHEN clinical.patient_id IS NULL THEN m.body
+      ELSE m.body || jsonb_build_object('patientId', clinical.patient_id) END AS body
+    FROM analiza.inventory_movements m
+    LEFT JOIN analiza.clinical_records clinical
+      ON NOT (m.body ? 'patientId') AND clinical.organization_id=m.organization_id
+      AND clinical.id=m.body->>'reference'
+      AND ((clinical.body->'stockMovementIds') ? m.id OR m.body ? 'reversalOf')
+    WHERE m.organization_id=$1 ORDER BY m.created_at,m.id`,
+    [actor.organizationId]
+  );
+  return result.rows.map(row=>inventoryMovementSchema.parse(row.body));
+}
+
 export async function populateFieldOperations(
   client: PoolClient,
   actor: ServerActor,
@@ -135,6 +157,23 @@ export async function populateFieldOperations(
       [actor.organizationId],
     );
     result.homeCustodies = rows.rows.map((row) => homeCustodySchema.parse(row.body));
+    // The original receipt determines its location even after stock has moved between warehouses.
+    result.inventoryLedgerReceipts = (
+      await client.query<{
+        traceRecordId: string;
+        warehouseId: string;
+        purchaseDocumentNumber?: string;
+      }>(
+        `SELECT e.trace_record_id AS "traceRecordId", e.body->>'warehouseId' AS "warehouseId",
+              NULLIF(p.body->>'invoiceNumber','') AS "purchaseDocumentNumber"
+       FROM analiza.inventory_trace_events e
+       LEFT JOIN analiza.purchases p ON p.organization_id=e.organization_id AND p.id=e.body->>'purchaseId'
+       WHERE e.organization_id=$1 AND e.event_type='RECEIVED' AND e.body ? 'warehouseId'
+         AND e.body ? 'quantity' AND e.trace_record_id IS NOT NULL
+         AND (e.body ? 'kind' OR e.body ? 'purchaseId')`,
+        [actor.organizationId],
+      )
+    ).rows;
   }
   if (can(actor.role, 'inventory:write')) {
     const patients = await client.query<{
@@ -201,12 +240,14 @@ export async function executeFieldCommand(pool: Pool, actor: ServerActor, raw: u
   if (!isFieldCommand(command)) throw new MongoInputError('Comando no reconocido.');
   return transaction(pool, actor, async (client) => {
     const scope = await commercialScope(client, actor);
-    if (command === 'home.dispatch') {
+    if (command === 'home.dispatch' || command === 'home.equipment.loan') {
       requirePermission(actor, 'inventory:write');
       const { dispatch } = z
-        .object({ command: z.literal('home.dispatch'), dispatch: homeCustodyInputSchema })
+        .object({ command: z.literal(command), dispatch: homeCustodyInputSchema })
         .strict()
         .parse(raw);
+      if (command === 'home.dispatch' && !dispatch.addressLine)
+        throw new MongoInputError('Indique la dirección de entrega.');
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
         `${actor.organizationId}:${dispatch.itemId}:${dispatch.warehouseId}`,
       ]);
@@ -236,7 +277,13 @@ export async function executeFieldCommand(pool: Pool, actor: ServerActor, raw: u
       const item = await client.query(
         `SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2
          AND body->>'status'='ACTIVE' AND body->>'category'=ANY($3::text[])`,
-        [actor.organizationId, dispatch.itemId, ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT']],
+        [
+          actor.organizationId,
+          dispatch.itemId,
+          command === 'home.equipment.loan'
+            ? ['EQUIPMENT']
+            : ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'],
+        ],
       );
       const warehouse = await client.query(
         "SELECT id FROM analiza.warehouses WHERE organization_id=$1 AND id=$2 AND status='ACTIVE'",
@@ -255,7 +302,7 @@ export async function executeFieldCommand(pool: Pool, actor: ServerActor, raw: u
       );
       if (balance < dispatch.quantity)
         throw new MongoInputError(
-          'No hay existencias liberadas suficientes en esta bodega. Revise Inventario → Lotes: las compras en cuarentena o vencidas no están disponibles para entrega.',
+          'No hay existencias liberadas suficientes en esta bodega. Revise Kárdex → Control de lotes y series: las compras en cuarentena o vencidas no están disponibles para entrega.',
         );
       const traced = await client.query(
         'SELECT 1 FROM analiza.inventory_trace_records WHERE organization_id=$1 AND item_id=$2 LIMIT 1',
@@ -343,6 +390,59 @@ export async function executeFieldCommand(pool: Pool, actor: ServerActor, raw: u
       await audit(client, actor, 'HOME_CUSTODY_DISPATCHED', 'home_custodies', custody.id);
       return custody;
     }
+    if (command === 'home.equipment.return') {
+      requirePermission(actor, 'inventory:write');
+      const { receipt } = z
+        .object({ command: z.literal(command), receipt: equipmentReturnSchema })
+        .strict()
+        .parse(raw);
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+        `${actor.organizationId}:equipment-return:${receipt.id}`,
+      ]);
+      const saved = (
+        await client.query(
+          'SELECT custody_id,quantity,received_at FROM analiza.equipment_returns WHERE organization_id=$1 AND id=$2',
+          [actor.organizationId, receipt.id],
+        )
+      ).rows[0];
+      if (
+        saved &&
+        (saved.custody_id !== receipt.custodyId ||
+          Number(saved.quantity) !== receipt.quantity ||
+          new Date(saved.received_at).getTime() !== Date.parse(receipt.receivedAt))
+      )
+        throw new MongoConflictError();
+      const row = (
+        await client.query(
+          `SELECT c.body FROM analiza.home_custodies c JOIN analiza.catalog_items i
+           ON i.organization_id=c.organization_id AND i.id=c.item_id AND i.body->>'category'='EQUIPMENT'
+         WHERE c.organization_id=$1 AND c.id=$2 FOR UPDATE OF c`,
+          [actor.organizationId, receipt.custodyId],
+        )
+      ).rows[0];
+      if (!row) throw new MongoInputError('Seleccione un préstamo de equipo registrado.');
+      const current = homeCustodySchema.parse(row.body);
+      if (saved) return current;
+      const next = applyEquipmentReturn(current, receipt, actor.userId);
+      await client.query(
+        'INSERT INTO analiza.equipment_returns(organization_id,id,custody_id,quantity,received_at,received_by) VALUES ($1,$2,$3,$4,$5,$6)',
+        [
+          actor.organizationId,
+          receipt.id,
+          current.id,
+          receipt.quantity,
+          receipt.receivedAt,
+          actor.userId,
+        ],
+      );
+      // equipment_returns is the append-only quarantine receipt for each partial return.
+      await client.query(
+        "UPDATE analiza.home_custodies SET body=$3::jsonb,status=$4,closed_at=CASE WHEN $4='CLOSED' THEN $5::timestamptz END WHERE organization_id=$1 AND id=$2",
+        [actor.organizationId, current.id, JSON.stringify(next), next.status, receipt.receivedAt],
+      );
+      await audit(client, actor, 'EQUIPMENT_RETURN_RECORDED', 'home_custodies', current.id);
+      return next;
+    }
     if (command === 'home.close') {
       requirePermission(actor, 'inventory:write');
       const { closure } = z
@@ -368,6 +468,8 @@ export async function executeFieldCommand(pool: Pool, actor: ServerActor, raw: u
           throw new MongoConflictError();
         return current;
       }
+      if (current.returns?.length)
+        throw new MongoInputError('Registre el saldo pendiente desde Ubicación de equipo.');
       if (closure.returnedQuantity > current.quantity)
         throw new MongoInputError('La devolución no puede exceder lo enviado.');
       const closed = homeCustodySchema.parse({

@@ -454,3 +454,7 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - `MEETING-Q002` actualizado: la aclaración del usuario define una página separada por profesional y mes. Se implementaron visitas realizadas, ventas explícitas con referencia y objetivos configurables; Atlas verificó el guardado. Pendiente fuente de conciliación y definición institucional de venta, no inferida de cotizaciones.
 - `MEETING-Q003` actualizado: cuentas NURSE vinculadas a recursos, asignación al crear/editar hospitalización y restricción de escritura en servidor ya verificadas con dos enfermeras y otra organización. Todas las enfermeras de la misma organización pueden consultar el balance; sólo asignadas y administrador pueden editar. Pendiente política institucional de vigencia, reasignación y retención, sin ampliar accesos entre organizaciones.
 - `MEETING-Q004`: definir campos fiscales, emisor, numeración y reglas tributarias de factura/crédito fiscal. La cotización actual conserva únicamente la clasificación administrativa y no calcula impuestos.
+
+## Inventario y compras, noviembre de 2026
+
+La recepción de una nota de crédito queda registrada para conciliación. Falta que Finanzas defina cómo vincularla a una factura anterior y cómo repartirla si aplica a más de un documento. La factura y el crédito fiscal sí pueden aprobarse por separado para Cuentas por pagar.

@@ -1,3 +1,4 @@
+import { applyEquipmentReturn, equipmentReturnSchema } from './equipment-returns';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { ClientSession, Db } from 'mongodb';
@@ -159,6 +160,12 @@ const commands = z.discriminatedUnion('command', [
   z.object({ command: z.literal('visit.create'), visit: visitInputSchema }).strict(),
   z.object({ command: z.literal('goal.save'), goal: goalInputSchema }).strict(),
   z.object({ command: z.literal('home.dispatch'), dispatch: homeCustodyInputSchema }).strict(),
+  z
+    .object({ command: z.literal('home.equipment.loan'), dispatch: homeCustodyInputSchema })
+    .strict(),
+  z
+    .object({ command: z.literal('home.equipment.return'), receipt: equipmentReturnSchema })
+    .strict(),
   z.object({ command: z.literal('home.close'), closure: homeCustodyCloseSchema }).strict(),
   z
     .object({ command: z.literal('commercial.visit.record'), visit: commercialVisitInputSchema })
@@ -343,6 +350,21 @@ export class MongoOperationsRepository {
     if (can(actor.role, 'inventory:read')) {
       const rows = await read('homeCustodies');
       result.homeCustodies = rows.map((row) => homeCustodySchema.strip().parse(row));
+      const receipts = await this.database
+        .collection('inventoryTraceEvents')
+        .find(
+          {
+            organizationId: actor.organizationId,
+            eventType: 'RECEIVED',
+            'body.warehouseId': { $exists: true },
+          },
+          { projection: { traceRecordId: 1, 'body.warehouseId': 1 } },
+        )
+        .toArray();
+      result.inventoryLedgerReceipts = receipts.map((row) => ({
+        traceRecordId: String(row.traceRecordId),
+        warehouseId: String(row.body.warehouseId),
+      }));
     }
     if (can(actor.role, 'inventory:write')) {
       const rows = await read('patients');
@@ -1101,6 +1123,10 @@ export class MongoOperationsRepository {
         if (input.command === 'inventory.record') {
           permission('inventory:write');
           const movement = input.movement;
+          if (movement.patientId || movement.purchaseDocumentNumber)
+            throw new MongoInputError(
+              'Los vínculos de origen los registra la operación correspondiente.',
+            );
           const previous = await this.database
             .collection('inventoryMovements')
             .findOne({ ...scoped, idempotencyKey: input.idempotencyKey }, { session });
@@ -1971,9 +1997,12 @@ export class MongoOperationsRepository {
           await audit('VISIT_GOAL_SAVED', id);
           return { id };
         }
-        if (input.command === 'home.dispatch') {
+        if (input.command === 'home.dispatch' || input.command === 'home.equipment.loan') {
           permission('inventory:write');
           const dispatch = input.dispatch;
+          if (input.command === 'home.dispatch' && !dispatch.addressLine)
+            throw new MongoInputError('Indique la dirección de entrega.');
+
           const old = await this.database
             .collection('homeCustodies')
             .findOne({ ...scoped, idempotencyKey: dispatch.idempotencyKey }, { session });
@@ -1990,7 +2019,10 @@ export class MongoOperationsRepository {
                 ...scoped,
                 id: dispatch.itemId,
                 status: 'ACTIVE',
-                category: { $in: ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'] },
+                category:
+                  input.command === 'home.equipment.loan'
+                    ? 'EQUIPMENT'
+                    : { $in: ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'] },
               },
               { session },
             ),
@@ -2086,6 +2118,7 @@ export class MongoOperationsRepository {
                 createdAt: dispatch.sentAt,
                 reason: 'Despacho a custodia domiciliaria',
                 reference: dispatch.reference,
+                patientId: dispatch.patientId,
                 user: actor.userId,
                 traceRecordId: row.id,
                 traceNumber: row.number,
@@ -2130,6 +2163,7 @@ export class MongoOperationsRepository {
               createdAt: dispatch.sentAt,
               reason: 'Despacho a custodia domiciliaria',
               reference: dispatch.reference,
+              patientId: dispatch.patientId,
               user: actor.userId,
             });
             await this.database.collection('inventoryMovements').insertOne(
@@ -2154,6 +2188,35 @@ export class MongoOperationsRepository {
           await audit('HOME_CUSTODY_DISPATCHED', custody.id);
           return custody;
         }
+        if (input.command === 'home.equipment.return') {
+          permission('inventory:write');
+          const { receipt } = input;
+          const previous = await this.database
+            .collection('homeEquipmentReturns')
+            .findOne({ ...scoped, id: receipt.id }, { session });
+          if (previous) assertSameRetry(previous, receipt, Object.keys(receipt));
+          const old = await this.database
+            .collection('homeCustodies')
+            .findOne({ ...scoped, id: receipt.custodyId }, { session });
+          if (
+            !old ||
+            !(await this.database
+              .collection('catalogItems')
+              .findOne({ ...scoped, id: old.itemId, category: 'EQUIPMENT' }, { session }))
+          )
+            throw new MongoInputError('Seleccione un préstamo de equipo registrado.');
+          const current = homeCustodySchema.strip().parse(old);
+          if (previous) return current;
+          const next = applyEquipmentReturn(current, receipt, actor.userId);
+          await this.database
+            .collection('homeEquipmentReturns')
+            .insertOne({ ...scoped, ...receipt, receivedBy: actor.userId }, { session });
+          await this.database
+            .collection('homeCustodies')
+            .updateOne({ ...scoped, id: current.id }, { $set: next }, { session });
+          await audit('EQUIPMENT_RETURN_RECORDED', current.id);
+          return next;
+        }
         if (input.command === 'home.close') {
           permission('inventory:write');
           const closure = input.closure;
@@ -2172,6 +2235,8 @@ export class MongoOperationsRepository {
               throw new MongoConflictError();
             return current;
           }
+          if (current.returns?.length)
+            throw new MongoInputError('Registre el saldo pendiente desde Ubicación de equipo.');
           if (closure.returnedQuantity > current.quantity)
             throw new MongoInputError('La devolución no puede exceder lo enviado.');
           const closed = homeCustodySchema.parse({
@@ -2453,6 +2518,7 @@ export const mongoOperationsIndexes: Array<{
     'inventoryTraceRecords',
     'homeCustodies',
     'homeReturnHolds',
+    'homeEquipmentReturns',
     'commercialVisits',
     'commercialAdmissions',
     'commercialGoals',

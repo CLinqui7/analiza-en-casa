@@ -2,22 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
+import {
+  RequestProductsEditor,
+  blankRequestProduct,
+  readProductRows,
+} from '@/components/clinical/request-products-editor';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
 import {
   supplyRequestSchema,
+  supplyRequestProducts,
   type SupplyRequest,
   type SupplyRequestCatalogItem,
 } from '@/lib/supply-requests';
 
 const priorityLabels = { LOW: 'Baja', MEDIUM: 'Media', HIGH: 'Alta' } as const;
-const categoryLabels = {
-  MEDICATIONS: 'Medicamento',
-  SUPPLIES: 'Insumo',
-  EQUIPMENT: 'Equipo',
-} as const;
-
 type Inbox = { requests: SupplyRequest[]; catalogItems: SupplyRequestCatalogItem[] };
 
 export default function SupplyRequestsPage() {
@@ -30,8 +30,7 @@ export default function SupplyRequestsPage() {
   const [notice, setNotice] = useState('');
   const [open, setOpen] = useState(false);
   const [patientId, setPatientId] = useState('');
-  const [catalogItemId, setCatalogItemId] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [rows, setRows] = useState(() => [blankRequestProduct()]);
   const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM');
   const [note, setNote] = useState('');
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
@@ -77,14 +76,17 @@ export default function SupplyRequestsPage() {
     event.preventDefault();
     setError('');
     setNotice('');
-    if (
-      !patientId ||
-      !catalogItemId ||
-      !Number.isInteger(quantity) ||
-      quantity < 1 ||
-      quantity > 100000
-    ) {
-      setError('Seleccione paciente e ítem y escriba una cantidad entera positiva.');
+    let products;
+    try {
+      products = supplyRequestProducts.parse(readProductRows(rows));
+    } catch {
+      setError(
+        'Seleccione cada concepto una sola vez, con una cantidad entera positiva y el importe del honorario cuando corresponda.',
+      );
+      return;
+    }
+    if (!patientId) {
+      setError('Seleccione el paciente para esta solicitud.');
       return;
     }
     setBusy(true);
@@ -99,8 +101,7 @@ export default function SupplyRequestsPage() {
         body: JSON.stringify({
           idempotencyKey,
           patientId,
-          catalogItemId,
-          quantity,
+          ...(products.length === 1 && 'catalogItemId' in products[0] ? products[0] : { products }),
           priority,
           note,
         }),
@@ -109,14 +110,23 @@ export default function SupplyRequestsPage() {
         const payload = (await response.json()) as { error?: string };
         throw new Error(payload.error ?? 'No se pudo guardar la solicitud.');
       }
-      await load();
+      const saved = supplyRequestSchema.safeParse(await response.json());
+      if (saved.success) {
+        setInbox((previous) => ({
+          ...previous,
+          requests: [saved.data, ...previous.requests.filter((row) => row.id !== saved.data.id)],
+        }));
+      } else {
+        void load().catch(() =>
+          setError('La solicitud quedó registrada. Actualice la bandeja para ver sus productos.'),
+        );
+      }
       setNotice(
-        'Solicitud interna recibida y auditada. No se ha enviado ninguna notificación externa.',
+        'Solicitud interna recibida y auditada. Los conceptos ya están disponibles en Precotización.',
       );
       setOpen(false);
       setPatientId('');
-      setCatalogItemId('');
-      setQuantity(1);
+      setRows([blankRequestProduct()]);
       setPriority('MEDIUM');
       setNote('');
       setIdempotencyKey(crypto.randomUUID());
@@ -151,7 +161,7 @@ export default function SupplyRequestsPage() {
           </Button>
         ) : null}
       </header>
-      {error ? (
+      {error && !open ? (
         <p className="notice danger" role="alert">
           {error}
         </p>
@@ -174,8 +184,7 @@ export default function SupplyRequestsPage() {
               <thead>
                 <tr>
                   <th>Fecha</th>
-                  <th>Ítem</th>
-                  <th>Cantidad</th>
+                  <th>Productos y cantidades</th>
                   <th>Prioridad</th>
                   <th>Paciente</th>
                   <th>Estado</th>
@@ -183,7 +192,17 @@ export default function SupplyRequestsPage() {
               </thead>
               <tbody>
                 {inbox.requests.map((request) => {
-                  const item = itemsById.get(request.catalogItemId);
+                  const products =
+                    request.products ??
+                    (request.catalogItemId
+                      ? [
+                          {
+                            id: request.id,
+                            catalogItemId: request.catalogItemId,
+                            quantity: request.quantity,
+                          },
+                        ]
+                      : []);
                   const patient = can('patients:read')
                     ? patients.find((entry) => entry.id === request.patientId)
                     : undefined;
@@ -196,9 +215,16 @@ export default function SupplyRequestsPage() {
                         }).format(new Date(request.createdAt))}
                       </td>
                       <td>
-                        {item ? `${item.sku} · ${item.name}` : 'Ítem de catálogo no disponible'}
+                        {products.map((line) => (
+                          <div key={line.id}>
+                            {'feeService' in line
+                              ? line.feeService
+                              : (itemsById.get(line.catalogItemId)?.name ??
+                                'Producto del catálogo')}{' '}
+                            × {line.quantity}
+                          </div>
+                        ))}
                       </td>
-                      <td>{request.quantity}</td>
                       <td>{priorityLabels[request.priority]}</td>
                       <td>{patient?.fullName ?? 'Destino protegido'}</td>
                       <td>
@@ -227,7 +253,12 @@ export default function SupplyRequestsPage() {
         description="El pedido queda dentro del sistema. No incluye diagnóstico, indicaciones médicas ni envío por WhatsApp o correo."
         footer={
           <>
-            <Button className="button-secondary" onClick={() => setOpen(false)} type="button">
+            <Button
+              className="button-secondary"
+              disabled={busy}
+              onClick={() => setOpen(false)}
+              type="button"
+            >
               Cancelar
             </Button>
             <Button disabled={busy} form="supply-request-form" type="submit">
@@ -235,7 +266,9 @@ export default function SupplyRequestsPage() {
             </Button>
           </>
         }
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          if (!busy) setOpen(false);
+        }}
         open={open}
         title="Nueva solicitud de enfermería"
       >
@@ -244,6 +277,11 @@ export default function SupplyRequestsPage() {
           id="supply-request-form"
           onSubmit={(event) => void submit(event)}
         >
+          {error && (
+            <p className="notice danger full" role="alert">
+              {error}
+            </p>
+          )}
           <label>
             Paciente
             <SearchableSelect
@@ -257,30 +295,15 @@ export default function SupplyRequestsPage() {
               value={patientId}
             />
           </label>
-          <label>
-            Medicamento, insumo o equipo
-            <SearchableSelect
-              ariaLabel="Buscar medicamento, insumo o equipo"
-              onChange={setCatalogItemId}
-              options={inbox.catalogItems.map((item) => ({
-                value: item.id,
-                label: `${categoryLabels[item.category]} · ${item.sku} · ${item.name}`,
-              }))}
-              placeholder="Código o nombre del catálogo"
-              value={catalogItemId}
+          <div className="full">
+            <RequestProductsEditor
+              rows={rows}
+              onChange={setRows}
+              catalog={inbox.catalogItems}
+              busy={busy}
+              minimum={1}
             />
-          </label>
-          <label>
-            Cantidad
-            <input
-              min="1"
-              max="100000"
-              step="1"
-              type="number"
-              value={quantity}
-              onChange={(event) => setQuantity(Number(event.target.value))}
-            />
-          </label>
+          </div>
           <label>
             Prioridad operativa
             <select

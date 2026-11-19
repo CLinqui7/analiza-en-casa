@@ -692,21 +692,46 @@ try {
     ).rows[0].count;
   });
   assert.equal(manualAudit, 1);
-  await transaction(pool, actor, async (c) => {
-    await c.query(
-      'UPDATE analiza.catalog_items SET body=$3::jsonb WHERE organization_id=$1 AND id=$2',
-      [actor.organizationId, itemId, JSON.stringify(item)],
-    );
-  });
-  // Registering a sale price later does not silently rewrite an issued snapshot,
-  // nor charge a request twice when the operator repeats the original action.
+  const priorPayment = {
+    ...payment,
+    id: randomUUID(),
+    idempotencyKey: randomUUID(),
+    quoteId: manualQuote.id,
+  };
+  await backend.operations.execute(actor, { command: 'payment.apply', payment: priorPayment });
+  await Promise.all(
+    [1, 2].map(() => backend.operations.execute(actor, { command: 'catalog.save', item })),
+  );
   assert.equal((await assignSupplyRequest(pool, actor, manual)).alreadyAssigned, true);
   assert.deepEqual(await storedQuote(manualResult.quoteId), manualQuote);
   const inboxAfterPrice = await prequoteInbox(pool, actor, 1, pricedRequest.id);
-  assert.equal(inboxAfterPrice.entries[0].assignedUnitPrice, 0);
+  assert.equal(inboxAfterPrice.entries[0].assignedUnitPrice, item.salePriceExcludingTax);
   assert.equal(inboxAfterPrice.entries[0].unitPrice, item.salePriceExcludingTax);
+  const revised = await storedQuote(inboxAfterPrice.entries[0].currentQuoteId!);
+  assert.equal(revised.version, manualQuote.version + 1);
+  assert.equal(
+    revised.items.filter((line) => line.id === 'supply-request-' + pricedRequest.id).length,
+    1,
+  );
+  assert.equal(revised.total, manualQuote.total + 27); // 3 × 10, less the stored 10% discount
+  const chain = (await backend.quotes.listWithVersions(actor))
+    .map((row) => row.quote)
+    .filter((q) => q.rootQuoteId === ownerId);
+  const applied = await transaction(pool, actor, async (c) =>
+    (
+      await c.query('SELECT body FROM analiza.payments WHERE organization_id=$1 AND id=$2', [
+        actor.organizationId,
+        priorPayment.id,
+      ])
+    ).rows.map((row) => paymentSchema.parse(row.body)),
+  );
+  assert.equal(applied.length, 1);
+  const accountsAfter = receivableAccounts(chain, applied);
+  assert.equal(accountsAfter.length, 1);
+  assert.equal(accountsAfter[0].paid, 5);
+  assert.equal(accountsAfter[0].balance, revised.patientAmount - 5);
   pass(
-    'authorized missing price at zero adds quantity once, audits pending price and preserves snapshots after catalogue update',
+    'concurrent catalogue saves reconcile once, preserve the sent snapshot, discount, payment and one receivable',
   );
 
   // Search applies before pagination, treats wildcard characters literally and stays tenant scoped.

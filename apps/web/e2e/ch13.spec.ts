@@ -1,3 +1,4 @@
+import { loadLegacyPurchases } from './fixtures/legacy-purchases';
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { strFromU8, unzipSync } from 'fflate';
@@ -14,18 +15,18 @@ test('CH13 renders a factual purchase list without financial operations', async 
   const before = await page.evaluate(() =>
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   );
-  await expect(page.getByRole('heading', { name: 'Listado' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Historial de compras' })).toBeVisible();
   for (const header of [
     'Acciones',
     'Tipo',
     'Ubicación / referencia',
     'Proveedor',
     'Total de compra',
-    'Número de factura',
+    'Documento del proveedor',
     'Fecha',
     'Estado',
   ])
-    await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: header, exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Excel' })).toBeDisabled();
   await page.getByLabel('Buscar compras').fill('sin-compra-ch13');
   await expect(page.locator('tbody .empty-state')).toContainText('Sin compras documentadas');
@@ -42,9 +43,15 @@ test('purchase catalog supports word-prefix search and equipment keeps only its 
   page,
 }) => {
   await login(page);
-  await page.getByRole('button', { name: 'Nueva compra' }).click();
-
-  const dialog = page.getByRole('dialog', { name: 'Nueva compra' });
+  await loadLegacyPurchases(page, 'PURCHASE-SEARCH-QA-001', 'FACT-SEARCH-QA', [
+    'SERIE-ORIGINAL-QA',
+  ]);
+  await page
+    .getByRole('row')
+    .filter({ hasText: 'PURCHASE-SEARCH-QA-001' })
+    .getByRole('button', { name: 'Editar', exact: true })
+    .click();
+  const dialog = page.getByRole('dialog', { name: 'Editar compra' });
   await expect(dialog.getByLabel('Bodega de destino')).toHaveValue('central');
   const catalog = dialog.getByRole('combobox', { name: 'Ítem de catálogo' });
   await catalog.fill('unidad');
@@ -65,8 +72,8 @@ test('purchase catalog supports word-prefix search and equipment keeps only its 
 
   await dialog.getByLabel('Referencia de compra').fill('PURCHASE-SEARCH-QA-001');
   await dialog.getByLabel('Número de serie').fill('SERIAL-SYNTHETIC-01');
-  await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
-  await expect(page.getByRole('status')).toContainText('guardada como borrador');
+  await dialog.getByRole('button', { name: 'Guardar cambios' }).click();
+  await expect(page.getByRole('status')).toContainText('actualizado y auditado');
 
   const saved = await page.evaluate(() => {
     const purchases = JSON.parse(
@@ -99,7 +106,7 @@ test('CH13 permits AUDITOR read-only list access and denies NURSE directly', asy
   await auditor.getByLabel('Usuario o correo').fill('auditor@demo.local');
   await auditor.getByLabel('Clave').fill('demo-auditor');
   await auditor.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(auditor.getByRole('heading', { name: 'Listado' })).toBeVisible();
+  await expect(auditor.getByRole('heading', { name: 'Historial de compras' })).toBeVisible();
   await expect(auditor.getByRole('button', { name: 'Nueva compra' })).toHaveCount(0);
   const nurse = await browser.newPage();
   await nurse.goto('/login?next=%2Fpurchases');

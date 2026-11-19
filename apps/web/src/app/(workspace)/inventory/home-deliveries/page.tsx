@@ -1,250 +1,246 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState, type FormEvent } from 'react';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
+import type { HomeCustody } from '@analiza/contracts';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { useOperations } from '@/lib/use-operations';
-import type { HomeCustody } from '@analiza/contracts';
+import { custodyReturns, stockByWarehouse } from '@/lib/inventory-ledger';
+import '../stock.css';
 
-const dateTime = (value: string) =>
-  new Date(value).toLocaleString('es-SV', { dateStyle: 'medium', timeStyle: 'short' });
+const formatDate = (value: string) =>
+  new Date(value).toLocaleString('es-SV', { dateStyle: 'short', timeStyle: 'short' });
+type LocationForm = { type: 'loan' | 'return'; custody?: HomeCustody; key: string; date: string };
 
-export default function HomeDeliveriesPage() {
+export default function EquipmentLocationsPage() {
   const operations = useOperations();
-  const { catalogItems, hospitalizations } = useWorkspace();
+  const { catalogItems, inventoryMovements, patients, refreshWorkspace } = useWorkspace();
   const { can } = useAuth();
-  const [dialog, setDialog] = useState<'dispatch' | 'close' | null>(null);
-  const [selected, setSelected] = useState<HomeCustody | null>(null);
-  const [patientId, setPatientId] = useState('');
-  const [addressLine, setAddressLine] = useState('');
-  const [query, setQuery] = useState('');
-  const [status, setStatus] = useState<'ALL' | 'OPEN' | 'CLOSED'>('ALL');
+  const [form, setForm] = useState<LocationForm | null>(null);
+  const [itemId, setItemId] = useState('');
+  const [warehouseId, setWarehouseId] = useState('');
+  const [search, setSearch] = useState('');
+  const [type, setType] = useState('');
+  const [page, setPage] = useState(0);
   const [message, setMessage] = useState('');
-  const [key, setKey] = useState(() => crypto.randomUUID());
-  const [commandAt, setCommandAt] = useState(() => new Date().toISOString());
-  const items = useMemo(
-    () =>
-      catalogItems.filter(
-        (item) =>
-          item.status === 'ACTIVE' &&
-          ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category ?? ''),
-      ),
+  const names = useMemo(
+    () => new Map([...patients, ...operations.deliveryPatients].map((p) => [p.id, p.fullName])),
+    [patients, operations.deliveryPatients],
+  );
+  const equipment = useMemo(
+    () => new Map(catalogItems.filter((i) => i.category === 'EQUIPMENT').map((i) => [i.id, i])),
     [catalogItems],
   );
-  const names = new Map(
-    operations.deliveryPatients.map((patient) => [patient.id, patient.fullName]),
+  const warehouses = useMemo(
+    () => new Map(operations.warehouses.map((w) => [w.id, w])),
+    [operations.warehouses],
   );
-  const itemNames = new Map(catalogItems.map((item) => [item.id, item.name]));
-  const warehouseNames = new Map(
-    operations.warehouses.map((warehouse) => [warehouse.id, warehouse.name]),
+  const stock = useMemo(
+    () => stockByWarehouse(inventoryMovements, operations.traceRecords, operations.homeCustodies),
+    [inventoryMovements, operations.traceRecords, operations.homeCustodies],
   );
-  const rows = operations.homeCustodies.filter(
+  const available = stock.filter(
+    (p) =>
+      p.available > 0 &&
+      equipment.get(p.itemId)?.status === 'ACTIVE' &&
+      warehouses.get(p.warehouseId)?.status === 'ACTIVE',
+  );
+  const availableIds = new Set(available.map((p) => p.itemId));
+  const limit = form?.custody
+    ? form.custody.quantity - form.custody.returnedQuantity
+    : (available.find((p) => p.itemId === itemId && p.warehouseId === warehouseId)?.available ?? 0);
+  const custodies = useMemo(
+    () => operations.homeCustodies.filter((c) => equipment.has(c.itemId)),
+    [operations.homeCustodies, equipment],
+  );
+  const events = useMemo(
+    () =>
+      custodies
+        .flatMap((c) => [
+          { key: `loan:${c.id}`, date: c.sentAt, custody: c, type: 'loan', quantity: c.quantity },
+          ...custodyReturns(c).map((r) => ({
+            key: `return:${c.id}:${r.id}`,
+            date: r.receivedAt,
+            custody: c,
+            type: 'return',
+            quantity: r.quantity,
+          })),
+        ])
+        .sort((a, b) => b.date.localeCompare(a.date) || a.key.localeCompare(b.key)),
+    [custodies],
+  );
+  const rows = events.filter(
     (row) =>
-      (status === 'ALL' || row.status === status) &&
-      `${names.get(row.patientId) ?? ''} ${itemNames.get(row.itemId) ?? ''} ${row.reference}`
-        .toLocaleLowerCase('es-SV')
-        .includes(query.trim().toLocaleLowerCase('es-SV')),
+      (!type || row.type === type) &&
+      [
+        names.get(row.custody.patientId),
+        equipment.get(row.custody.itemId)?.name,
+        warehouses.get(row.custody.warehouseId)?.name,
+      ]
+        .join(' ')
+        .toLocaleLowerCase('es')
+        .includes(search.trim().toLocaleLowerCase('es')),
   );
-  const open = operations.homeCustodies.filter((row) => row.status === 'OPEN');
-  const held = operations.homeCustodies
-    .filter((row) => row.status === 'CLOSED')
-    .reduce((sum, row) => sum + row.returnedQuantity, 0);
-
+  const lastPage = Math.max(0, Math.ceil(rows.length / 50) - 1);
+  const currentPage = Math.min(page, lastPage);
+  const held = custodies
+    .filter((c) => c.status === 'OPEN')
+    .reduce((sum, c) => sum + c.quantity - c.returnedQuantity, 0);
+  const canWrite = can('inventory:write');
+  function start(custody?: HomeCustody) {
+    setItemId('');
+    setWarehouseId('');
+    setMessage('');
+    setForm({
+      type: custody ? 'return' : 'loan',
+      custody,
+      key: crypto.randomUUID(),
+      date: new Date().toISOString(),
+    });
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const values = new FormData(event.currentTarget);
-    const okay =
-      dialog === 'dispatch'
-        ? await operations.execute({
-            command: 'home.dispatch',
-            dispatch: {
-              id: key,
-              idempotencyKey: key,
-              patientId,
-              ...(values.get('caseId') ? { caseId: String(values.get('caseId')) } : {}),
-              itemId: String(values.get('itemId')),
-              warehouseId: String(values.get('warehouseId')),
-              addressLine: addressLine.trim(),
-              quantity: Number(values.get('quantity')),
-              reference: String(values.get('reference')).trim(),
-              note: String(values.get('note')).trim(),
-              sentAt: commandAt,
-            },
-          })
-        : selected &&
-          (await operations.execute({
-            command: 'home.close',
-            closure: {
-              custodyId: selected.id,
-              returnedQuantity: Number(values.get('returnedQuantity')),
-              receivedAt: commandAt,
-              conditionNote: String(values.get('conditionNote')).trim(),
-              idempotencyKey: key,
-            },
-          }));
-    if (!okay) return;
-    setDialog(null);
-    setSelected(null);
-    setKey(crypto.randomUUID());
-    setMessage(
-      dialog === 'dispatch'
-        ? 'Despacho registrado; las unidades salieron de la bodega y quedaron bajo custodia domiciliaria.'
-        : 'Cierre registrado; lo devuelto quedó en cuarentena, sin aumentar el stock disponible.',
-    );
+    if (!form || operations.busy) return;
+    const data = new FormData(event.currentTarget);
+    const quantity = Number(data.get('quantity'));
+    const saved = form.custody
+      ? await operations.execute({
+          command: 'home.equipment.return',
+          receipt: { id: form.key, custodyId: form.custody.id, quantity, receivedAt: form.date },
+        })
+      : await operations.execute({
+          command: 'home.equipment.loan',
+          dispatch: {
+            id: form.key,
+            idempotencyKey: form.key,
+            patientId: String(data.get('patientId')),
+            itemId,
+            warehouseId,
+            quantity,
+            sentAt: form.date,
+            reference: form.key,
+          },
+        });
+    if (saved) {
+      setMessage(
+        form.custody
+          ? 'Devolución registrada. El equipo recibido queda en cuarentena.'
+          : 'Préstamo registrado. El equipo ya figura a cargo del paciente.',
+      );
+      setForm(null);
+      await refreshWorkspace();
+    }
   }
-
   return (
-    <div className="page-stack">
+    <div className="page-stack inventory-ledger-page equipment-locations">
       <header className="page-header page-header-actions">
         <div>
-          <p className="eyebrow">Inventario · Custodia domiciliaria</p>
-          <h1>Movimientos hacia casas</h1>
-          <p>
-            Despachos a pacientes, seguimiento de lo enviado y cierre con devolución física en
-            cuarentena.
-          </p>
+          <p className="eyebrow">Inventario y compras</p>
+          <h1>Ubicación de equipo e instrumentos por paciente</h1>
+          <p>Registre un préstamo y confirme las unidades que devuelve el paciente.</p>
         </div>
-        {can('inventory:write') ? (
+        {canWrite && (
           <Button
             data-action-id="HOME-DISPATCH-CREATE"
-            disabled={
-              !operations.connected ||
-              !items.length ||
-              !operations.warehouses.some((item) => item.status === 'ACTIVE')
-            }
-            onClick={() => {
-              setDialog('dispatch');
-              setKey(crypto.randomUUID());
-              setCommandAt(new Date().toISOString());
-              setMessage('');
-            }}
+            disabled={!operations.connected || operations.busy}
+            onClick={() => start()}
           >
-            Registrar despacho
+            Registrar nueva ubicación
           </Button>
-        ) : null}
+        )}
       </header>
-      {message ? (
+      {message && (
         <p className="notice success" role="status">
           {message}
         </p>
-      ) : null}
-      {operations.error ? (
+      )}
+      {!form && operations.error && (
         <p className="notice warning" role="alert">
           {operations.error}
         </p>
-      ) : null}
-      <section className="studio-metrics" aria-label="Resumen de custodia domiciliaria">
-        <Panel>
-          <article>
-            <div>
-              <small>Despachos abiertos</small>
-              <strong>{open.length}</strong>
-              <p>Requieren conciliación o cierre</p>
-            </div>
-          </article>
-        </Panel>
-        <Panel>
-          <article>
-            <div>
-              <small>Unidades en casas</small>
-              <strong>{open.reduce((sum, row) => sum + row.quantity, 0)}</strong>
-              <p>Fuera de las bodegas</p>
-            </div>
-          </article>
-        </Panel>
-        <Panel>
-          <article>
-            <div>
-              <small>Devueltas en cuarentena</small>
-              <strong>{held}</strong>
-              <p>No disponibles para volver a entregar</p>
-            </div>
-          </article>
-        </Panel>
-      </section>
-      <Panel>
+      )}
+      <Panel className="inventory-ledger-table-panel">
         <div className="table-heading">
-          <h2>Historial por paciente</h2>
-          <StatusTag>{rows.length} registros</StatusTag>
+          <h2>Movimientos de equipo</h2>
+          <StatusTag>{held} unidades en préstamo</StatusTag>
         </div>
-        <div className="studio-toolbar">
+        <div className="filter-grid">
           <label>
-            Buscar paciente, artículo o referencia
+            Buscar paciente, equipo o bodega
             <input
-              aria-label="Buscar despacho domiciliario"
-              onChange={(event) => setQuery(event.target.value)}
               type="search"
-              value={query}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(0);
+              }}
             />
           </label>
           <label>
-            Estado
+            Tipo de movimiento
             <select
-              aria-label="Filtrar estado de despacho"
-              onChange={(event) => setStatus(event.target.value as typeof status)}
-              value={status}
+              value={type}
+              onChange={(e) => {
+                setType(e.target.value);
+                setPage(0);
+              }}
             >
-              <option value="ALL">Todos</option>
-              <option value="OPEN">Abiertos</option>
-              <option value="CLOSED">Cerrados</option>
+              <option value="">Todos</option>
+              <option value="loan">Préstamo</option>
+              <option value="return">Devolución</option>
             </select>
           </label>
         </div>
         {rows.length ? (
           <div className="table-wrap">
-            <table>
+            <table className="inventory-ledger-table stock-cards">
               <thead>
                 <tr>
                   <th>Fecha</th>
-                  <th>Paciente / dirección</th>
-                  <th>Artículo</th>
+                  <th>Ítem</th>
+                  <th>Tipo</th>
+                  <th>Cantidad</th>
                   <th>Bodega</th>
-                  <th>Enviado</th>
-                  <th>Devuelto</th>
-                  <th>Estado</th>
-                  <th>Acción</th>
+                  <th>Paciente</th>
+                  {canWrite && <th>Acciones</th>}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td>
-                      {dateTime(row.sentAt)}
-                      <small style={{ display: 'block' }}>{row.reference}</small>
+                {rows.slice(currentPage * 50, (currentPage + 1) * 50).map((row) => (
+                  <tr key={row.key}>
+                    <td data-stock-label="Fecha">{formatDate(row.date)}</td>
+                    <td data-stock-label="Ítem">
+                      <strong>{equipment.get(row.custody.itemId)?.name}</strong>
+                      <small>{equipment.get(row.custody.itemId)?.sku}</small>
                     </td>
-                    <td>
-                      <strong>{names.get(row.patientId) ?? 'Paciente'}</strong>
-                      <small style={{ display: 'block' }}>{row.addressLine}</small>
-                    </td>
-                    <td>{itemNames.get(row.itemId) ?? row.itemId}</td>
-                    <td>{warehouseNames.get(row.warehouseId) ?? row.warehouseId}</td>
-                    <td>{row.quantity}</td>
-                    <td>{row.returnedQuantity}</td>
-                    <td>
-                      <StatusTag tone={row.status === 'OPEN' ? 'warning' : 'success'}>
-                        {row.status === 'OPEN' ? 'En casa' : 'Cerrado'}
+                    <td data-stock-label="Tipo">
+                      <StatusTag tone={row.type === 'loan' ? 'neutral' : 'success'}>
+                        {row.type === 'loan' ? 'Préstamo' : 'Devolución'}
                       </StatusTag>
                     </td>
-                    <td>
-                      {row.status === 'OPEN' && can('inventory:write') ? (
-                        <Button
-                          className="button-secondary"
-                          data-action-id="HOME-DISPATCH-CLOSE"
-                          onClick={() => {
-                            setSelected(row);
-                            setKey(crypto.randomUUID());
-                            setCommandAt(new Date().toISOString());
-                            setDialog('close');
-                          }}
-                        >
-                          Cerrar y recibir
-                        </Button>
-                      ) : row.returnedQuantity ? (
-                        'En cuarentena'
-                      ) : (
-                        '—'
-                      )}
+                    <td data-stock-label="Cantidad">{row.quantity}</td>
+                    <td data-stock-label="Bodega">
+                      {warehouses.get(row.custody.warehouseId)?.name ?? row.custody.warehouseId}
                     </td>
+                    <td data-stock-label="Paciente">
+                      {names.get(row.custody.patientId) ?? 'Paciente vinculado'}
+                    </td>
+                    {canWrite && (
+                      <td data-stock-label="Acciones">
+                        {row.type === 'loan' && row.custody.status === 'OPEN' ? (
+                          <Button
+                            className="button-secondary"
+                            disabled={!operations.connected || operations.busy}
+                            onClick={() => start(row.custody)}
+                          >
+                            Registrar devolución
+                          </Button>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -252,165 +248,157 @@ export default function HomeDeliveriesPage() {
           </div>
         ) : (
           <EmptyState
-            title="Sin despachos en este filtro"
-            detail="Un traslado entre bodegas sigue registrándose en Movimientos; aquí se documenta la custodia en casa."
+            title="Sin movimientos de equipo"
+            detail={
+              type || search
+                ? 'Cambie los filtros para ver otros movimientos.'
+                : 'Los préstamos y sus devoluciones aparecerán aquí.'
+            }
           />
         )}
+        {lastPage > 0 && (
+          <nav aria-label="Páginas de movimientos" className="action-row">
+            <Button
+              className="button-secondary"
+              disabled={!currentPage}
+              onClick={() => setPage(currentPage - 1)}
+            >
+              Anterior
+            </Button>
+            <span>
+              Página {currentPage + 1} de {lastPage + 1}
+            </span>
+            <Button
+              className="button-secondary"
+              disabled={currentPage >= lastPage}
+              onClick={() => setPage(currentPage + 1)}
+            >
+              Siguiente
+            </Button>
+          </nav>
+        )}
       </Panel>
-      <p className="notice" role="note">
-        Al cerrar, la diferencia entre enviado y devuelto queda como «no devuelto»: no se presume
-        administración ni consumo. Los artículos devueltos requieren liberación de calidad antes de
-        volver a estar disponibles.
-      </p>
+      {operations.homeCustodies.some((c) => !equipment.has(c.itemId)) && (
+        <div>
+          <Link className="button button-secondary" href="/inventory/home-deliveries/history">
+            Entregas anteriores de otros artículos
+          </Link>
+        </div>
+      )}
       <Dialog
-        open={dialog !== null}
-        onClose={() => setDialog(null)}
-        title={dialog === 'dispatch' ? 'Despacho a domicilio' : 'Cerrar custodia domiciliaria'}
-        description={
-          dialog === 'dispatch'
-            ? 'Confirme paciente, dirección, artículo, bodega y cantidad. La salida se audita en el Kárdex.'
-            : 'Indique sólo las unidades físicamente recibidas. Permanecerán en cuarentena.'
-        }
+        open={Boolean(form)}
+        onClose={() => {
+          if (!operations.busy) setForm(null);
+        }}
+        title={form?.custody ? 'Registrar devolución' : 'Registrar nueva ubicación'}
         footer={
           <>
-            <Button className="button-secondary" onClick={() => setDialog(null)}>
+            <Button
+              className="button-secondary"
+              disabled={operations.busy}
+              onClick={() => setForm(null)}
+            >
               Cancelar
             </Button>
-            <Button disabled={operations.busy} form="home-delivery-form" type="submit">
+            <Button type="submit" form="equipment-form" disabled={operations.busy || limit < 1}>
               {operations.busy ? 'Guardando…' : 'Guardar'}
             </Button>
           </>
         }
       >
-        <form
-          className="form-grid"
-          id="home-delivery-form"
-          onSubmit={(event) => void submit(event)}
-        >
-          {dialog === 'dispatch' ? (
-            <>
-              <label className="full">
-                Paciente
+        {form && (
+          <form key={form.key} id="equipment-form" onSubmit={submit} className="form-grid">
+            <label>
+              Tipo de movimiento
+              <input readOnly value={form.custody ? 'Devolución' : 'Préstamo'} />
+            </label>
+            <label>
+              Paciente
+              {form.custody ? (
+                <input readOnly value={names.get(form.custody.patientId) ?? 'Paciente vinculado'} />
+              ) : (
+                <select name="patientId" defaultValue="" required>
+                  <option value="" disabled>
+                    Seleccione un paciente
+                  </option>
+                  {operations.deliveryPatients.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.fullName}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </label>
+            <label>
+              Ítem
+              {form.custody ? (
+                <input readOnly value={equipment.get(form.custody.itemId)?.name ?? ''} />
+              ) : (
                 <select
-                  required
-                  value={patientId}
-                  onChange={(event) => {
-                    const id = event.target.value;
-                    setPatientId(id);
-                    setAddressLine(
-                      operations.deliveryPatients.find((patient) => patient.id === id)
-                        ?.addressLine ?? '',
-                    );
+                  value={itemId}
+                  onChange={(e) => {
+                    setItemId(e.target.value);
+                    setWarehouseId('');
                   }}
+                  required
                 >
-                  <option value="">Seleccione un paciente</option>
-                  {operations.deliveryPatients.map((patient) => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.fullName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="full">
-                Dirección de entrega
-                <textarea
-                  required
-                  minLength={5}
-                  maxLength={500}
-                  rows={2}
-                  value={addressLine}
-                  onChange={(event) => setAddressLine(event.target.value)}
-                />
-                <span className="field-help">
-                  Se guarda una copia de la dirección usada en este despacho.
-                </span>
-              </label>
-              <label className="full">
-                Hospitalización relacionada (opcional)
-                <select name="caseId">
-                  <option value="">Entrega directa al paciente</option>
-                  {hospitalizations
-                    .filter((item) => item.patientId === patientId)
-                    .map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.id} · {item.startDate}
+                  <option value="">Seleccione un equipo</option>
+                  {[...equipment.values()]
+                    .filter((i) => availableIds.has(i.id))
+                    .map((i) => (
+                      <option key={i.id} value={i.id}>
+                        {i.sku} · {i.name}
                       </option>
                     ))}
                 </select>
-                <span className="field-help">
-                  Si la entrega pertenece a un caso, vincúlelo para conservar trazabilidad.
-                </span>
-              </label>
-              <label>
-                Artículo
-                <select name="itemId" required>
-                  <option value="">Seleccione un artículo</option>
-                  {items.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Bodega de origen
-                <select name="warehouseId" required>
+              )}
+            </label>
+            <label>
+              Bodega
+              {form.custody ? (
+                <input readOnly value={warehouses.get(form.custody.warehouseId)?.name ?? ''} />
+              ) : (
+                <select
+                  value={warehouseId}
+                  onChange={(e) => setWarehouseId(e.target.value)}
+                  required
+                >
                   <option value="">Seleccione una bodega</option>
-                  {operations.warehouses
-                    .filter((warehouse) => warehouse.status === 'ACTIVE')
-                    .map((warehouse) => (
-                      <option key={warehouse.id} value={warehouse.id}>
-                        {warehouse.name}
+                  {available
+                    .filter((p) => p.itemId === itemId)
+                    .map((p) => (
+                      <option key={p.warehouseId} value={p.warehouseId}>
+                        {warehouses.get(p.warehouseId)?.name} · {p.available} disponibles
                       </option>
                     ))}
                 </select>
-              </label>
-              <label>
-                Cantidad <input name="quantity" type="number" min="1" step="1" required />
-              </label>
-              <label>
-                Referencia / acuse <input name="reference" maxLength={200} required />
-              </label>
-              <label className="full">
-                Nota administrativa (opcional) <textarea name="note" rows={2} maxLength={1000} />
-              </label>
-            </>
-          ) : (
-            <>
-              <p className="notice full">
-                {selected
-                  ? `${names.get(selected.patientId) ?? 'Paciente'} · ${itemNames.get(selected.itemId) ?? selected.itemId} · ${selected.quantity} unidades enviadas`
-                  : ''}
+              )}
+            </label>
+            <label>
+              Cantidad
+              <input
+                name="quantity"
+                type="number"
+                step={1}
+                min={1}
+                max={limit}
+                defaultValue={1}
+                required
+              />
+              {form.custody && <small>En poder del paciente: {limit}</small>}
+            </label>
+            {!form.custody && !available.length && (
+              <p className="notice full-field">
+                No hay equipos disponibles para préstamo en bodegas activas.
               </p>
-              <label>
-                Unidades físicamente devueltas
-                <input
-                  name="returnedQuantity"
-                  type="number"
-                  min="0"
-                  max={selected?.quantity ?? 0}
-                  step="1"
-                  defaultValue="0"
-                  required
-                />
-              </label>
-              <label className="full">
-                Estado observado de la devolución
-                <textarea
-                  name="conditionNote"
-                  rows={2}
-                  maxLength={1000}
-                  placeholder="Describa empaque o condición visible si hay devolución"
-                />
-              </label>
-            </>
-          )}
-          {operations.error ? (
-            <p className="field-error full" role="alert">
-              {operations.error}
-            </p>
-          ) : null}
-        </form>
+            )}
+            {operations.error && (
+              <p className="field-error full-field" role="alert">
+                {operations.error}
+              </p>
+            )}
+          </form>
+        )}
       </Dialog>
     </div>
   );

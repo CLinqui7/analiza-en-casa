@@ -284,7 +284,7 @@ export const homeCustodyInputSchema = z
     caseId: id.optional(),
     itemId: id,
     warehouseId: id,
-    addressLine: z.string().trim().min(5).max(500),
+    addressLine: z.string().trim().min(5).max(500).optional(),
     quantity: z.number().int().positive().max(1000000),
     sentAt: date,
     reference: z.string().trim().min(1).max(200),
@@ -295,6 +295,11 @@ export const homeCustodyInputSchema = z
 export const homeCustodySchema = homeCustodyInputSchema.extend({
   status: z.enum(['OPEN', 'CLOSED']),
   dispatchedBy: id,
+  returns: z
+    .array(
+      z.object({ id, quantity: z.number().int().positive(), receivedAt: date, receivedBy: id }),
+    )
+    .optional(),
   returnedQuantity: z.number().int().nonnegative().default(0),
   receivedAt: date.optional(),
   returnCondition: z.string().trim().max(1000).optional(),
@@ -376,6 +381,12 @@ export const confirmedSaleInputSchema = z
 export const confirmedSaleSchema = confirmedSaleInputSchema.extend({ confirmedBy: id });
 export type ConfirmedSale = z.infer<typeof confirmedSaleSchema>;
 export type OperationsSnapshot = {
+  inventoryLedgerReceipts?: Array<{
+    traceRecordId: string;
+    warehouseId: string;
+    purchaseDocumentNumber?: string;
+    registeredBy?: string;
+  }>;
   clinicalQuotes?: ClinicalQuoteContext[];
   currentJvpe: string;
   clinicalRecords: ClinicalRecord[];
