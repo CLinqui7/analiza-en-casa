@@ -36,7 +36,11 @@ function applyPendingPrices(
   });
   const quote =
     matched.length && price > 0
-      ? { ...source, items, ...calculateQuoteTotals(items, source.discount, source.insurerAmount) }
+      ? quoteSchema.parse({
+          ...source,
+          items,
+          ...calculateQuoteTotals(items, source.discount, source.insurerAmount),
+        })
       : source;
   return { quote, matched };
 }

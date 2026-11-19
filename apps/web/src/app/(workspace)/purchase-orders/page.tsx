@@ -147,8 +147,8 @@ export default function PurchaseOrdersPage() {
           <p className="eyebrow">Inventario y compras</p>
           <h1>Órdenes de compra</h1>
           <p>
-            Solicite insumos, medicamentos y equipos con varios productos en una orden y descargue
-            el PDF. Esta orden no recibe inventario ni sustituye una factura.
+            Prepare los productos de cada proveedor. Al aprobar la orden, podrá registrar lo
+            recibido en Compras.
           </p>
         </div>
         <Link className="action-link-button" href="/purchases">

@@ -101,7 +101,8 @@ export default function ReceivedOrdersPage() {
           <p className="eyebrow">Inventario y compras</p>
           <h1>Pedidos recibidos</h1>
           <p>
-            Medicamentos e insumos de las cotizaciones, con seguimiento de entrega a enfermería.
+            Medicamentos, insumos y equipos de las cotizaciones, con seguimiento de entrega a
+            enfermería.
           </p>
         </div>
         <div className="fulfillment-count">

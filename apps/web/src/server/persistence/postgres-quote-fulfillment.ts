@@ -39,7 +39,7 @@ const orderLines = `WITH q AS (${latestQuotes()}), lines AS (
   SELECT q.id AS "quoteId",q.root_quote_id AS "rootId",q.created_at AS "createdAt",p.body->>'fullName' AS "patientName",coalesce(p.body->>'documentId','') AS "patientDocument",line->>'id' AS "lineId",
   line->>'name' AS "itemName",(line->>'quantity')::numeric AS quantity,q.body->>'status' AS status
   FROM q JOIN analiza.patients p ON p.organization_id=$1 AND p.id=q.patient_id CROSS JOIN LATERAL jsonb_array_elements(q.body->'items') line
-  WHERE line->>'category' IN ('MEDICATIONS','SUPPLIES') AND NOT EXISTS (${terminal} AND d.decision='NOT_APPROVED')
+  WHERE line->>'category' IN ('MEDICATIONS','SUPPLIES','EQUIPMENT') AND NOT EXISTS (${terminal} AND d.decision='NOT_APPROVED')
 )`;
 
 export async function prequoteInbox(
@@ -545,7 +545,9 @@ export async function deliverReceivedOrder(pool: Pool, actor: ServerActor, raw: 
     if (latest?.id !== input.quoteId) throw new MongoConflictError();
     const quote = quoteSchema.parse(latest.body);
     const line = quote.items.find(
-      (item) => item.id === input.lineId && ['MEDICATIONS', 'SUPPLIES'].includes(item.category),
+      (item) =>
+        item.id === input.lineId &&
+        ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category),
     );
     if (!line || quote.status !== 'SENT')
       throw new MongoInputError('El pedido debe corresponder a una cotización enviada.');

@@ -132,7 +132,8 @@ async function movementOut(
  * Project only its patient key and verify the movement binding, never the clinical body. */
 export async function listInventoryMovements(client: PoolClient, actor: ServerActor) {
   requirePermission(actor, 'inventory:read');
-  const result = await client.query<{body:unknown}>(`
+  const result = await client.query<{ body: unknown }>(
+    `
     SELECT CASE WHEN clinical.patient_id IS NULL THEN m.body
       ELSE m.body || jsonb_build_object('patientId', clinical.patient_id) END AS body
     FROM analiza.inventory_movements m
@@ -141,9 +142,9 @@ export async function listInventoryMovements(client: PoolClient, actor: ServerAc
       AND clinical.id=m.body->>'reference'
       AND ((clinical.body->'stockMovementIds') ? m.id OR m.body ? 'reversalOf')
     WHERE m.organization_id=$1 ORDER BY m.created_at,m.id`,
-    [actor.organizationId]
+    [actor.organizationId],
   );
-  return result.rows.map(row=>inventoryMovementSchema.parse(row.body));
+  return result.rows.map((row) => inventoryMovementSchema.parse(row.body));
 }
 
 export async function populateFieldOperations(

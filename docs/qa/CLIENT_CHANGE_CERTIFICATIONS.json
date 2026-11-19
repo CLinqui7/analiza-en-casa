@@ -38,7 +38,7 @@
     "CR-001": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "1489b27aa24bc31a1573271166264c5f7202b4665bb418205e8760a97e6956b8",
+      "functional_fingerprint": "73906544c47bfac1379634e150ea522140a8e1c4ec171f4b30701caaf402709c",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -129,7 +129,7 @@
     "CR-011": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "b32ccfe1f85d0b33aa5bedf4e19568fbc7daa09c01f5e50edb7b9f4be5a92cc6",
+      "functional_fingerprint": "b24521d367449ac8f5edc5fd63c1074bcc9e50f51d16835cfddf2da43eef177d",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -140,7 +140,7 @@
     "CR-012": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "5ddcd8b58efcc48d105e3458ab658f6dc641c4d182dc3270de8b84e493765421",
+      "functional_fingerprint": "c08e423654627a0ce70619128286f33833b2fcb391608f0fabb81d037a260408",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"

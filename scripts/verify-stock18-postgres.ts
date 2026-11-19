@@ -80,6 +80,18 @@ try {
     reason: 'Entrada manual',
   };
   await send({ command: 'inventory.record', idempotencyKey: entry.id, movement: entry });
+  await assert.rejects(
+    send({
+      command: 'inventory.record',
+      idempotencyKey: randomUUID(),
+      movement: {
+        ...entry,
+        id: randomUUID(),
+        kind: 'ADJUSTMENT',
+        adjustmentDirection: 'IN',
+      },
+    }),
+  );
   const transfer = {
     id: randomUUID(),
     idempotencyKey: randomUUID(),

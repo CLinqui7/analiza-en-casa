@@ -1855,6 +1855,8 @@ export function postgresPersistence(): Persistence {
             if (!previous.same) throw new MongoConflictError();
             return { id: previous.id };
           }
+          if (movement.kind === 'ADJUSTMENT')
+            throw new MongoInputError('Seleccione Entrada, Salida o Devolución.');
           const item = await c.query(
             `SELECT id FROM analiza.catalog_items
              WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'

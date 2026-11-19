@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import '../stock.css';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { catalogItemSchema, type CatalogItem } from '@analiza/contracts';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -15,7 +16,7 @@ export default function SuppliersPage() {
   const [message, setMessage] = useState('');
   const suppliers = catalogItems.filter((item) => item.category === 'PROVIDERS');
   const visible = suppliers.filter((item) =>
-    `${item.name} ${item.sku} ${item.contactName ?? ''} ${item.email ?? ''}`
+    `${item.name} ${item.sku} ${item.contactName ?? ''} ${item.email ?? ''} ${item.landlinePhone ?? ''} ${item.mobilePhone ?? ''} ${item.address ?? ''}`
       .toLocaleLowerCase('es')
       .includes(query.trim().toLocaleLowerCase('es')),
   );
@@ -81,7 +82,7 @@ export default function SuppliersPage() {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Empresa, código, contacto o correo"
+              placeholder="Empresa, contacto, teléfono, correo o dirección"
             />
           </label>
           <StatusTag>
@@ -101,7 +102,7 @@ export default function SuppliersPage() {
             aria-label="Directorio de proveedores"
             tabIndex={0}
           >
-            <table className="supplier-table" aria-label="Proveedores">
+            <table className="supplier-table stock-cards" aria-label="Proveedores">
               <thead>
                 <tr>
                   <th scope="col">Proveedor</th>
@@ -120,8 +121,8 @@ export default function SuppliersPage() {
                       <strong>{item.name}</strong>
                       <small className="cell-secondary">{item.sku}</small>
                     </th>
-                    <td>{item.contactName || 'Sin registrar'}</td>
-                    <td>
+                    <td data-stock-label="Contacto">{item.contactName || 'Sin registrar'}</td>
+                    <td data-stock-label="Teléfonos">
                       {item.landlinePhone ? (
                         <span className="supplier-phone">
                           {item.landlinePhone}
@@ -136,18 +137,18 @@ export default function SuppliersPage() {
                       ) : null}
                       {!item.landlinePhone && !item.mobilePhone ? 'Sin registrar' : null}
                     </td>
-                    <td>{item.email || 'Sin registrar'}</td>
-                    <td>
+                    <td data-stock-label="Correo">{item.email || 'Sin registrar'}</td>
+                    <td data-stock-label="Dirección">
                       {item.address || 'Sin registrar'}
                       {item.notes && <small className="cell-secondary">Notas: {item.notes}</small>}
                     </td>
-                    <td>
+                    <td data-stock-label="Estado">
                       <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                       </StatusTag>
                     </td>
                     {can('catalogs:write') ? (
-                      <td>
+                      <td data-stock-label="Acciones">
                         <Button
                           className="button-secondary"
                           onClick={() => {

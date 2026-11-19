@@ -82,9 +82,13 @@ test('orden aprobada, recepción parcial y aprobación financiera son acciones s
   await expect(receipt).toContainText('9.61');
   const href = await receipt.getByRole('link', { name: 'Descargar PDF' }).getAttribute('href');
   expect(href).toBeTruthy();
-  const pdf = await page.request.get(href!);
-  expect(pdf.ok()).toBe(true);
-  expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
+  const pdf = await page.evaluate(async (url) => {
+    const result = await fetch(url);
+    const bytes = new Uint8Array(await result.arrayBuffer());
+    return { status: result.status, header: String.fromCharCode(...bytes.subarray(0, 5)) };
+  }, href!);
+  expect(pdf).toEqual({ status: 200, header: '%PDF-' });
+
   await page.goto('/payables');
   const invoice = page.getByRole('row').filter({ hasText: 'CF-' + run });
   await expect(invoice).toContainText('pendiente de aprobación');

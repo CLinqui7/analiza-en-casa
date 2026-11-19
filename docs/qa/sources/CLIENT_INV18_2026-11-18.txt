@@ -22,32 +22,32 @@ c. Aprobada: al aprobarla, la orden pasa automáticamente a la ventana Compras
 B. Compras
 1. Quitar el botón "Nueva compra": las compras ya no se crean aquí, llegan desde las Órdenes de
 compra aprobadas.
-2. Modiﬁcar la columna "Acciones":
+2. Modificar la columna "Acciones":
 a. Recibir líneas: abre la compra y permite editarla (por ejemplo, si en la orden se pidieron 5
 y llegaron 4, se corrige la cantidad). Al recibir, deben aparecer estos campos:
 • Cantidades: editables.
 • Bodega destino (selector): solo Bodega general Analiza en Casa y Botiquín
 Analiza.
-• Tipo de documento (selector): Factura, Nota de crédito o Crédito ﬁscal. Según el
+• Tipo de documento (selector): Factura, Nota de crédito o Crédito fiscal. Según el
 que se elija, se abre el campo para ingresar su número.
 • Vida útil del artículo: campo de texto.
 • Fecha de vencimiento: selector de fecha.
 • Lote: campo de texto.
-• Activo ﬁjo: casilla/botón para marcar si el artículo es acLvo ﬁjo.
+• Activo fijo: casilla/botón para marcar si el artículo es activo fijo.
 b. PDF: para descargar o imprimir la compra.
-c. Anular: anula la orden de compra; es obligatorio escribir el moAvo.
+c. Anular: anula la orden de compra; es obligatorio escribir el motivo.
 3. Al guardar la recepción (Recibir líneas):
 • Se registra automáticamente la entrada al inventario, que debe verse en el Kárdex.
 • La compra pasa automáticamente a Financiero → Cuentas por pagar.
 C. Kárdex
 1. Debe registrar todas las entradas y salidas que se hagan en el sistema.
-2. Veriﬁcar que todas las compras se estén guardando como entradas.
+2. Verificar que todas las compras se estén guardando como entradas.
 3. En "Detalle del Kárdex":
 a. Agregar la columna "Paciente", con el nombre del paciente.
 
 Página 2
 b. En la columna "Responsable", cuando el movimiento venga de una compra, mostrar el
-número del documento (factura, nota de crédito o crédito ﬁscal).
+número del documento (factura, nota de crédito o crédito fiscal).
 c. Quitar la columna "Referencia".
 4. Al registrar un nuevo movimiento:
 a. Quitar los campos "Referencia" y "Motivo".
@@ -59,13 +59,13 @@ D. Existencias
 Comprometidos y Lotes.
 3. Se mantienen: Ítems, Proveedores y Bodegas.
 4. Ítems → columna "Acciones":
-a. Movimientos del ítem: se manLene tal como está.
+a. Movimientos del ítem: se mantiene tal como está.
 b. Generar traslado (nueva): el cuadro de traslado que hoy está arriba se pasa a esta acción,
 con estos campos:
-• Ítem: se manLene.
+• Ítem: se mantiene.
 • Bodega origen: aparece por default (la bodega donde está el ítem).
 • Bodega destino: selector, como está.
-• Cantidad: se manLene.
+• Cantidad: se mantiene.
 • Quitar los campos "Referencia" y "Motivo".
 5. Proveedores: al agregar un nuevo proveedor, debe pedir:
 a. Nombre de la empresa
@@ -73,7 +73,7 @@ b. Contacto
 c. Teléfono
 d. Correo
 e. Dirección
-6. Bodegas: se manLene tal como está.
+6. Bodegas: se mantiene tal como está.
 E. Ubicación de equipo e instrumentos por paciente (antes "Entregas a domicilio")
 1. Como se integra con Movimientos, esta ventana debe verse igual que la ventana actual de
 Movimientos.
@@ -99,8 +99,8 @@ Página 3
 b. Productos: se pueden agregar varios en una sola solicitud (medicamentos, insumos y/o
 equipos), para no generar muchas solicitudes por paciente.
 c. Cantidad por producto: a la par de cada producto (ej.: Abrilar → 1; Mesa mayo → 1).
-d. Prioridad: se manLene.
-e. Nota logística (opcional): se manLene.
+d. Prioridad: se mantiene.
+e. Nota logística (opcional): se mantiene.
 3. Al dar clic en "Enviar solicitud interna", la solicitud pasa a una nueva ventana en Clínico llamada
 "Precotización".
 

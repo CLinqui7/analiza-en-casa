@@ -89,3 +89,14 @@
     grid-column: 1/-1;
   }
 }
+
+@media (max-width: 720px) {
+  .supplier-table.stock-cards tbody th[scope='row'] {
+    grid-column: 1/-1;
+    inline-size: auto;
+    padding: 0 0 0.6rem;
+  }
+  .supplier-directory .supplier-table-hint {
+    display: none;
+  }
+}

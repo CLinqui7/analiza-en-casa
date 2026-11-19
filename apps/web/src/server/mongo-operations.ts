@@ -1154,8 +1154,8 @@ export class MongoOperationsRepository {
             throw new MongoInputError(
               'Un traslado necesita bodega de origen y destino. Regístrelo cuando estén definidas ambas.',
             );
-          if (movement.kind === 'ADJUSTMENT' && !movement.adjustmentDirection)
-            throw new MongoInputError('Indique la dirección del ajuste.');
+          if (movement.kind === 'ADJUSTMENT')
+            throw new MongoInputError('Seleccione Entrada, Salida o Devolución.');
           if (
             !(await this.database.collection('warehouses').findOne(
               {
@@ -1175,11 +1175,7 @@ export class MongoOperationsRepository {
             throw new MongoInputError(
               'Este artículo usa trazabilidad. Registre recepciones o salidas desde Lotes y series.',
             );
-          const delta =
-            (movement.kind === 'EXIT' ||
-            (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection === 'OUT')
-              ? -1
-              : 1) * movement.quantity;
+          const delta = (movement.kind === 'EXIT' ? -1 : 1) * movement.quantity;
           await applyStockDelta(
             this.database,
             session,

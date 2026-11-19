@@ -37,9 +37,9 @@ test('solicitud clínica agrupada y ampliación aprobada con adicionales en amba
   await dialog.getByLabel('Cantidad', { exact: true }).fill('2');
   await dialog.getByRole('button', { name: 'Agregar otro concepto' }).click();
   const second = dialog.getByRole('group', { name: 'Concepto 2' });
-  await second.getByLabel('Categoría', { exact: true }).selectOption('FEES');
-  await second.getByLabel('Servicio médico').selectOption('Visita');
-  await second.getByLabel('Honorario médico').selectOption('25');
+  await second.getByRole('combobox', { name: 'Categoría', exact: true }).selectOption('FEES');
+  await second.getByRole('combobox', { name: 'Servicio médico' }).selectOption('Visita');
+  await second.getByRole('combobox', { name: /Honorario médico/ }).selectOption('25');
   await expect(dialog.getByLabel('Cantidad', { exact: true })).toHaveCount(2);
   expect(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
   const screenshots = join('.local', 'inv18-browser');
@@ -68,9 +68,11 @@ test('solicitud clínica agrupada y ampliación aprobada con adicionales en amba
       .first();
     await row.getByRole('button', { name: 'Revisar solicitud' }).click();
     dialog = admin.getByRole('dialog');
-    await dialog.getByLabel('Asignar a una cotización').selectOption({ index: 1 });
+    await dialog
+      .getByRole('combobox', { name: 'Asignar a una cotización' })
+      .selectOption({ index: 1 });
     await dialog.getByRole('button', { name: 'Agregar concepto', exact: true }).click();
-    await dialog.getByLabel('Categoría', { exact: true }).selectOption('SERVICES');
+    await dialog.getByRole('combobox', { name: 'Categoría', exact: true }).selectOption('SERVICES');
     await dialog
       .getByRole('combobox', { name: 'Buscar concepto de catálogo' })
       .fill(fixture.serviceSku);

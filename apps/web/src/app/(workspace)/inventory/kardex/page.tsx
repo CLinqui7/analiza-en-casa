@@ -68,30 +68,31 @@ export default function KardexPage() {
       ...(providerMode === 'mock' ? demoItemCatalog : {}),
       ...Object.fromEntries(
         catalogItems
-          .filter(
-            (item) =>
-              item.status === 'ACTIVE' &&
-              ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category ?? ''),
-          )
+          .filter((item) => ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category ?? ''))
           .map((item) => [item.id, { name: item.name, sku: item.sku }]),
       ),
     }),
     [catalogItems, providerMode],
   );
-  const warehouses: Record<string, string> = {
-    ...(providerMode === 'mock' ? demoWarehouses : {}),
-    ...Object.fromEntries(
-      inventoryMovements
-        .filter((item) => item.warehouseId)
-        .map((item) => [
-          item.warehouseId!,
-          item.warehouseId === 'central' ? 'Bodega central' : item.warehouseId!,
-        ]),
-    ),
-    // Keep the configured label authoritative, including for inactive warehouses that
-    // still appear in the immutable movement history.
-    ...Object.fromEntries(operations.warehouses.map((warehouse) => [warehouse.id, warehouse.name])),
-  };
+  const warehouses = useMemo<Record<string, string>>(
+    () => ({
+      ...(providerMode === 'mock' ? demoWarehouses : {}),
+      ...Object.fromEntries(
+        inventoryMovements
+          .filter((item) => item.warehouseId)
+          .map((item) => [
+            item.warehouseId!,
+            item.warehouseId === 'central' ? 'Bodega central' : item.warehouseId!,
+          ]),
+      ),
+      // Keep the configured label authoritative, including for inactive warehouses that
+      // still appear in the immutable movement history.
+      ...Object.fromEntries(
+        operations.warehouses.map((warehouse) => [warehouse.id, warehouse.name]),
+      ),
+    }),
+    [providerMode, inventoryMovements, operations.warehouses],
+  );
   const activeWarehouses = operations.warehouses.filter(
     (warehouse) => warehouse.status === 'ACTIVE',
   );
@@ -138,7 +139,19 @@ export default function KardexPage() {
     () => [...new Set([...Object.keys(itemCatalog), ...allRows.map((m) => m.itemId)])],
     [allRows, itemCatalog],
   );
-  const activeItemIds = Object.keys(itemCatalog);
+  const activeItemIds = useMemo(
+    () => [
+      ...(providerMode === 'mock' ? Object.keys(demoItemCatalog) : []),
+      ...catalogItems
+        .filter(
+          (item) =>
+            item.status === 'ACTIVE' &&
+            ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category ?? ''),
+        )
+        .map((item) => item.id),
+    ],
+    [catalogItems, providerMode],
+  );
   const rows = allRows.filter((row) => {
     const date = row.createdAt.slice(0, 10);
     return (

@@ -86,7 +86,7 @@ export function RequestProductsEditor({
                 patch(row.key, { category: event.target.value as Category, item: '', fee: '' })
               }
             >
-              <option value="PHYSICAL">Medicamentos, insumos y equipos</option>
+              <option value="PHYSICAL">Productos de inventario</option>
               {Object.entries(requestCategoryLabels).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}

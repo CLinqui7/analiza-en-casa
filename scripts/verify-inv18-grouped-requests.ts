@@ -12,6 +12,7 @@ import { postgresPersistence } from '../apps/web/src/server/persistence/postgres
 import { PostgresSupplyRequestRepository } from '../apps/web/src/server/persistence/postgres-supply-requests';
 import {
   prequoteInbox,
+  receivedOrders,
   assignSupplyRequest,
 } from '../apps/web/src/server/persistence/postgres-quote-fulfillment';
 import { requestQuoteCategories } from '../apps/web/src/lib/supply-requests';
@@ -215,6 +216,13 @@ try {
   const after = (await prequoteInbox(pool, actor, 1, a.id)).entries[0];
   assert.equal(after.products?.length, 9);
   assert.equal(after.assignmentPresent, true);
+  const physical = await receivedOrders(pool, actor, 1, 'QAG-' + run);
+  const deliveredLineIds = new Set(physical.entries.map((entry) => entry.lineId));
+  for (const line of newest.items)
+    assert.equal(
+      deliveredLineIds.has(line.id),
+      ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(line.category),
+    );
   assert.equal((await requests.list(nurse)).filter((row) => row.patientId === patientId).length, 1);
   const stock = await transaction(pool, actor, (c) =>
     c.query(

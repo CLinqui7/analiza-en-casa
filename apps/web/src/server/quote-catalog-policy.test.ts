@@ -32,6 +32,17 @@ const base: Quote = {
   createdAt: new Date(0).toISOString(),
 };
 
+it('keeps request provenance when revising an existing line and only accepts new additional lines via fulfillment', () => {
+  const additional = { ...base, items: [{ ...base.items[0], id: 'supply-request-synthetic' }] };
+  expect(quoteCatalogPriceError(additional, [], [], base)).toMatch(/Precotización/);
+  expect(quoteCatalogPriceError(additional, [], [], additional)).toBeNull();
+  const replaced = {
+    ...additional,
+    items: [{ ...additional.items[0], inventoryItemId: 'another-item' }],
+  };
+  expect(quoteCatalogPriceError(replaced, [], [], additional)).toMatch(/Precotización/);
+});
+
 describe('quote catalog price policy', () => {
   it('requires both selected doctors in the scoped directory even without fee lines', () => {
     const quote = {

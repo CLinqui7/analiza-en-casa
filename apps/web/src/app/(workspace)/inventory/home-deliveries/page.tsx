@@ -9,9 +9,9 @@ import { useOperations } from '@/lib/use-operations';
 import { custodyReturns, stockByWarehouse } from '@/lib/inventory-ledger';
 import '../stock.css';
 
-const formatDate = (value: string) =>
-  new Date(value).toLocaleString('es-SV', { dateStyle: 'short', timeStyle: 'short' });
-type LocationForm = { type: 'loan' | 'return'; custody?: HomeCustody; key: string; date: string };
+const dateFormatter = new Intl.DateTimeFormat('es-SV', { dateStyle: 'short', timeStyle: 'short' });
+const formatDate = (value: string) => dateFormatter.format(new Date(value));
+type LocationForm = { custody?: HomeCustody; key: string; date: string };
 
 export default function EquipmentLocationsPage() {
   const operations = useOperations();
@@ -93,7 +93,6 @@ export default function EquipmentLocationsPage() {
     setWarehouseId('');
     setMessage('');
     setForm({
-      type: custody ? 'return' : 'loan',
       custody,
       key: crypto.randomUUID(),
       date: new Date().toISOString(),

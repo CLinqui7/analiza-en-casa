@@ -304,10 +304,10 @@ test('Nov17 prequote refresh, assignment, nurse delivery, supplier table CRUD an
   await expect(page).toHaveURL(/\/inventory\/suppliers$/);
   await page.getByRole('button', { name: 'Nuevo proveedor' }).click();
   const name = 'Proveedor sintético navegador ' + Date.now();
-  await dialog.getByLabel('Empresa / nombre').fill(name);
+  await dialog.getByLabel('Nombre de la empresa').fill(name);
   await dialog.getByLabel('Contacto', { exact: true }).fill('Contacto sintético');
   await dialog.getByLabel('Correo', { exact: true }).fill('proveedor-qa@example.test');
-  await dialog.getByLabel('Dirección y notas').fill('Dirección sintética de prueba');
+  await dialog.getByLabel('Dirección', { exact: true }).fill('Dirección sintética de prueba');
   await dialog.getByRole('button', { name: 'Guardar proveedor' }).click();
   await expect(dialog).toHaveCount(0);
   await page.reload();
@@ -566,7 +566,9 @@ test('Pending18 unpriced supply adds at zero without price input and keeps the s
   expect(revised.items.at(-1).unitPrice).toBe(7.25);
   await page.goto('/clinical/prequotes');
   await page.locator('tbody tr').first().getByRole('button', { name: 'Revisar solicitud' }).click();
-  await expect(dialog.getByRole('listitem').filter({hasText:'Insumo sin precio sintético Nov18'})).toContainText('$7.25');
+  await expect(
+    dialog.getByRole('listitem').filter({ hasText: 'Insumo sin precio sintético Nov18' }),
+  ).toContainText('$7.25');
   await expect(
     dialog.getByRole('button', { name: 'Añadir a cotización', exact: true }),
   ).toHaveCount(0);
