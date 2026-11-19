@@ -1,0 +1,29 @@
+Analiza en Casa – Ajustes adicionales – 18 de noviembre de 2026
+Ajustes extra, adicionales al flujo nuevo
+Ajustes
+Clínico → Órdenes médicas → Acciones médicas
+Cambiar el nombre de la tarjeta "Antecedentes clínicos" por "Antecedentes personales".
+Clínico → Órdenes médicas (Acciones médicas y Acciones de enfermería)
+El campo Hospitalización se mantiene como selector, pero debe permitir buscar escribiendo. Ejemplo: si el paciente tiene muchas y se busca la 444, al escribir "44" deben aparecer las coincidencias para seleccionar.
+Clínico → Órdenes médicas → Acciones de enfermería → Planes de cuidado
+Hoy, al seleccionar uno o varios tipos de plan (Dieta, Cuidado de enfermería), aparece un solo campo "Descripción" para todos.
+Debe aparecer un campo de descripción por cada tipo seleccionado:
+Si se selecciona Dieta: campo "Descripción de dieta".
+Si se selecciona Cuidado de enfermería: campo "Descripción de cuidados de enfermería".
+Si se seleccionan ambos, aparecen los dos campos, cada uno por separado.
+Clínico → Expediente clínico
+Así como se pueden imprimir las secciones (una, varias o el expediente completo), se deben poder descargar en PDF con las mismas opciones. Hoy esa opción no existe.
+Clínico → Órdenes médicas → Acciones de enfermería → Tarjeta de medicamentos
+Se mantiene que la tarjeta carga por default todos los medicamentos de la cotización.
+Agregar que también cargue los productos de la cotización cuyo nombre contenga "Solución" o "Soluciones" (no existe una categoría Soluciones; se identifican por el nombre del producto).
+Administración → Equipo y cuentas → Nuevo rol: Doctor
+Crear el rol "Doctor", que por el momento solo tendrá acceso a Clínico, en estas ventanas:
+Ingresos clínicos
+Agenda
+Expediente clínico
+Órdenes médicas
+Crear el usuario con el rol Doctor:
+Correo: [correo de la cuenta conservado en el documento original privado]
+
+SHA256 del original: 21a4a415bce02be3c24358ab73c1bd3b177b6294902d159a826c217b751fc825
+El correo de la cuenta operativa se omite en Git; el resto del texto se conserva.

@@ -58,7 +58,9 @@ export async function POST(request: NextRequest) {
     return await withPrivateUpload(async () => {
       const form = await privateMultipart(request);
       if (
-        [...form.keys()].some((key) => key !== 'ownerType' && key !== 'ownerId' && key !== 'file')
+        [...form.keys()].some(
+          (key) => !['ownerType', 'ownerId', 'file', 'dependentId', 'documentKind'].includes(key),
+        )
       ) {
         throw new MongoInputError();
       }
@@ -73,6 +75,10 @@ export async function POST(request: NextRequest) {
         name: rawFile.name,
         mimeType: rawFile.type || 'application/octet-stream',
         bytes: new Uint8Array(await rawFile.arrayBuffer()),
+        ...(form.has('dependentId') ? { dependentId: formValue(form, 'dependentId') } : {}),
+        ...(form.has('documentKind')
+          ? { documentKind: formValue(form, 'documentKind') as 'BIRTH_CERTIFICATE' | 'CONSENT' }
+          : {}),
       });
       return NextResponse.json(file, { status: 201, headers: { 'Cache-Control': 'no-store' } });
     });

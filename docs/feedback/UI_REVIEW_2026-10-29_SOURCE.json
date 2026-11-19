@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-29",
+  "source": "Solicitud del cliente en este chat; las capturas originales permanecen privadas",
+  "requests": [
+    "En las ventanas pone “clínico\" antes que la ventana \"financiero\"",
+    "En el descuento, dos cosas: primero mejorarlo visualmente jaja y segundo cuando selecciono la categoria a aplicar o pongo la cantidad de descuento no los agarra ninguno",
+    "en clínico ingresos clínicos: en la acción ATENCIÓN mejora visualmente por favor jeje y cuando le doy guardar aparecen 2 botones quita el gris que no me permitía seleccionar y deja el final como guardar",
+    "en financiero CUENTAS POR COBRAR en vez de número de cheque que sea número de reserva jeje",
+    "La. tabla de visitadoras no funciona, me abre la ventana de catalogos y catalogos operativos",
+    "por favor, vas a tener un pensamiento alto, necesito que por favor, veas y rediseñes todo perfecto, ya que hay botones que se ven feos, se ven cuadrados o se ven rectangulares pero de formas feas, y hay textos que sobresalen del boton y botones no puestos bien, necesito que hagas un rediseño y visites cada pagina y veas cursos de uxui y necesito que se vea perfecto ok?, hay paginas donde tengo que moverme por adentro porque no esta bien cuadrado , y hay botones que al darle agregar mas, se vuelve mas grande el boton y mas feo porfa necesito que eso lo resuelvas",
+    "revisa si el vps esta bien o hay una actualziacion de ubuntu que tendriamos que hacer y sin romper nada porfa revisa eso"
+  ],
+  "attachments": [
+    {
+      "filename": "WhatsApp Image 2026-10-29 at 14.59.40 (1).jpeg",
+      "sha256": "59954dc1bc2c9be2ad0d866dbc3b43eb191c96a78e021a93b456cf90b9141af0",
+      "visibility": "PRIVATE_NOT_COMMITTED"
+    },
+    {
+      "filename": "WhatsApp Image 2026-10-29 at 14.59.40.jpeg",
+      "sha256": "ddd4e5fb116ec912eec25539ed10377f42ab35dc9eaaa14294261c62f3edd88c",
+      "visibility": "PRIVATE_NOT_COMMITTED"
+    },
+    {
+      "filename": "WhatsApp Image 2026-10-29 at 14.59.41 (1).jpeg",
+      "sha256": "98b9c61009b848f6d340c81e307e046fdce103ca9992545cb84a4271f0dfcb34",
+      "visibility": "PRIVATE_NOT_COMMITTED"
+    },
+    {
+      "filename": "WhatsApp Image 2026-10-29 at 14.59.41 (2).jpeg",
+      "sha256": "96ddd3150693fa638b596b606cd18ada34390e19fdcc981643f9cabeaddaab4c",
+      "visibility": "PRIVATE_NOT_COMMITTED"
+    },
+    {
+      "filename": "WhatsApp Image 2026-10-29 at 14.59.41.jpeg",
+      "sha256": "0497a6d50b2a67d409face881b71d35943df2286b8b61ac1693ffb09955ac21a",
+      "visibility": "PRIVATE_NOT_COMMITTED"
+    }
+  ]
+}

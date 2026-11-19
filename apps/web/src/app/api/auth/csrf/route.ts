@@ -13,11 +13,16 @@ export const dynamic = 'force-dynamic';
  * same-origin caller and must be echoed in the login header. It is consumed after successful login.
  */
 export async function GET(request: NextRequest) {
+  if (request.headers.get('sec-fetch-site') === 'cross-site')
+    return NextResponse.json(
+      { error: 'La solicitud no pudo verificarse.' },
+      { status: 403, headers: { 'Cache-Control': 'no-store' } },
+    );
   const sessionToken = request.cookies.get(sessionCookieName)?.value;
   if (sessionToken) {
     try {
       const auth = (await persistence()).auth;
-      const csrfToken = await auth.rotateCsrf(sessionToken);
+      const csrfToken = await auth.getCsrf(sessionToken);
       return NextResponse.json({ csrfToken }, { headers: { 'Cache-Control': 'no-store' } });
     } catch (error) {
       if (!(error instanceof SessionError)) {

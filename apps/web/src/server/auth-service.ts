@@ -1,5 +1,6 @@
 import {
   createHash,
+  createHmac,
   randomBytes,
   randomUUID,
   scrypt as nodeScrypt,
@@ -17,6 +18,11 @@ export const LOGIN_MAX_ATTEMPTS = 5;
 export const sessionCookieName = 'analiza_session';
 export const loginCsrfCookieName = 'analiza_login_csrf';
 export const csrfHeaderName = 'x-analiza-csrf';
+
+/** Domain-separated secret: stable for this random HttpOnly session, never its bearer token. */
+function csrfForSession(sessionToken: string) {
+  return createHmac('sha256', sessionToken).update('analiza:session-csrf:v1').digest('base64url');
+}
 
 export type ServerSession = Readonly<{
   id: string;
@@ -211,7 +217,7 @@ export class AuthService {
 
     const issuedAt = this.now();
     const sessionToken = randomSecret();
-    const csrfToken = randomSecret();
+    const csrfToken = csrfForSession(sessionToken);
     const stored: StoredSession = {
       sessionHash: hashSecret(sessionToken),
       csrfHash: hashSecret(csrfToken),
@@ -252,7 +258,7 @@ export class AuthService {
       active: true,
     };
     const sessionToken = randomSecret();
-    const csrfToken = randomSecret();
+    const csrfToken = csrfForSession(sessionToken);
     const stored: StoredSession = {
       sessionHash: hashSecret(sessionToken),
       csrfHash: hashSecret(csrfToken),
@@ -345,15 +351,18 @@ export class AuthService {
     if (!stored || stored.revokedAt || stored.expiresAt <= now) throw new CsrfError();
     const expected = Buffer.from(stored.csrfHash, 'hex');
     const received = Buffer.from(hashSecret(csrfToken), 'hex');
-    if (expected.length !== received.length || !timingSafeEqual(expected, received))
-      throw new CsrfError();
+    const stable = Buffer.from(hashSecret(csrfForSession(sessionToken)), 'hex');
+    // Keep the last issued token of pre-upgrade sessions valid until their normal expiry.
+    // Reading CSRF in another tab must not revoke an already open form's token.
+    const issuedMatches =
+      expected.length === received.length && timingSafeEqual(expected, received);
+    const stableMatches = timingSafeEqual(stable, received);
+    if (!issuedMatches && !stableMatches) throw new CsrfError();
   }
 
-  async rotateCsrf(sessionToken: string | undefined): Promise<string> {
-    const session = await this.requireSession(sessionToken);
-    const csrfToken = randomSecret();
-    await this.store.updateSessionCsrf(session.id, hashSecret(csrfToken));
-    return csrfToken;
+  async getCsrf(sessionToken: string | undefined): Promise<string> {
+    await this.requireSession(sessionToken);
+    return csrfForSession(sessionToken!);
   }
 
   async logout(sessionToken: string | undefined): Promise<void> {

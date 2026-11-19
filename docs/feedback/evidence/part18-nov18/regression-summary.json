@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "syntheticOnly": true,
+  "functionalSha": "eed8f47cffe4778253c27bc757d50d37d74edfb6",
+  "finalVisualSha": "cd1214b7c41917d47879245e0dedbb11d9451dee",
+  "unitServerTests": 376,
+  "isolatedPostgresGroups": 19,
+  "mockBrowserDistinctScenarios": 58,
+  "connectedBrowserDistinctScenarios": 8,
+  "connectedInitial": {
+    "passed": 7,
+    "failed": 1,
+    "failure": "EmptyState selector expected a heading; fixed to assert visible exact text."
+  },
+  "connectedFinalFocused": {
+    "passed": 2,
+    "failed": 0,
+    "scenarios": [
+      "Missing catalogue price assignment and same receivable",
+      "Patient search across pages and Clinical navigation"
+    ]
+  },
+  "visualWidths": [
+    1440,
+    768,
+    390
+  ],
+  "screenshotsInspected": [
+    "price-mobile.png",
+    "orders-desktop.png",
+    "orders-mobile.png"
+  ],
+  "productionWrites": false
+}

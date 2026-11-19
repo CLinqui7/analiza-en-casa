@@ -46,5 +46,6 @@ test('migration grants only the required new-table operations to the discovered 
   assert.match(migrationRunner, /SELECT,INSERT,UPDATE ON analiza\.payments/);
   assert.match(migrationRunner, /SELECT,INSERT ON analiza\.home_visits/);
   assert.match(migrationRunner, /SELECT,INSERT,UPDATE ON analiza\.visit_goals/);
+  assert.match(migrationRunner, /SELECT,INSERT,UPDATE,DELETE ON analiza\.quote_form_drafts/);
   assert.doesNotMatch(migrationRunner, /GRANT ALL[^\n]+analiza\.(payments|home_visits|visit_goals)/);
 });

@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "functionalSha": "51317f128fc228c8274d7cadf2f12662a0f3ce07",
+  "finalVisualSha": "e91949373a5d94c7fdc9b1eeecf2379629d7688c",
+  "unitServer": 382,
+  "postgresGroups": {
+    "fulfillment": 13,
+    "clinical": 18,
+    "financial": 6
+  },
+  "mockScenarios": 58,
+  "connectedScenarios": 8,
+  "finalConnectedRepeats": 2,
+  "checks": [
+    "typecheck",
+    "eslint",
+    "prettier",
+    "production builds",
+    "security",
+    "React boundaries",
+    "CH01–CH03",
+    "client gate 32/32",
+    "audit verify",
+    "traceability mirror"
+  ],
+  "data": "synthetic only",
+  "businessRules": "Client explicitly authorized missing catalogue sale price at zero and subsequent maintenance in the general catalogue. No automatic repricing of issued snapshots.",
+  "visual": "Opened desktop and 390px screenshots after correcting the catalogue action inside the dialog. No document/dialog/button horizontal overflow.",
+  "scope": "Pending18 document only. Historical video statuses preserved; no new EXACT or full 17-chapter review."
+}

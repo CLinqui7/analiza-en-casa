@@ -1,0 +1,1702 @@
+{
+  "implementation_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05",
+  "scope": "Synthetic visual review, not proof of every business operation or real database persistence.",
+  "route_inventory": [
+    {
+      "path": "/agenda",
+      "title": "Agenda y turnos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/audit",
+      "title": "Auditoría",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs",
+      "title": "Catálogo general",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/changes",
+      "title": "Cambios solicitados",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical",
+      "title": "Expediente clínico",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/dashboard",
+      "title": "Una vista clara de tu operación",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/doctors",
+      "title": "Médicos y recursos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/feedback",
+      "title": "Preguntas o errores encontrados",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/help",
+      "title": "Centro de ayuda",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/hospitalizations",
+      "title": "Hospitalización",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/import",
+      "title": "Importar información",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/insurance",
+      "title": "Preautorizaciones y seguros",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/insurers",
+      "title": "Aseguradoras",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/inventory",
+      "title": "Gestión de inventario",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/nursing-team",
+      "title": "Equipo y cuentas",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/onboarding",
+      "title": "Cuéntanos sobre tu trabajo",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/patients",
+      "title": "Pacientes",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/payables",
+      "title": "Cuentas por pagar",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/payments",
+      "title": "Reporte de pagos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/profile",
+      "title": "Un espacio que se siente tuyo",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/purchase-orders",
+      "title": "Órdenes a proveedores",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/purchases",
+      "title": "Compras",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/quotes",
+      "title": "Cotizaciones",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/receivables",
+      "title": "Cuentas por cobrar",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/sales",
+      "title": "Ventas confirmadas",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/supply-requests",
+      "title": "Solicitudes de medicamentos e insumos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/surveys",
+      "title": "Encuestas de satisfacción",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/tutorial",
+      "title": "Tutorial de Analiza en Casa",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/analytics/logins",
+      "status": "SUPPLEMENTED_WITH_API_FIXTURE"
+    },
+    {
+      "path": "/catalogs/clinical",
+      "title": "Diagnósticos y escalas",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs/discounts",
+      "title": "Descuentos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs/fees",
+      "title": "Items / Honorarios",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs/medical-visitors",
+      "title": "Visitadores médicos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs/medications",
+      "title": "Items / Medicamentos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs/operational",
+      "title": "Catálogos operativos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs/services",
+      "title": "Items / Servicios",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs/studies",
+      "title": "Items / Estudios Dx",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/catalogs/supplies",
+      "title": "Items / Insumos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/administrations",
+      "title": "Administración de medicamentos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/balance",
+      "title": "Balance hídrico",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/care-plans",
+      "title": "Plan de cuidado",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/document-versions",
+      "title": "Planes de cuidado",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/evolutions",
+      "title": "Evolución clínica",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/hospitalizations",
+      "title": "Ingresos clínicos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/medication-cards",
+      "title": "Tarjeta de medicamentos",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/nursing",
+      "title": "Tablero de enfermería",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/orders",
+      "title": "Órdenes médicas",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/clinical/reports",
+      "title": "Expediente clínico",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/inventory/home-deliveries",
+      "title": "Movimientos hacia casas",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/inventory/kardex",
+      "title": "Kárdex de inventario",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/inventory/movements",
+      "title": "Movimientos de inventario",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/reports/home-visits",
+      "title": "Visitas clínicas a domicilio",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/reports/nurse-hours",
+      "title": "Horas de enfermería",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/reports/other",
+      "title": "Otros reportes",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/reports/returns",
+      "title": "Devoluciones",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/reports/visits-goals",
+      "status": "SUPPLEMENTED_WITH_API_FIXTURE"
+    },
+    {
+      "path": "/patients/patient-demo-001",
+      "title": "Paciente Demo Aurora",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/hospitalizations/case-demo-001",
+      "title": "case-demo-001",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    },
+    {
+      "path": "/quotes/quote-demo-001",
+      "title": "COT-EDEMO001",
+      "status": "CAPTURED_AND_INSPECTED",
+      "desktopOverflow": 0,
+      "mobileOverflow": 0
+    }
+  ],
+  "dialog_states": [
+    {
+      "name": "import-patients",
+      "path": "/patients",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "new-admission",
+      "path": "/hospitalizations",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "edit-admission",
+      "path": "/hospitalizations/case-demo-001",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "new-doctor",
+      "path": "/doctors",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "new-user",
+      "path": "/nursing-team",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "new-quote",
+      "path": "/quotes",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "insurance-update",
+      "path": "/insurance",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "new-insurer",
+      "path": "/insurers",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "new-purchase",
+      "path": "/purchases",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "confirmed-sale",
+      "path": "/sales",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "supply-request",
+      "path": "/supply-requests",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "catalog-item",
+      "path": "/catalogs",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "diagnosis",
+      "path": "/catalogs/clinical",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "discount",
+      "path": "/catalogs/discounts",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "visitor",
+      "path": "/catalogs/medical-visitors",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "operational-option",
+      "path": "/catalogs/operational",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "nurse-resource",
+      "path": "/clinical/nursing",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "document-version",
+      "path": "/clinical/document-versions",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "attention",
+      "path": "/clinical/hospitalizations",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "goal",
+      "path": "/reports/home-visits",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "visit",
+      "path": "/reports/home-visits",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "change-detail",
+      "path": "/changes",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-medical-indicación-médica",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-medical-evolución-clínica",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-medical-historia-clínica",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-medical-antecedentes-clínicos",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-medical-signos-vitales",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-nursing-tarjeta-de-medicamentos",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-nursing-balance-hídrico",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-nursing-plan-de-cuidado",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-nursing-administración-de-medicamentos",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-nursing-signos-vitales",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-nursing-nota-de-enfermería",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-nursing-escala",
+      "path": "/clinical/orders",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "inventory-Items",
+      "path": "/inventory",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "inventory-Acuses",
+      "path": "/inventory",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "inventory-Cierres",
+      "path": "/inventory",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "inventory-Proveedores",
+      "path": "/inventory",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "inventory-Bodegas",
+      "path": "/inventory",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "inventory-Kit-de-insumos",
+      "path": "/inventory",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "inventory-Lotes",
+      "path": "/inventory",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "clipped": []
+        }
+      ]
+    }
+  ],
+  "additional_states": [
+    {
+      "name": "login",
+      "path": "/login",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    },
+    {
+      "name": "register",
+      "path": "/register",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    },
+    {
+      "name": "new-patient",
+      "path": "/patients",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    },
+    {
+      "name": "movement",
+      "path": "/inventory/kardex",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    },
+    {
+      "name": "account-menu",
+      "path": "/patients",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    },
+    {
+      "name": "patient-menu",
+      "path": "/patients",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    },
+    {
+      "name": "searchable-nationality",
+      "path": "/patients",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    },
+    {
+      "name": "admission-footer",
+      "path": "/hospitalizations",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    },
+    {
+      "name": "purchase-checkbox",
+      "path": "/purchases",
+      "widths": [
+        1440,
+        390,
+        768
+      ]
+    }
+  ],
+  "production_build_with_synthetic_api": [
+    {
+      "name": "analytics-logins",
+      "url": "/analytics/logins",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "reports-visits-goals",
+      "url": "/reports/visits-goals",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "url": "/profile",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "purchase-orders",
+      "url": "/purchase-orders",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "payables",
+      "url": "/payables",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "surveys",
+      "url": "/surveys",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "supply-requests",
+      "url": "/supply-requests",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "nursing-team",
+      "url": "/nursing-team",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "receivables",
+      "url": "/receivables",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "reports-returns",
+      "url": "/reports/returns",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-orders",
+      "url": "/clinical/orders",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "onboarding",
+      "url": "/onboarding",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "transfer",
+      "url": "/inventory",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "delivery",
+      "url": "/inventory/home-deliveries",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "payment",
+      "url": "/receivables",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "warehouse",
+      "url": "/inventory",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "receipt",
+      "url": "/inventory",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "stock-out",
+      "url": "/inventory",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "clinical-history-menu",
+      "url": "/clinical/orders",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "administration-with-card",
+      "url": "/clinical/orders",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "survey-qr",
+      "url": "/surveys",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    },
+    {
+      "name": "public-survey",
+      "url": "/survey",
+      "sizes": [
+        {
+          "width": 1440,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 390,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        },
+        {
+          "width": 768,
+          "overflow": 0,
+          "scopeOverflow": 0,
+          "clipped": []
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "public_survey_followup": {
+    "widths": [
+      1440,
+      768,
+      390
+    ],
+    "overflow": 0,
+    "radio_selection": "PASS",
+    "note": "Final stylesheet applied to production build; published bundle checked separately."
+  },
+  "limitations": [
+    "Native operating-system select menus retain their browser rendering. Searchable custom lists have keyboard coverage.",
+    "Five legacy catalog create actions remain disabled by their existing business constraints.",
+    "Wide data tables retain intentional local scrolling.",
+    "Initial incomplete selectors/fixtures were corrected in additional tours; audit logs retain the initial failures.",
+    "No real patient data or production mutation was used in these visual tours."
+  ]
+}

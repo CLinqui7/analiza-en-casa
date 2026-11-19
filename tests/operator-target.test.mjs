@@ -63,6 +63,9 @@ test('self-hosted runtime provisioning requires the exact Unix socket and explic
     ANALIZA_PG_RUNTIME_PASSWORD: 'synthetic-test-only-credential-32chars',
   };
   assert.doesNotThrow(() => assertProvisionTarget(selfHosted));
+  assert.doesNotThrow(() =>
+    assertProvisionTarget({ ...selfHosted, PGDATABASE: 'analiza_live_20261014' }),
+  );
   for (const invalid of [
     { ANALIZA_SELFHOSTED_PROVISION_APPROVED: '0' },
     { ANALIZA_DB_TRANSPORT: 'tcp' },

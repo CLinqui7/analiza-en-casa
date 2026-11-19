@@ -36,6 +36,7 @@ async function fillRequired(
   await dialog.getByLabel('Teléfono celular').fill('7000-0000');
   await dialog.getByLabel('Empresa').fill('Empresa demo');
   await dialog.getByRole('option', { name: 'Empresa demo' }).click();
+  await dialog.getByLabel('Origen del paciente').selectOption('FAMILY_FRIENDS');
   await dialog
     .getByRole('textbox', { name: 'Dirección obligatorio', exact: true })
     .fill('Dirección sintética CH02');
@@ -78,7 +79,7 @@ test('CH02-F016 lists missing fields beside Guardar and focuses the first invali
     'Fecha de nacimiento',
     'Sexo',
     'Teléfono celular',
-    'Empresa',
+    'Origen del paciente',
     'Dirección',
     'Comentarios relevantes de la dirección',
   ]) {

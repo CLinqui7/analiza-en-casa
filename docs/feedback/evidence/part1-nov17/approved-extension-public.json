@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "sha": "e1f0935b5111c78c2769486bda96098e93e8b8e1",
+  "syntheticOnly": true,
+  "businessWrites": false,
+  "routes": [
+    {
+      "path": "/clinical/prequotes",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/quotes",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/receivables",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/clinical/hospitalizations",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/inventory/received-orders",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    }
+  ],
+  "errors": [],
+  "inboxQuotesChecked": 0,
+  "approvedChoices": 0,
+  "scope": "Public read-only API/render checks; full approved extension writes verified in isolated PostgreSQL/browser QA."
+}

@@ -13,6 +13,8 @@ export const roles = [
 export type Role = (typeof roles)[number];
 
 export type Permission =
+  | 'clinical-config:write'
+  | 'doctors:read'
   | 'dashboard:read'
   | 'patients:read'
   | 'patients:write'
@@ -94,6 +96,7 @@ const permissions: Record<Role, readonly Permission[]> = {
     'patients:write',
     'cases:read',
     'cases:write',
+    'quotes:read',
     'clinical:read',
     'clinical:write',
     'nursing:write',
@@ -108,26 +111,22 @@ const permissions: Record<Role, readonly Permission[]> = {
     'supply-requests:write',
   ],
   DOCTOR: [
-    'dashboard:read',
     'patients:read',
-    'patients:write',
     'cases:read',
     'cases:write',
-    'quotes:read',
-    'quotes:write',
-    'insurance:read',
     'clinical:read',
     'clinical:write',
     'clinical:sign',
     'medical-orders:write',
     'agenda:read',
-    'reports:read',
+    'agenda:write',
   ],
   NURSE: [
     'dashboard:read',
     'patients:read',
     'patients:write',
     'cases:read',
+    'quotes:read',
     'clinical:read',
     'clinical:write',
     'nursing:write',
@@ -140,6 +139,7 @@ const permissions: Record<Role, readonly Permission[]> = {
   INVENTORY: [
     'dashboard:read',
     'inventory:read',
+    'quotes:read',
     'supply-requests:read',
     'inventory:write',
     'purchases:read',
@@ -162,7 +162,7 @@ const permissions: Record<Role, readonly Permission[]> = {
     'reports:read',
   ],
   AUDITOR: allRead,
-  ANALYTICS: ['login-analytics:read'],
+  ANALYTICS: ['login-analytics:read', 'quotes:read'],
   WEBMASTER: [...allRead, ...allWrite, 'login-analytics:read'],
 };
 
@@ -171,6 +171,10 @@ export function isRole(value: unknown): value is Role {
 }
 
 export function can(role: Role | undefined, permission: Permission): boolean {
+  if (permission === 'clinical-config:write')
+    return !!role && role !== 'DOCTOR' && roles.includes(role);
+  if (permission === 'doctors:read')
+    return role === 'DOCTOR' || can(role, 'settings:write') || can(role, 'quotes:write');
   return Boolean(role && permissions[role].includes(permission));
 }
 
@@ -179,6 +183,9 @@ export function isAdministrator(role: Role | undefined): boolean {
 }
 
 const routePermissions: Array<{ prefix: string; permission: Permission }> = [
+  { prefix: '/clinical/prequotes', permission: 'quotes:write' },
+  { prefix: '/catalogs/clinical', permission: 'clinical-config:write' },
+  { prefix: '/catalogs/discounts', permission: 'clinical-config:write' },
   { prefix: '/analytics/logins', permission: 'login-analytics:read' },
   { prefix: '/nursing-team', permission: 'nurses:manage' },
   { prefix: '/supply-requests', permission: 'supply-requests:read' },
@@ -197,6 +204,7 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/agenda', permission: 'agenda:read' },
   { prefix: '/inventory', permission: 'inventory:read' },
   { prefix: '/purchases', permission: 'purchases:read' },
+  { prefix: '/purchase-orders', permission: 'purchases:read' },
   { prefix: '/catalogs', permission: 'catalogs:read' },
   { prefix: '/insurers', permission: 'catalogs:read' },
   { prefix: '/reports', permission: 'reports:read' },
@@ -210,4 +218,16 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
 
 export function permissionForPath(pathname: string): Permission | undefined {
   return routePermissions.find(({ prefix }) => pathname.startsWith(prefix))?.permission;
+}
+
+export function roleAllowsPath(role: Role | undefined, pathname: string): boolean {
+  if (role !== 'DOCTOR') return true;
+  const path = pathname.split('?')[0].replace(/\/$/, '') || '/';
+  return [
+    '/clinical',
+    '/clinical/hospitalizations',
+    '/clinical/orders',
+    '/agenda',
+    '/profile',
+  ].includes(path);
 }

@@ -1,0 +1,55 @@
+Fuente: parte1ana_.docx
+Recibido: 2026-11-17
+SHA256: 4B86E52C72DFDC36A7F7C5707331EBE1D1FC66ACA65B36CEDEC3E83BFB1F512C
+
+  Variaciones – Parte 2: Nuevo flujo del sistema – 03/11/2026
+Reunión de seguimiento — 3 de noviembre de 2026
+Acciones — 1. General
+Inicio → Pacientes (al crear un nuevo paciente)
+Agregar el campo "Dependientes" (hijos del paciente), con opciones Sí / No, igual que el campo de sexo.
+Si se selecciona Sí, se ingresan los datos de cada dependiente (se pueden agregar varios):
+Nombres
+Apellidos
+Género
+Fecha de nacimiento
+Subir partida de nacimiento (archivo)
+Subir consentimiento (archivo)
+Si se selecciona No, no se ingresa nada.
+Clínico → Cotizaciones
+Al crear una nueva cotización, el cuadro de Responsable administrativo se mantiene, pero debe aparecer por default el usuario que está ingresando la cotización.
+Además de estas acciones: Editar, Aprobada y Rechazada, agregar la acción "Enviada": solo indica que la cotización ya se compartió con el cliente.
+Con esto, los estados de la cotización quedan así:
+Borrador
+Enviada (nuevo)
+Aprobada
+Rechazada
+La acción Editar solo aparece cuando la cotización está en Borrador o Enviada; al editar se pueden agregar o quitar productos.
+Al guardar la edición, se debe modificar la cotización original; no se debe crear una cotización nueva.
+Si la cotización está Aprobada o Rechazada, ya no aparece la acción Editar.
+Clínico → Ingresos clínicos
+Hoy solo se ven los ingresos de tipo Hospitalización; deben verse los tres tipos de ingreso clínico:
+Hospitalización
+Ambulatorio en domicilio del paciente
+Ambulatorio en Analiza en Casa
+Agregar un selector de tipo de ingreso para filtrar, con estas opciones:
+Hospitalización
+Ambulatorio en domicilio del paciente
+Ambulatorio en Analiza en Casa
+Todos (muestra los tres tipos juntos)
+Clínico → Precotización (nueva ventana)
+Aquí llegan todas las solicitudes de insumos enviadas por enfermería.
+Columnas: Fecha, Paciente, Ítems y Acciones.
+Acciones:
+Revisar la solicitud.
+Asignar a una cotización: como la solicitud ya trae el paciente, se abre un selector con sus cotizaciones para elegir a cuál se suman los insumos solicitados (para poder cobrarlos).
+Al dar "Guardar":
+Se actualiza la cotización original con los productos de la solicitud.
+Se actualiza la cotización en Financiero → Cuentas por cobrar.
+Inventario y compras → Pedidos recibidos (nueva ventana)
+Aquí llegan las cotizaciones, mostrando solo los medicamentos e insumos que van a salir hacia los pacientes.
+Columnas: Fecha de cotización, Paciente, Ítem, Cantidad y Acciones.
+Acciones:
+Visualizar el pedido.
+Entregado: marca que los productos ya se entregaron a la enfermera; debe pedir seleccionar a qué enfermera se le entregan.
+Administración → Catálogos
+Quitar Proveedores de Catálogos: ahora se crean en Inventario y compras → Existencias → Proveedores.

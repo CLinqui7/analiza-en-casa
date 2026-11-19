@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "source": "docs/qa/MEETING_2026_10_26_SOURCE.json",
+  "source_sha256": "e5ea5a583d0cd9b2fa88910582f78448f58f2cac6ea4c828ec15721f08b2537c",
+  "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+  "implementation_map": "docs/qa/MEETING_2026_10_26_IMPLEMENTATION.md",
+  "verification": {
+    "repository_preflight": "PASS: 17 chapters, 1359 events, no errors",
+    "standalone_tests": "PASS: 144/144",
+    "qa_checks": "PASS: 76/76",
+    "react_server_tests": "PASS: 283/283",
+    "browser_tests": "COVERED: first run 189 passed, 8 outdated expectations corrected, 21 not run; focused reruns covered all 29 and passed, including the final 2 after a dev-server reload",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "format": "PASS",
+    "production_build": "PASS",
+    "security_scan": "PASS: 1180 source files",
+    "video_audit": "PASS: 17/17 chapters",
+    "video_parity_ch01_ch03": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
+    "client_change_gate": "PASS: 32/32",
+    "traceability_mirror": "PASS",
+    "isolated_postgresql_schema": "PASS: migrations 037 and 038 applied twice over a schema-only copy, then QA database removed",
+    "contabo_read_only_smoke": "PASS: health, login, quotes, payables, clinical admissions, payment report and other reports"
+  },
+  "limits": [
+    "The PostgreSQL migration was validated against an isolated schema-only copy; financial and clinical write flows were not exercised against production data.",
+    "The clinical attention and shift scheduling UI uses two server operations; a second-operation failure is shown to the user and must be retried after checking Agenda.",
+    "Costs, expenses, margins, insurer rules, and supplier payment reconciliation remain pending client-supplied source data and rules."
+  ]
+}

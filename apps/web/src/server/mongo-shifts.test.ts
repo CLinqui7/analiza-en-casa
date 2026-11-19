@@ -153,10 +153,13 @@ describe('Mongo agenda series commands', () => {
       }),
     ).rejects.toBeInstanceOf(MongoInputError);
     await expect(
-      repository.createSeries(reader, {
-        shifts: [shift('new', '2026-09-12T08:00:00.000Z', '2026-09-12T14:00:00.000Z')],
-        idempotencyKey: 'role',
-      }),
+      repository.createSeries(
+        { ...reader, role: 'AUDITOR' },
+        {
+          shifts: [shift('new', '2026-09-12T08:00:00.000Z', '2026-09-12T14:00:00.000Z')],
+          idempotencyKey: 'role',
+        },
+      ),
     ).rejects.toBeInstanceOf(MongoAccessError);
   });
 

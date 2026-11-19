@@ -42,7 +42,7 @@ const formSchema = z.object({
   manager: z.string().trim(),
   priority: z.enum(priorities),
   diagnosisSummary: z.string().trim(),
-  primaryDoctorId: z.string().trim(),
+  primaryDoctorId: z.string().trim().min(1, 'Seleccione el médico tratante principal.'),
   secondaryDoctorId: z.string().trim(),
   nextAction: z.string().trim(),
   admissionPeriods: z.array(
@@ -888,9 +888,12 @@ export default function HospitalizationsPage() {
             />
           </label>
           <label>
-            Médico tratante principal
+            Médico tratante principal{' '}
+            <span className="required-marker" aria-label="obligatorio">
+              *
+            </span>
             <select {...form.register('primaryDoctorId')}>
-              <option value="">Sin asignar</option>
+              <option value="">Seleccione un médico</option>
               {doctors
                 .filter(
                   (doctor) =>
@@ -906,6 +909,11 @@ export default function HospitalizationsPage() {
                   </option>
                 ))}
             </select>
+            {form.formState.errors.primaryDoctorId ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.primaryDoctorId.message}
+              </span>
+            ) : null}
           </label>
           <label>
             Médico tratante secundario
@@ -931,15 +939,14 @@ export default function HospitalizationsPage() {
             Próxima acción
             <textarea {...form.register('nextAction')} rows={2} />
           </label>
-          <p className="notice full" role="status">
-            Los dispositivos, accesos y enfermeras asignadas se completan después en{' '}
+          <p className="notice notice-with-action full" role="status">
+            <span>Los dispositivos, accesos y enfermeras asignadas se completan después en </span>
             <Link
               className="action-link-button action-link-button--inline"
               href="/clinical/hospitalizations"
             >
               Abrir hospitalización clínica
             </Link>
-            .
           </p>
         </form>
       </Dialog>

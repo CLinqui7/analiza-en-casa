@@ -1,5 +1,4 @@
-import { ClinicalDocumentsPage } from '@/components/clinical-documents-page';
-
-export default function CarePlansPage() {
-  return <ClinicalDocumentsPage type="CARE_PLAN" />;
+import { ClinicalActions } from '@/components/clinical-actions';
+export default function Page() {
+  return <ClinicalActions initialKind="CARE_PLAN" />;
 }

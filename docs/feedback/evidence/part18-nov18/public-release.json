@@ -1,0 +1,60 @@
+{
+  "status": "PASS",
+  "sha": "cc009b15d0c273f17ae4c667ab7c10f6924f4ad3",
+  "syntheticOnly": true,
+  "businessWrites": false,
+  "csrfStable": true,
+  "routes": [
+    {
+      "path": "/quotes",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/clinical/prequotes",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/receivables",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/inventory/suppliers",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/inventory/received-orders",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    },
+    {
+      "path": "/supply-requests",
+      "widths": [
+        1440,
+        768,
+        390
+      ]
+    }
+  ],
+  "errors": [],
+  "checkedRequests": 0,
+  "scope": "Public read-only API and responsive checks. Locked owner, manual missing-price assignment, single receivable and patient search across pages certified in isolated PostgreSQL/browser QA."
+}

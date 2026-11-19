@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "checks": [
+    "draft version metadata cannot be reassigned",
+    "concurrent replay inserts one payment and conflicting replay is rejected",
+    "fractional cents, overpayment, missing reservation, role and tenant boundaries reject",
+    "new sent version replaces charge, preserves prior payment and immutable original",
+    "reservation payment and reversal persist once with audit evidence",
+    "insurance uses quote payer, excludes private accounts and preserves existing request snapshot"
+  ],
+  "patientId": "billing-qa-p-4ff0a99c",
+  "quoteId": "billing-qa-q-4ff0a99c-v2",
+  "originalQuoteId": "billing-qa-q-4ff0a99c",
+  "insuredQuoteId": "billing-qa-q-4ff0a99c-insured",
+  "expectedPaid": 40,
+  "expectedBalance": 80
+}

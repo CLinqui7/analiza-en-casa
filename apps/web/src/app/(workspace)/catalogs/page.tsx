@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { CatalogItem } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -17,7 +18,6 @@ const categories = [
   ['MEDICATIONS', 'Medicamentos', 'MED'],
   ['SUPPLIES', 'Insumos', 'INS'],
   ['EQUIPMENT', 'Equipos', 'EQU'],
-  ['PROVIDERS', 'Proveedores', 'PRO'],
   ['INSURERS', 'Aseguradoras', 'ASE'],
 ] as const;
 type Category = (typeof categories)[number][0];
@@ -32,7 +32,6 @@ const itemSchema = z.object({
     'MEDICATIONS',
     'SUPPLIES',
     'EQUIPMENT',
-    'PROVIDERS',
     'INSURERS',
   ]),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
@@ -45,13 +44,17 @@ const itemSchema = z.object({
 });
 type ItemForm = z.infer<typeof itemSchema>;
 
-export default function CatalogsPage() {
+function CatalogsContent() {
+  const searchParams = useSearchParams();
   const { addCatalogItem, catalogItems } = useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CatalogItem | null>(null);
-  const [activeCategory, setActiveCategory] = useState<Category>('SERVICES');
-  const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<Category>(() => {
+    const requested = searchParams.get('category');
+    return categories.find(([category]) => category === requested)?.[0] ?? 'SERVICES';
+  });
+  const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ItemForm>({
@@ -108,6 +111,7 @@ export default function CatalogsPage() {
   }
   async function save(values: ItemForm) {
     const item: CatalogItem = {
+      ...editing,
       id: editing?.id ?? crypto.randomUUID(),
       sku: editing?.sku ?? nextSku(values.category),
       name: values.name.trim(),
@@ -145,6 +149,14 @@ export default function CatalogsPage() {
         <div>
           <p className="eyebrow">Administración</p>
           <h1>Catálogo general</h1>
+          <div className="action-row">
+            <Link className="action-link-button" href="/catalogs/clinical">
+              Diagnósticos y escalas
+            </Link>
+            <Link className="action-link-button" href="/catalogs/discounts">
+              Descuentos configurados por el equipo
+            </Link>
+          </div>
           <p>
             Cree, edite, active o desactive los conceptos disponibles en cotizaciones e inventario.
           </p>
@@ -327,6 +339,7 @@ export default function CatalogsPage() {
           <label>
             Precio de venta sin IVA
             <input
+              aria-describedby="catalog-price-help"
               min="0"
               step="any"
               type="number"
@@ -340,8 +353,20 @@ export default function CatalogsPage() {
               </span>
             ) : null}
           </label>
+          <p className="field-help full" id="catalog-price-help">
+            Al guardar el precio de venta se actualizan las líneas de precotización pendientes de
+            precio y el saldo de la cuenta correspondiente. Los abonos ya registrados se conservan.
+          </p>
         </form>
       </Dialog>
     </div>
+  );
+}
+
+export default function CatalogsPage() {
+  return (
+    <Suspense fallback={<p role="status">Cargando catálogo…</p>}>
+      <CatalogsContent />
+    </Suspense>
   );
 }

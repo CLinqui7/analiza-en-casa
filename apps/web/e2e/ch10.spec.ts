@@ -1,95 +1,55 @@
-import { expect, test } from '@playwright/test';
-
+import { expect, test, type Page } from '@playwright/test';
+// Client-approved replacement: analizaencasa31oct_.pdf pp. 1–2.
 // test-id: playwright:ch10-medical-order-list
 // test-id: playwright:ch10-medical-order-menu-and-guards
-
-async function loginToOrders(
-  page: import('@playwright/test').Page,
-  email = 'admin@demo.local',
-  password = 'demo-admin',
-) {
+async function login(page: Page, role = 'admin') {
   await page.goto('/login?next=%2Fclinical%2Forders');
-  await page.getByLabel('Usuario o correo').fill(email);
-  await page.getByLabel('Clave').fill(password);
+  await page.getByLabel('Usuario o correo').fill(role + '@demo.local');
+  await page.getByLabel('Clave').fill('demo-' + role);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(/\/clinical\/orders$/);
 }
-
-test('CH10 factual medical-order list filters active and inactive patients without deriving clinical values', async ({
-  page,
-}) => {
-  await loginToOrders(page);
-  await expect(page.getByRole('columnheader', { name: 'Acciones', exact: true })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Nombre', exact: true })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'DUI', exact: true })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Fecha Nac.', exact: true })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Triage', exact: true })).toBeVisible();
-  await expect(
-    page.getByRole('columnheader', { name: 'Hospitalización', exact: true }),
-  ).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Estatus', exact: true })).toBeVisible();
-  await expect(page.getByRole('tab', { name: 'Tratamientos con cambios' })).toBeDisabled();
-  await expect(page.getByRole('tab', { name: 'Actualizaciones' })).toBeDisabled();
-  await page.getByLabel('Buscar orden médica').fill('Aurora');
+test('CH10 all-patient order list supports name and document search', async ({ page }) => {
+  await login(page);
+  const search = page.getByRole('searchbox', { name: 'Buscar por nombre o DUI' });
   await expect(page.getByText('Paciente Demo Aurora', { exact: true })).toBeVisible();
-  await page.getByLabel('Buscar orden médica').fill('sin-coincidencia-ch10');
-  await expect(page.getByText('No hay registros disponibles', { exact: true })).toBeVisible();
-  await page.getByLabel('Buscar orden médica').fill('');
-  await page.getByRole('tab', { name: 'Inactivos', exact: true }).click();
   await expect(page.getByText('Paciente Demo Brisa', { exact: true })).toBeVisible();
-  await page.getByRole('tab', { name: 'Activos', exact: true }).click();
-  await page.getByRole('button', { name: 'Siguiente' }).click();
+  await expect(page.getByRole('tab', { name: 'Inactivos', exact: true })).toHaveCount(0);
+  await search.fill('Aurora');
+  await expect(page.locator('.clinical-patient-list > div')).toHaveCount(1);
+  await search.fill('sin-coincidencia-ch10');
+  await expect(page.getByText('No hay pacientes para mostrar')).toBeVisible();
+  await search.fill('');
   await expect(page.getByText('Paciente Demo Gloria', { exact: true })).toBeVisible();
 });
-
-test('CH10 row menu exposes document choice while keeping undefined order and XPO flows non-mutating', async ({
-  page,
-}) => {
-  await loginToOrders(page);
-  await page.getByRole('button', { name: 'Acciones para Paciente Demo Aurora' }).click();
-  await expect(page.getByRole('menu')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Ver Órdenes' })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Registro XPO' })).toBeDisabled();
-  await page.getByRole('button', { name: 'Nuevo' }).click();
-  const dialog = page.getByRole('dialog', { name: '¿Qué quieres crear?' });
-  await expect(dialog.getByRole('button', { name: 'Orden Médica' })).toBeDisabled();
-  await expect(dialog.getByRole('button', { name: 'Tarjeta de medicamentos' })).toBeDisabled();
-  await expect(dialog.getByRole('status')).toContainText('permanece bloqueada');
-});
-
-test('CH10 denies the medical-order direct route to INVENTORY', async ({ page }) => {
-  await page.goto('/login?next=%2Fclinical%2Forders');
-  await page.getByLabel('Usuario o correo').fill('inventory@demo.local');
-  await page.getByLabel('Clave').fill('demo-inventory');
-  await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+for (const role of ['admin', 'doctor', 'nurse'])
+  test(
+    'CH10 ' + role + ' opens a manual indication without inventing clinical values',
+    async ({ page }) => {
+      await login(page, role);
+      await page
+        .locator('.clinical-patient-list')
+        .getByRole('button', { name: 'Indicación médica' })
+        .first()
+        .click();
+      const dialog = page.getByRole('dialog', { name: 'Indicación médica' });
+      await expect(dialog.getByLabel('Resumen', { exact: true })).toHaveValue('');
+      await expect(dialog.getByRole('button', { name: 'Guardar', exact: true })).toBeEnabled();
+      await expect(dialog.getByRole('combobox', { name: 'Paciente', exact: true })).toHaveValue(
+        'patient-demo-001',
+      );
+      await dialog.getByRole('button', { name: 'Cancelar' }).click();
+      await expect(page.locator('.clinical-record-block')).toHaveCount(0);
+    },
+  );
+test('CH10 AUDITOR reads without clinical write controls', async ({ page }) => {
+  await login(page, 'auditor');
+  await expect(page.locator('.clinical-patient-list').getByRole('button')).toHaveCount(0);
   await expect(
-    page.getByText('Acceso restringido para el rol INVENTORY.', { exact: true }),
+    page.locator('.clinical-patient-list').getByRole('link', { name: 'Ver expediente' }).first(),
   ).toBeVisible();
 });
-
-test('CH10 permits DOCTOR to read the factual list', async ({ page }) => {
-  await loginToOrders(page, 'doctor@demo.local', 'demo-doctor');
-  await expect(page.getByText('Paciente Demo Aurora', { exact: true })).toBeVisible();
-});
-
-test('CH10 permits NURSE to read but not expose a new clinical document', async ({ page }) => {
-  await loginToOrders(page, 'nurse@demo.local', 'demo-nurse');
-  await page.getByRole('button', { name: 'Acciones para Paciente Demo Aurora' }).click();
-  await expect(page.getByRole('button', { name: 'Nuevo' })).toHaveCount(0);
-});
-
-test('CH10 permits AUDITOR to read but not expose a new clinical document', async ({ page }) => {
-  await loginToOrders(page, 'auditor@demo.local', 'demo-auditor');
-  await page.getByRole('button', { name: 'Acciones para Paciente Demo Aurora' }).click();
-  await expect(page.getByRole('button', { name: 'Nuevo' })).toHaveCount(0);
-});
-
-test('CH10 denies the medical-order direct route to FINANCE', async ({ page }) => {
-  await page.goto('/login?next=%2Fclinical%2Forders');
-  await page.getByLabel('Usuario o correo').fill('finance@demo.local');
-  await page.getByLabel('Clave').fill('demo-finance');
-  await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(
-    page.getByText('Acceso restringido para el rol FINANCE.', { exact: true }),
-  ).toBeVisible();
-});
+for (const role of ['inventory', 'finance'])
+  test('CH10 denies the clinical route to ' + role, async ({ page }) => {
+    await login(page, role);
+    await expect(page.locator('main[role="alert"]')).toContainText(role.toUpperCase());
+  });

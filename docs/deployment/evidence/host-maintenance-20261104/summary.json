@@ -1,0 +1,88 @@
+{
+  "verified_at": "2026-11-04T22:51:05.1257910Z",
+  "maintenance_code_sha": "1cd5eb5ab53eb58fdbaf518980772dfc89ce3d05",
+  "application_release": "81823a6933b027cde0e8b21596612f54741c89b8",
+  "packages_updated": 28,
+  "docker": "29.9.3",
+  "containerd": "2.4.2",
+  "kernel": "6.8.0-147-generic",
+  "reboot_completed": true,
+  "failed_units": 0,
+  "pending_service_restarts": 0,
+  "live_restore": true,
+  "cache_reclaimed_gb": 1.381,
+  "images_preserved": 58,
+  "volumes_preserved": 11,
+  "remaining_update": "libsqlite3-0: Ubuntu phased 10%",
+  "upgrade_monitor": {
+    "container_state_unchanged": true,
+    "samples": 94,
+    "transient_failures": [
+      {
+        "time": "2026-11-04T22:39:59+00:00",
+        "url": "https://analiza.207.244.227.122.sslip.io/api/health",
+        "status": 502,
+        "seconds": 0.085013
+      }
+    ]
+  },
+  "reboot_monitor": [
+    "2026-11-04T22:45:02.3312066Z Analiza=200 TuVet=302",
+    "2026-11-04T22:45:09.0483207Z Analiza=200 TuVet=302",
+    "2026-11-04T22:45:14.8145795Z Analiza=200 TuVet=302",
+    "2026-11-04T22:45:20.7499177Z Analiza=000 TuVet=000",
+    "2026-11-04T22:45:30.9138552Z Analiza=000 TuVet=000",
+    "2026-11-04T22:45:41.9845583Z Analiza=000 TuVet=000",
+    "2026-11-04T22:45:53.0419076Z Analiza=502 TuVet=502",
+    "2026-11-04T22:45:58.7904823Z Analiza=502 TuVet=302",
+    "2026-11-04T22:46:06.8092468Z Analiza=200 TuVet=302",
+    "2026-11-04T22:46:15.1562883Z Analiza=200 TuVet=302",
+    "2026-11-04T22:46:20.9853966Z Analiza=200 TuVet=302",
+    "2026-11-04T22:46:26.7609409Z Analiza=200 TuVet=302",
+    "2026-11-04T22:46:32.4563070Z Analiza=200 TuVet=302",
+    "2026-11-04T22:46:38.1269742Z Analiza=200 TuVet=302",
+    "2026-11-04T22:46:43.8913696Z Analiza=200 TuVet=302",
+    "2026-11-04T22:46:49.5770994Z Analiza=200 TuVet=302",
+    "2026-11-04T22:46:55.2954158Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:00.9866140Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:06.7309526Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:12.5957825Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:18.6333135Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:24.6089625Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:30.3841621Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:36.1196746Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:42.0147348Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:47.8035847Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:53.5140652Z Analiza=200 TuVet=302",
+    "2026-11-04T22:47:59.2749134Z Analiza=200 TuVet=302",
+    "2026-11-04T22:48:04.9839686Z Analiza=200 TuVet=302",
+    "2026-11-04T22:48:10.6995342Z Analiza=200 TuVet=302",
+    "2026-11-04T22:48:16.5220677Z Analiza=200 TuVet=302",
+    "2026-11-04T22:48:22.2300564Z Analiza=200 TuVet=302",
+    "2026-11-04T22:48:27.9783376Z Analiza=200 TuVet=302",
+    "2026-11-04T22:48:34.0897572Z Analiza=200 TuVet=302",
+    "2026-11-04T22:48:39.7298168Z Analiza=200 TuVet=302",
+    "2026-11-04T22:48:45.4250653Z Analiza=200 TuVet=302"
+  ],
+  "browser": {
+    "restricted": 1,
+    "errors": 0,
+    "routes": 59,
+    "widths": [
+      1440,
+      768,
+      390
+    ]
+  },
+  "backups": {
+    "tuvet_snapshot": "890460917e9293852033e18233d0b62e2e904ecd63659b21433aaab0bb51120a",
+    "next_automatic_execution": "not yet observed",
+    "external_integrity": "SHA-256 and restic read-data PASS",
+    "analiza_snapshot": "9578e0717bb4f5a921f07475fae03fcd63bccbab0d0928693e8402ff4d264d56",
+    "cloud_sync": "not verified",
+    "windows_task_results": [
+      0,
+      0
+    ]
+  }
+}

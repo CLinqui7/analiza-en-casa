@@ -5,6 +5,7 @@ import { sessionCookieName, csrfHeaderName } from '@/server/auth-service';
 import { MongoConflictError, MongoInputError } from '@/server/validation/patients';
 import { authorizationStatus } from '@/server/http-auth';
 import { isReleasedCommand } from '@/lib/release-profile';
+import { ZodError } from 'zod';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,9 @@ function failure(error: unknown) {
   const status =
     error instanceof MongoConflictError
       ? 409
-      : error instanceof MongoInputError || error instanceof SyntaxError
+      : error instanceof MongoInputError ||
+          error instanceof SyntaxError ||
+          error instanceof ZodError
         ? 400
         : authorizationStatus(error);
   return NextResponse.json(

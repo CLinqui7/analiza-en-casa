@@ -93,6 +93,11 @@ test('webmaster keeps the admin workspace and receives analytics as an extra', a
   await expect(page).toHaveURL(/\/analytics\/logins$/);
   await expect(page.getByRole('heading', { name: 'Bitácora de accesos' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Pacientes' })).toBeVisible();
+  const administrationMenu = page.getByRole('button', { name: /Administración/ });
+  if ((await administrationMenu.getAttribute('aria-expanded')) === 'false')
+    await administrationMenu.click();
   await expect(page.getByRole('link', { name: 'Auditoría' })).toBeVisible();
+  const reportsMenu = page.getByRole('button', { name: /Reportes/ });
+  if ((await reportsMenu.getAttribute('aria-expanded')) === 'false') await reportsMenu.click();
   await expect(page.getByRole('link', { name: 'Analítica de accesos' })).toBeVisible();
 });

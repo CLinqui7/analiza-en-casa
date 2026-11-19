@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
-import { privateHeaders } from '@/server/auth-http';
+import { boundedJson, privateHeaders } from '@/server/auth-http';
 import { authorizationStatus } from '@/server/http-auth';
 import { persistence } from '@/server/persistence';
 import { MongoConflictError, MongoInputError } from '@/server/validation/patients';
@@ -58,12 +58,13 @@ export async function POST(request: NextRequest) {
         { error: 'No disponible en este ambiente.' },
         { status: 404, headers: privateHeaders },
       );
-    if (Number(request.headers.get('content-length') ?? 0) > 16_384)
-      throw new MongoInputError('La solicitud es demasiado grande.');
-    return NextResponse.json(await backend.supplyRequests.create(actor, await request.json()), {
-      status: 201,
-      headers: privateHeaders,
-    });
+    return NextResponse.json(
+      await backend.supplyRequests.create(actor, await boundedJson(request, 24_000)),
+      {
+        status: 201,
+        headers: privateHeaders,
+      },
+    );
   } catch (error) {
     return failure(error);
   }

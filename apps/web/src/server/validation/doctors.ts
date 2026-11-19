@@ -16,6 +16,9 @@ function parseDoctor(value: unknown): Doctor {
         'Los archivos se cargan de forma privada después de guardar el médico.',
       );
     }
+    if (!doctor.landlinePhone?.trim()) {
+      throw new MongoInputError('Ingrese el teléfono fijo del médico.');
+    }
     return doctor;
   } catch (error) {
     if (error instanceof MongoInputError) throw error;
@@ -27,7 +30,10 @@ export function parseDoctorCreate(input: unknown): Doctor {
   rejectBrowserAuthority(input);
   const body = object(input);
   if (Object.keys(body).some((key) => key !== 'doctor')) throw new MongoInputError();
-  return parseDoctor(body.doctor);
+  const doctor = parseDoctor(body.doctor);
+  if (!doctor.referralCategory)
+    throw new MongoInputError('Seleccione si el médico es nuevo o recurrente.');
+  return doctor;
 }
 
 export function parseDoctorReplace(input: unknown): { doctor: Doctor; expectedVersion: number } {
@@ -39,5 +45,8 @@ export function parseDoctorReplace(input: unknown): { doctor: Doctor; expectedVe
   if (!Number.isInteger(body.expectedVersion) || (body.expectedVersion as number) < 1) {
     throw new MongoInputError('La versión esperada es obligatoria.');
   }
-  return { doctor: parseDoctor(body.doctor), expectedVersion: body.expectedVersion as number };
+  const doctor = parseDoctor(body.doctor);
+  if (!doctor.referralCategory)
+    throw new MongoInputError('Seleccione si el médico es nuevo o recurrente.');
+  return { doctor, expectedVersion: body.expectedVersion as number };
 }

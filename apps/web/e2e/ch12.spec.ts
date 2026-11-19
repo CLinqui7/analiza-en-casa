@@ -23,21 +23,13 @@ test('CH12 renders the factual payables summary without creating financial recor
   const storedBefore = await page.evaluate(() =>
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   );
-  await expect(page.getByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tab', { name: 'Pagos de Servicio' })).toBeDisabled();
-  await expect(page.getByRole('heading', { name: 'Facturas' })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'DUI/NIT' })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Monto' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Generar planilla' })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Restricciones' })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Descargar' })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Limpiar Tabla' })).toBeDisabled();
-  await page.getByLabel('Buscar facturas').fill('sin-factura-ch12');
-  await expect(
-    page.getByText('No hay facturas documentadas para “sin-factura-ch12”.'),
-  ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Reclamos' })).toBeVisible();
-  await expect(page.getByText('Sin reclamos documentados')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Órdenes de compra' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Facturas de proveedores' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Estado de factura' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Saldo aprobado' })).toBeVisible();
+  await page.getByLabel('Buscar orden o proveedor').fill('sin-factura-ch12');
+  await expect(page.getByText('No hay órdenes para esta búsqueda.')).toBeVisible();
+  await expect(page.getByText('No hay facturas para esta búsqueda.')).toBeVisible();
   await page.reload();
   await expect
     .poll(() =>
@@ -51,7 +43,8 @@ test('CH12 permits FINANCE to read the payables summary', async ({ page }) => {
   await page.locator('[data-action-id="PAYABLES-NAVIGATE"]').click();
   await expect(page).toHaveURL(/\/payables$/);
   await expect(page.getByRole('heading', { name: 'Cuentas por pagar' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Generar planilla' })).toBeDisabled();
+  await expect(page.getByRole('heading', { name: 'Órdenes de compra' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Crear orden' })).toHaveCount(0);
 });
 
 test('CH12 denies INVENTORY direct payables navigation', async ({ page }) => {

@@ -35,6 +35,7 @@ import {
   canEditQuote,
   hasValidInsuranceRequestContext,
   isInsuranceRequestStatus,
+  insurerForQuote,
 } from '@analiza/domain';
 import {
   loadSession,
@@ -461,7 +462,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           setError(
             cause instanceof Error ? cause.message : 'No fue posible guardar la serie de turnos.',
           );
-          return false;
+          throw cause;
         }
       }
       return persistMockChange((current) => ({
@@ -495,7 +496,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return true;
         } catch (cause) {
           setError(cause instanceof Error ? cause.message : 'No fue posible actualizar el turno.');
-          return false;
+          throw cause;
         }
       }
       return persistMockChange((current) => ({
@@ -683,11 +684,11 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       const quote = snapshot.quotes.find((candidate) => candidate.id === input.quoteId);
       const patient =
         quote && snapshot.patients.find((candidate) => candidate.id === quote.patientId);
-      const insurer = patient?.insurer ?? patient?.insurance?.insurer;
-      if (provider.mode !== 'mock' || !quote || !patient || !insurer) return false;
       const existing = snapshot.insuranceRequests.find(
-        (candidate) => candidate.quoteId === quote.id,
+        (candidate) => candidate.quoteId === quote?.id,
       );
+      const insurer = existing?.insurer ?? insurerForQuote(quote, patient);
+      if (provider.mode !== 'mock' || !quote || !patient || !insurer) return false;
       const request: InsuranceRequest = existing ?? {
         id: crypto.randomUUID(),
         quoteId: quote.id,
@@ -1001,6 +1002,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           const groupId = current.purchases.find(
             (purchase) => purchase.id === purchaseId,
           )?.invoiceGroupId;
+          const draftGroup =
+            current.purchases.find((purchase) => purchase.id === purchaseId)?.status === 'DRAFT';
           return {
             ...current,
             purchases: current.purchases.map((candidate) =>
@@ -1009,6 +1012,13 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
                     ...candidate,
                     invoiceVoidedAt: new Date().toISOString(),
                     invoiceVoidReason: reason,
+                    ...(draftGroup
+                      ? {
+                          status: 'CANCELLED' as const,
+                          cancelledAt: new Date().toISOString(),
+                          cancelReason: reason,
+                        }
+                      : {}),
                   }
                 : candidate,
             ),

@@ -1,6 +1,7 @@
 import {
   inventoryMovementSchema,
   paymentSchema,
+  paymentInputSchema,
   type InventoryMovement,
   type Payment,
 } from '@analiza/contracts';
@@ -68,7 +69,7 @@ export function parsePaymentCommand(input: unknown): Payment {
   const body = object(input);
   assertCommandKeys(body);
   if (!('payment' in body) || 'movement' in body) throw new MongoInputError();
-  const payment = paymentSchema.strict().parse(body.payment);
+  const payment = paymentInputSchema.strict().parse(body.payment);
   if (payment.idempotencyKey !== body.idempotencyKey) {
     throw new MongoInputError('La clave de pago no coincide con el comando.');
   }

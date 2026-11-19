@@ -1,3 +1,4 @@
+import { applyEquipmentReturn, equipmentReturnSchema } from './equipment-returns';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { ClientSession, Db } from 'mongodb';
@@ -42,6 +43,7 @@ import {
 import { can, isAdministrator } from '@/lib/permissions';
 import { commercialScopeForMember } from './commercial-access';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
+import { samePurchaseTaxRates } from '@/lib/purchase-totals';
 import { hashPassword } from './mongo-auth';
 import {
   MongoAccessError,
@@ -158,6 +160,12 @@ const commands = z.discriminatedUnion('command', [
   z.object({ command: z.literal('visit.create'), visit: visitInputSchema }).strict(),
   z.object({ command: z.literal('goal.save'), goal: goalInputSchema }).strict(),
   z.object({ command: z.literal('home.dispatch'), dispatch: homeCustodyInputSchema }).strict(),
+  z
+    .object({ command: z.literal('home.equipment.loan'), dispatch: homeCustodyInputSchema })
+    .strict(),
+  z
+    .object({ command: z.literal('home.equipment.return'), receipt: equipmentReturnSchema })
+    .strict(),
   z.object({ command: z.literal('home.close'), closure: homeCustodyCloseSchema }).strict(),
   z
     .object({ command: z.literal('commercial.visit.record'), visit: commercialVisitInputSchema })
@@ -342,6 +350,21 @@ export class MongoOperationsRepository {
     if (can(actor.role, 'inventory:read')) {
       const rows = await read('homeCustodies');
       result.homeCustodies = rows.map((row) => homeCustodySchema.strip().parse(row));
+      const receipts = await this.database
+        .collection('inventoryTraceEvents')
+        .find(
+          {
+            organizationId: actor.organizationId,
+            eventType: 'RECEIVED',
+            'body.warehouseId': { $exists: true },
+          },
+          { projection: { traceRecordId: 1, 'body.warehouseId': 1 } },
+        )
+        .toArray();
+      result.inventoryLedgerReceipts = receipts.map((row) => ({
+        traceRecordId: String(row.traceRecordId),
+        warehouseId: String(row.body.warehouseId),
+      }));
     }
     if (can(actor.role, 'inventory:write')) {
       const rows = await read('patients');
@@ -1100,6 +1123,10 @@ export class MongoOperationsRepository {
         if (input.command === 'inventory.record') {
           permission('inventory:write');
           const movement = input.movement;
+          if (movement.patientId || movement.purchaseDocumentNumber)
+            throw new MongoInputError(
+              'Los vínculos de origen los registra la operación correspondiente.',
+            );
           const previous = await this.database
             .collection('inventoryMovements')
             .findOne({ ...scoped, idempotencyKey: input.idempotencyKey }, { session });
@@ -1127,8 +1154,8 @@ export class MongoOperationsRepository {
             throw new MongoInputError(
               'Un traslado necesita bodega de origen y destino. Regístrelo cuando estén definidas ambas.',
             );
-          if (movement.kind === 'ADJUSTMENT' && !movement.adjustmentDirection)
-            throw new MongoInputError('Indique la dirección del ajuste.');
+          if (movement.kind === 'ADJUSTMENT')
+            throw new MongoInputError('Seleccione Entrada, Salida o Devolución.');
           if (
             !(await this.database.collection('warehouses').findOne(
               {
@@ -1148,11 +1175,7 @@ export class MongoOperationsRepository {
             throw new MongoInputError(
               'Este artículo usa trazabilidad. Registre recepciones o salidas desde Lotes y series.',
             );
-          const delta =
-            (movement.kind === 'EXIT' ||
-            (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection === 'OUT')
-              ? -1
-              : 1) * movement.quantity;
+          const delta = (movement.kind === 'EXIT' ? -1 : 1) * movement.quantity;
           await applyStockDelta(
             this.database,
             session,
@@ -1244,6 +1267,7 @@ export class MongoOperationsRepository {
               input.purchases.length ||
             input.purchases.some(
               (purchase) =>
+                !purchase.taxRates ||
                 purchase.status !== 'DRAFT' ||
                 purchase.receivedAt ||
                 purchase.traceRecordId ||
@@ -1255,7 +1279,8 @@ export class MongoOperationsRepository {
                 purchase.invoiceGroupId !== first.invoiceGroupId ||
                 purchase.reference !== first.reference ||
                 purchase.supplierCatalogItemId !== first.supplierCatalogItemId ||
-                purchase.warehouseId !== first.warehouseId,
+                purchase.warehouseId !== first.warehouseId ||
+                !samePurchaseTaxRates(purchase.taxRates, first.taxRates),
             )
           )
             throw new MongoInputError(
@@ -1313,6 +1338,7 @@ export class MongoOperationsRepository {
           permission('purchases:write');
           const purchase = input.purchase;
           if (
+            (input.command === 'purchase.create' && !purchase.taxRates) ||
             purchase.status !== 'DRAFT' ||
             purchase.receivedAt ||
             purchase.traceRecordId ||
@@ -1331,6 +1357,14 @@ export class MongoOperationsRepository {
           }
           if (input.command === 'purchase.update' && previous?.status !== 'DRAFT')
             throw new MongoConflictError();
+          if (
+            input.command === 'purchase.update' &&
+            previous &&
+            !samePurchaseTaxRates(purchase.taxRates, previous.taxRates)
+          )
+            throw new MongoInputError(
+              'Los impuestos de una compra registrada no se cambian al editarla.',
+            );
           if (input.command === 'purchase.update' && previous?.invoiceGroupId) {
             const linked = await this.database
               .collection('purchases')
@@ -1342,7 +1376,8 @@ export class MongoOperationsRepository {
                 purchase.invoiceNumber !== previous.invoiceNumber ||
                 purchase.reference !== previous.reference ||
                 purchase.supplierCatalogItemId !== previous.supplierCatalogItemId ||
-                purchase.warehouseId !== previous.warehouseId)
+                purchase.warehouseId !== previous.warehouseId ||
+                !samePurchaseTaxRates(purchase.taxRates, previous.taxRates))
             )
               throw new MongoInputError(
                 'El número, proveedor, referencia y bodega de una factura con varias líneas no se editan por separado.',
@@ -1452,7 +1487,12 @@ export class MongoOperationsRepository {
             .collection('purchases')
             .findOne({ ...scoped, id: input.purchaseId }, { session });
           if (!purchase) throw new MongoAccessError();
-          if (purchase.status !== 'RECEIVED' || !purchase.invoiceNumber || purchase.invoiceVoidedAt)
+          const draftGroup = purchase.status === 'DRAFT' && Boolean(purchase.invoiceGroupId);
+          if (
+            (!draftGroup && purchase.status !== 'RECEIVED') ||
+            !purchase.invoiceNumber ||
+            purchase.invoiceVoidedAt
+          )
             throw new MongoConflictError();
           const lines = purchase.invoiceGroupId
             ? await this.database
@@ -1462,9 +1502,12 @@ export class MongoOperationsRepository {
             : [purchase];
           if (
             !lines.length ||
+            (draftGroup && lines.length < 2) ||
             lines.some(
               (line) =>
-                !['RECEIVED', 'CANCELLED'].includes(line.status) ||
+                (draftGroup
+                  ? line.status !== 'DRAFT'
+                  : !['RECEIVED', 'CANCELLED'].includes(line.status)) ||
                 line.invoiceVoidedAt ||
                 line.invoiceNumber !== purchase.invoiceNumber ||
                 line.supplierCatalogItemId !== purchase.supplierCatalogItemId ||
@@ -1475,6 +1518,15 @@ export class MongoOperationsRepository {
             throw new MongoConflictError();
           const occurredAt = new Date().toISOString();
           for (const line of lines) {
+            const update = draftGroup
+              ? {
+                  status: 'CANCELLED' as const,
+                  cancelledAt: occurredAt,
+                  cancelReason: input.reason,
+                  invoiceVoidedAt: occurredAt,
+                  invoiceVoidReason: input.reason,
+                }
+              : { invoiceVoidedAt: occurredAt, invoiceVoidReason: input.reason };
             const updated = await this.database.collection('purchases').updateOne(
               {
                 ...scoped,
@@ -1482,11 +1534,14 @@ export class MongoOperationsRepository {
                 status: line.status,
                 invoiceVoidedAt: { $exists: false },
               },
-              { $set: { invoiceVoidedAt: occurredAt, invoiceVoidReason: input.reason } },
+              { $set: update },
               { session },
             );
             if (updated.matchedCount !== 1) throw new MongoConflictError();
-            await audit('PURCHASE_INVOICE_VOIDED', line.id);
+            await audit(
+              draftGroup ? 'PURCHASE_DRAFT_INVOICE_CANCELLED' : 'PURCHASE_INVOICE_VOIDED',
+              line.id,
+            );
           }
           return { ids: lines.map((line) => line.id) };
         }
@@ -1938,9 +1993,12 @@ export class MongoOperationsRepository {
           await audit('VISIT_GOAL_SAVED', id);
           return { id };
         }
-        if (input.command === 'home.dispatch') {
+        if (input.command === 'home.dispatch' || input.command === 'home.equipment.loan') {
           permission('inventory:write');
           const dispatch = input.dispatch;
+          if (input.command === 'home.dispatch' && !dispatch.addressLine)
+            throw new MongoInputError('Indique la dirección de entrega.');
+
           const old = await this.database
             .collection('homeCustodies')
             .findOne({ ...scoped, idempotencyKey: dispatch.idempotencyKey }, { session });
@@ -1957,7 +2015,10 @@ export class MongoOperationsRepository {
                 ...scoped,
                 id: dispatch.itemId,
                 status: 'ACTIVE',
-                category: { $in: ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'] },
+                category:
+                  input.command === 'home.equipment.loan'
+                    ? 'EQUIPMENT'
+                    : { $in: ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'] },
               },
               { session },
             ),
@@ -2053,6 +2114,7 @@ export class MongoOperationsRepository {
                 createdAt: dispatch.sentAt,
                 reason: 'Despacho a custodia domiciliaria',
                 reference: dispatch.reference,
+                patientId: dispatch.patientId,
                 user: actor.userId,
                 traceRecordId: row.id,
                 traceNumber: row.number,
@@ -2097,6 +2159,7 @@ export class MongoOperationsRepository {
               createdAt: dispatch.sentAt,
               reason: 'Despacho a custodia domiciliaria',
               reference: dispatch.reference,
+              patientId: dispatch.patientId,
               user: actor.userId,
             });
             await this.database.collection('inventoryMovements').insertOne(
@@ -2121,6 +2184,35 @@ export class MongoOperationsRepository {
           await audit('HOME_CUSTODY_DISPATCHED', custody.id);
           return custody;
         }
+        if (input.command === 'home.equipment.return') {
+          permission('inventory:write');
+          const { receipt } = input;
+          const previous = await this.database
+            .collection('homeEquipmentReturns')
+            .findOne({ ...scoped, id: receipt.id }, { session });
+          if (previous) assertSameRetry(previous, receipt, Object.keys(receipt));
+          const old = await this.database
+            .collection('homeCustodies')
+            .findOne({ ...scoped, id: receipt.custodyId }, { session });
+          if (
+            !old ||
+            !(await this.database
+              .collection('catalogItems')
+              .findOne({ ...scoped, id: old.itemId, category: 'EQUIPMENT' }, { session }))
+          )
+            throw new MongoInputError('Seleccione un préstamo de equipo registrado.');
+          const current = homeCustodySchema.strip().parse(old);
+          if (previous) return current;
+          const next = applyEquipmentReturn(current, receipt, actor.userId);
+          await this.database
+            .collection('homeEquipmentReturns')
+            .insertOne({ ...scoped, ...receipt, receivedBy: actor.userId }, { session });
+          await this.database
+            .collection('homeCustodies')
+            .updateOne({ ...scoped, id: current.id }, { $set: next }, { session });
+          await audit('EQUIPMENT_RETURN_RECORDED', current.id);
+          return next;
+        }
         if (input.command === 'home.close') {
           permission('inventory:write');
           const closure = input.closure;
@@ -2139,6 +2231,8 @@ export class MongoOperationsRepository {
               throw new MongoConflictError();
             return current;
           }
+          if (current.returns?.length)
+            throw new MongoInputError('Registre el saldo pendiente desde Ubicación de equipo.');
           if (closure.returnedQuantity > current.quantity)
             throw new MongoInputError('La devolución no puede exceder lo enviado.');
           const closed = homeCustodySchema.parse({
@@ -2420,6 +2514,7 @@ export const mongoOperationsIndexes: Array<{
     'inventoryTraceRecords',
     'homeCustodies',
     'homeReturnHolds',
+    'homeEquipmentReturns',
     'commercialVisits',
     'commercialAdmissions',
     'commercialGoals',

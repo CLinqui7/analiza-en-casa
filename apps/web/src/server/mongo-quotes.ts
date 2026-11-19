@@ -7,10 +7,20 @@ import {
   type InsuranceRequestStatus,
   type Quote,
 } from '@analiza/contracts';
-import { calculateQuoteTotals, canEditQuote, isInsuranceRequestStatus } from '@analiza/domain';
+import {
+  calculateQuoteTotals,
+  canEditQuote,
+  isInsuranceRequestStatus,
+  insurerForQuote,
+  hasSameQuoteVersionIdentity,
+} from '@analiza/domain';
 import type { ClientSession, Db } from 'mongodb';
 import { can } from '@/lib/permissions';
-import { quoteCatalogPriceError } from './quote-catalog-policy';
+import {
+  quoteCatalogPriceError,
+  quoteDoctorIds,
+  quoteDoctorSelectionError,
+} from './quote-catalog-policy';
 import {
   MongoAccessError,
   MongoConflictError,
@@ -42,6 +52,11 @@ function bodyObject(value: unknown): Record<string, unknown> {
 function parseQuote(value: unknown): Quote {
   try {
     const quote = quoteSchema.strict().parse(value);
+    if (
+      quote.items.some((item) => !item.id.trim()) ||
+      new Set(quote.items.map((item) => item.id)).size !== quote.items.length
+    )
+      throw new MongoInputError('Cada línea debe tener un identificador distinto.');
     const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
     return { ...quote, ...totals };
   } catch {
@@ -67,7 +82,7 @@ async function requireCatalogPrices(
   const catalogIds = quote.items.flatMap((line) =>
     line.inventoryItemId ? [line.inventoryItemId] : [],
   );
-  const doctorIds = quote.items.flatMap((line) => (line.doctorId ? [line.doctorId] : []));
+  const doctorIds = quoteDoctorIds(quote);
   const [catalog, doctors] = await Promise.all([
     database
       .collection<{
@@ -185,6 +200,18 @@ export class MongoQuoteRepository {
           previousQuote = publicQuote(previous);
         }
         await requireCatalogPrices(this.database, actor, quote, session, previousQuote);
+        if (previousQuote) {
+          quote.manager = previousQuote.manager;
+        } else {
+          const owner = await this.database
+            .collection('users')
+            .findOne({ id: actor.userId }, { session });
+          if (!owner?.displayName?.trim() || owner.disabledAt)
+            throw new MongoInputError(
+              'No se pudo confirmar el responsable de la cotización. Revise su perfil.',
+            );
+          quote.manager = owner.displayName;
+        }
         const stored: StoredQuote = {
           ...quote,
           rootQuoteId: rootId,
@@ -234,9 +261,10 @@ export class MongoQuoteRepository {
           { session },
         );
         if (!current || !canEditQuote(publicQuote(current))) throw new MongoConflictError();
-        if (current.patientId !== quote.patientId || current.caseId !== quote.caseId)
+        quote.manager = current.manager;
+        if (!hasSameQuoteVersionIdentity(publicQuote(current), quote))
           throw new MongoInputError(
-            'El paciente y la hospitalización no pueden cambiar dentro del mismo borrador.',
+            'Conserve el paciente, la hospitalización, la versión y el origen del borrador. Cree una revisión para cambiar de versión.',
           );
         await requireCatalogPrices(this.database, actor, quote, session, publicQuote(current));
         const updated = await this.database.collection<StoredQuote>('quotes').findOneAndUpdate(
@@ -305,6 +333,22 @@ export class MongoQuoteRepository {
           { returnDocument: 'after', session },
         );
         if (!updated) throw new MongoConflictError();
+        const doctors = await this.database
+          .collection<{ organizationId: string; id: string }>('doctors')
+          .find(
+            {
+              organizationId: actor.organizationId,
+              id: {
+                $in: [updated.primaryDoctorId, updated.secondaryDoctorId].filter(
+                  (value): value is string => Boolean(value),
+                ),
+              },
+            },
+            { session },
+          )
+          .toArray();
+        const doctorError = quoteDoctorSelectionError(updated, doctors);
+        if (doctorError) throw new MongoInputError(doctorError);
         await this.database.collection('auditEvents').insertOne(
           {
             id: crypto.randomUUID(),
@@ -388,7 +432,7 @@ export class MongoInsuranceRepository {
     const patient = await this.database
       .collection('patients')
       .findOne({ organizationId: actor.organizationId, id: quote.patientId });
-    const insurer =
+    const patientInsurer =
       typeof patient?.insurer === 'string'
         ? patient.insurer
         : patient?.insurance &&
@@ -396,8 +440,8 @@ export class MongoInsuranceRepository {
             typeof (patient.insurance as { insurer?: unknown }).insurer === 'string'
           ? (patient.insurance as { insurer: string }).insurer
           : null;
-    if (!patient || !insurer || insurer.toLowerCase().includes('sin aseguradora'))
-      throw new MongoInputError('El paciente no tiene aseguradora registrada.');
+    const quoteInsurer = insurerForQuote(quote, { insurer: patientInsurer ?? undefined });
+    if (!patient) throw new MongoInputError('El paciente no está disponible.');
 
     const session = this.database.client.startSession();
     try {
@@ -423,6 +467,11 @@ export class MongoInsuranceRepository {
           quoteId: quote.id,
         });
         const date = new Date(body.date as string).toISOString();
+        const insurer = existing?.insurer ?? quoteInsurer;
+        if (!insurer)
+          throw new MongoInputError(
+            'Seleccione una aseguradora en la cotización y use el tipo de cuenta Seguro.',
+          );
         const request: InsuranceRequest = existing
           ? { ...insuranceRequestSchema.parse(existing), status, updatedAt: date, lastNote: note }
           : {

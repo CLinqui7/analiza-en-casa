@@ -188,11 +188,14 @@ try {
     await client.query(
       `GRANT SELECT,INSERT,UPDATE ON analiza.users,analiza.memberships,analiza.sessions,analiza.auth_rate_limits,analiza.patients,analiza.doctors,analiza.nursing_resources,analiza.hospitalizations,analiza.hospitalization_nurses,analiza.configuration_entries,analiza.quotes,analiza.purchases,analiza.clinical_documents TO ${role}`,
     );
+    // Editing a scheduled shift locks and updates its row. Commands and audit remain append-only.
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.shifts TO ${role}`);
     await client.query(
-      `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events,analiza.inventory_movements,analiza.inventory_transfers TO ${role}`,
+      `GRANT SELECT,INSERT ON analiza.commands,analiza.file_metadata,analiza.audit_events,analiza.inventory_movements,analiza.inventory_transfers TO ${role}`,
     );
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.payments TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.home_visits TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.clinical_records TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.visit_goals TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.catalog_items TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.warehouses TO ${role}`);
@@ -202,6 +205,7 @@ try {
     await client.query(`GRANT SELECT,INSERT ON analiza.inventory_trace_events TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.login_events TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.supply_requests TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.supply_request_assignments,analiza.received_order_deliveries TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.home_custodies TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.home_return_holds TO ${role}`);
     await client.query(`GRANT SELECT ON analiza.commercial_access TO ${role}`);
@@ -216,6 +220,14 @@ try {
     await client.query(`GRANT SELECT,INSERT ON analiza.insurance_events TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.patient_origin_reviews TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.patient_origin_review_events TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON analiza.quote_form_drafts TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.purchase_orders TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.supply_price_resolutions TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.purchase_order_revisions TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.equipment_returns TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.quote_decisions TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.purchase_invoice_approvals TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.survey_invitations TO ${role}`);
     if (provision) {
       const runtimeCheck = new Client({
         user: runtimeRole,

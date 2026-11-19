@@ -11,6 +11,8 @@ export type PrivateFileMetadata = Readonly<{
   mimeType: string;
   size: number;
   sha256: string;
+  dependentId?: string;
+  documentKind?: 'BIRTH_CERTIFICATE' | 'CONSENT';
 }>;
 
 async function uploadError(response: Response) {
@@ -30,6 +32,7 @@ export async function uploadPrivateFiles(
   files: readonly File[],
   fetchImpl: typeof fetch = fetch,
   headers: () => Record<string, string> = mongoMutationHeaders,
+  dependent?: { dependentId: string; documentKind: 'BIRTH_CERTIFICATE' | 'CONSENT' },
 ): Promise<PrivateFileMetadata[]> {
   const uploaded: PrivateFileMetadata[] = [];
   for (const file of files) {
@@ -37,6 +40,10 @@ export async function uploadPrivateFiles(
     form.set('ownerType', ownerType);
     form.set('ownerId', ownerId);
     form.set('file', file);
+    if (dependent) {
+      form.set('dependentId', dependent.dependentId);
+      form.set('documentKind', dependent.documentKind);
+    }
     const response = await fetchImpl('/api/files', {
       method: 'POST',
       credentials: 'same-origin',

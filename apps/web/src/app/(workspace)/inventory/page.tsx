@@ -5,9 +5,9 @@ import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { InventoryTransferDialog, WarehouseManagement } from '@/components/warehouse-management';
-import { InventoryTraceability } from '@/components/inventory-traceability';
+import { stockByWarehouse } from '@/lib/inventory-ledger';
+import './stock.css';
 import { useAuth, useWorkspace } from '@/components/providers';
-import { expiredTraceQuantity, unavailableTraceQuantities } from '@/lib/inventory-traceability';
 import { useOperations } from '@/lib/use-operations';
 
 const demoItemCatalog: Record<string, { name: string; sku: string; category?: string }> = {
@@ -18,61 +18,7 @@ const demoWarehouses: Record<string, string> = {
   'warehouse-demo-central': 'Bodega central demo',
   'warehouse-demo-north': 'Bodega norte demo',
 };
-type Surface =
-  'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS' | 'WAREHOUSES' | 'LOTS' | 'KITS';
-type AcknowledgementTab = 'PATIENTS' | 'RESOURCES' | 'UNAVAILABLE' | 'REQUESTS' | 'TASKS';
-type ClosureTab = 'PENDING' | 'TOTALS' | 'CLOSED' | 'RESOURCES';
-const acknowledgementTabs: Array<{ id: AcknowledgementTab; label: string; actionId: string }> = [
-  { id: 'PATIENTS', label: 'Pacientes', actionId: 'INVENTORY-ACK-TAB-PATIENTS' },
-  { id: 'RESOURCES', label: 'Recursos', actionId: 'INVENTORY-ACK-TAB-RESOURCES' },
-  { id: 'UNAVAILABLE', label: 'No disponible', actionId: 'INVENTORY-ACK-TAB-UNAVAILABLE' },
-  { id: 'REQUESTS', label: 'Solicitudes 0', actionId: 'INVENTORY-ACK-TAB-REQUESTS' },
-  { id: 'TASKS', label: 'Tareas 0', actionId: 'INVENTORY-ACK-TAB-TASKS' },
-];
-const emptyAcknowledgementCopy: Record<
-  Exclude<AcknowledgementTab, 'PATIENTS'>,
-  { title: string; detail: string }
-> = {
-  RESOURCES: {
-    title: 'Sin recursos documentados',
-    detail: 'No hay una colección autorizada de recursos para acuses en el modelo actual.',
-  },
-  UNAVAILABLE: {
-    title: 'Sin registros no disponibles',
-    detail: 'La disponibilidad y sus reglas no están documentadas; no se deriva un estado local.',
-  },
-  REQUESTS: {
-    title: 'Sin solicitudes documentadas',
-    detail: 'No existe una fuente autorizada de solicitudes de acuse.',
-  },
-  TASKS: {
-    title: 'Sin tareas documentadas',
-    detail: 'No existe una fuente autorizada de tareas de acuse.',
-  },
-};
-const closureTabs: Array<{ id: ClosureTab; label: string; actionId: string }> = [
-  { id: 'PENDING', label: 'Pendientes', actionId: 'INVENTORY-CLOSURES-TAB-PENDING' },
-  { id: 'TOTALS', label: 'Cierres totales', actionId: 'INVENTORY-CLOSURES-TAB-TOTALS' },
-  { id: 'CLOSED', label: 'Cerrados', actionId: 'INVENTORY-CLOSURES-TAB-CLOSED' },
-  { id: 'RESOURCES', label: 'Recursos', actionId: 'INVENTORY-CLOSURES-TAB-RESOURCES' },
-];
-const emptyClosureCopy: Record<
-  Exclude<ClosureTab, 'PENDING'>,
-  { title: string; detail: string }
-> = {
-  TOTALS: {
-    title: 'Sin cierres totales documentados',
-    detail: 'No existe una fuente autorizada de cierres totales en el modelo actual.',
-  },
-  CLOSED: {
-    title: 'Sin cierres cerrados documentados',
-    detail: 'El estado Cerrado no se deriva ni se modifica sin la definición aprobada.',
-  },
-  RESOURCES: {
-    title: 'Sin recursos de cierre documentados',
-    detail: 'No existe una fuente autorizada de recursos de cierre en el modelo actual.',
-  },
-};
+type Surface = 'ITEMS' | 'WAREHOUSES';
 
 export default function InventoryPage() {
   const { inventoryMovements, catalogItems, providerMode, refreshWorkspace } = useWorkspace();
@@ -113,72 +59,53 @@ export default function InventoryPage() {
     [catalogItems, providerMode],
   );
   const [surface, setSurface] = useState<Surface>('ITEMS');
-  const [acknowledgementTab, setAcknowledgementTab] = useState<AcknowledgementTab>('PATIENTS');
-  const [closureTab, setClosureTab] = useState<ClosureTab>('PENDING');
   const [query, setQuery] = useState('');
-  const [supplierQuery, setSupplierQuery] = useState('');
+  const [page, setPage] = useState(0);
   const [warehouseQuery, setWarehouseQuery] = useState('');
-  const [kitQuery, setKitQuery] = useState('');
   const [historyItemId, setHistoryItemId] = useState<string | null>(null);
   const [historyFrom, setHistoryFrom] = useState('');
   const [historyTo, setHistoryTo] = useState('');
-  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferRow, setTransferRow] = useState<{ itemId: string; warehouseId: string } | null>(
+    null,
+  );
+  const stock = useMemo(
+    () => stockByWarehouse(inventoryMovements, operations.traceRecords, operations.homeCustodies),
+    [inventoryMovements, operations.traceRecords, operations.homeCustodies],
+  );
   const rows = useMemo(() => {
-    const itemIds = [
-      ...new Set([
-        ...inventoryMovements.map((movement) => movement.itemId),
-        ...operations.traceRecords.map((record) => record.itemId),
-      ]),
-    ];
-    return itemIds
-      .flatMap((itemId) => {
-        const movements = inventoryMovements.filter((movement) => movement.itemId === itemId);
-        const warehouseIds = [
-          ...new Set([
-            ...movements.map((movement) => movement.warehouseId).filter(Boolean),
-            ...operations.traceRecords
-              .filter((record) => record.itemId === itemId)
-              .flatMap((record) => record.balances.map((balance) => balance.warehouseId)),
-          ]),
-        ] as string[];
-        return (warehouseIds.length ? warehouseIds : ['central']).map((warehouseId) => ({
-          rowId: `${itemId}:${warehouseId}`,
-          itemId,
-          type:
-            itemCatalog[itemId]?.category === 'MEDICATIONS'
-              ? 'Medicamento'
-              : itemCatalog[itemId]?.category === 'SUPPLIES'
-                ? 'Insumo'
-                : itemCatalog[itemId]?.category === 'EQUIPMENT'
-                  ? 'Equipo'
-                  : 'Otro',
-          code: itemCatalog[itemId]?.sku ?? itemId,
-          name: itemCatalog[itemId]?.name ?? itemId,
-          warehouse: warehouseNames[warehouseId] ?? warehouseId,
-          available: Math.max(
-            0,
-            currentInventoryBalance(inventoryMovements, itemId, warehouseId) -
-              expiredTraceQuantity(operations.traceRecords, itemId, warehouseId),
-          ),
-          ...unavailableTraceQuantities(operations.traceRecords, itemId, warehouseId),
-        }));
+    const search = query.trim().toLocaleLowerCase('es');
+    return stock
+      .map((position) => {
+        const item = itemCatalog[position.itemId];
+        const type =
+          (
+            { MEDICATIONS: 'Medicamento', SUPPLIES: 'Insumo', EQUIPMENT: 'Equipo' } as Record<
+              string,
+              string
+            >
+          )[item?.category ?? ''] ?? 'Otro';
+        return {
+          ...position,
+          type,
+          code: item?.sku ?? position.itemId,
+          name: item?.name ?? position.itemId,
+          warehouse: warehouseNames[position.warehouseId] ?? position.warehouseId,
+        };
       })
-      .filter((row) =>
-        `${row.type} ${row.code} ${row.name} ${row.warehouse}`
-          .toLocaleLowerCase('es')
-          .includes(query.toLocaleLowerCase('es')),
-      );
-  }, [inventoryMovements, operations.traceRecords, query, itemCatalog, warehouseNames]);
-  const supplierRows = useMemo(
-    () =>
-      catalogItems
-        .filter((item) => item.category === 'PROVIDERS')
-        .filter((item) =>
-          `${item.sku} ${item.name} ${item.contactName ?? ''} ${item.landlinePhone ?? ''} ${item.mobilePhone ?? ''} ${item.email ?? ''}`
+      .filter(
+        (row) =>
+          !search ||
+          [row.type, row.code, row.name, row.warehouse]
+            .join(' ')
             .toLocaleLowerCase('es')
-            .includes(supplierQuery.toLocaleLowerCase('es')),
-        ),
-    [catalogItems, supplierQuery],
+            .includes(search),
+      );
+  }, [stock, query, itemCatalog, warehouseNames]);
+  const lastPage = Math.max(0, Math.ceil(rows.length / 50) - 1);
+  const currentPage = Math.min(page, lastPage);
+  const activeWarehouses = useMemo(
+    () => new Set(visibleWarehouses.filter((w) => w.status === 'ACTIVE').map((w) => w.id)),
+    [visibleWarehouses],
   );
   const historyItem =
     rows.find((row) => row.itemId === historyItemId) ??
@@ -222,198 +149,32 @@ export default function InventoryPage() {
     (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection !== 'OUT')
       ? 'Entrada'
       : 'Salida';
-  const openAcknowledgements = () => {
-    setSurface('ACKNOWLEDGEMENTS');
-    setAcknowledgementTab('PATIENTS');
-  };
-  const openClosures = () => {
-    setSurface('CLOSURES');
-    setClosureTab('PENDING');
-  };
-  const openSuppliers = () => {
-    setSurface('SUPPLIERS');
-    setSupplierQuery('');
-  };
-  const openWarehouses = () => {
-    setSurface('WAREHOUSES');
-    setWarehouseQuery('');
-  };
-  const openKits = () => {
-    setSurface('KITS');
-    setKitQuery('');
-  };
-
   return (
-    <div className="page-stack">
-      <header className="page-header page-header-actions">
-        <div>
-          <p className="eyebrow">Inventario</p>
-          <h1>
-            {surface === 'ACKNOWLEDGEMENTS'
-              ? 'Inventario / Acuses'
-              : surface === 'CLOSURES'
-                ? 'Inventario / Cierres'
-                : surface === 'SUPPLIERS'
-                  ? 'Inventario / Proveedores'
-                  : surface === 'WAREHOUSES'
-                    ? 'Items / Bodegas'
-                    : surface === 'LOTS'
-                      ? 'Inventario / Lotes y números de serie'
-                      : surface === 'KITS'
-                        ? 'Inventario / Kit de insumos'
-                        : 'Gestión de inventario'}
-          </h1>
-          <p>
-            {surface === 'ACKNOWLEDGEMENTS'
-              ? 'Superficie factual y de solo lectura. No crea acuses, cambia estados, reserva existencias ni consulta fuentes de pacientes o casos.'
-              : surface === 'CLOSURES'
-                ? 'Superficie factual y de solo lectura. No consulta pacientes ni casos, ni crea, aprueba, cancela, concilia o revierte cierres.'
-                : surface === 'SUPPLIERS'
-                  ? 'Superficie factual y de solo lectura. No consulta ni crea proveedores; los datos, identidades y ciclo de vida requieren definición aprobada.'
-                  : surface === 'WAREHOUSES'
-                    ? 'Administre bodegas activas e inactivas con códigos únicos, permisos y trazabilidad. La desactivación exige saldo total cero.'
-                    : surface === 'LOTS'
-                      ? 'Recepción trazable por lote o serie, cuarentena, liberación, bloqueo, rechazo y salida FEFO/FIFO por bodega.'
-                      : surface === 'KITS'
-                        ? 'Superficie factual y de solo lectura. No consulta ni crea kits; la composición, consumo, permisos y auditoría requieren definición aprobada.'
-                        : 'Existencias cronológicas por ítem y bodega. Los traslados son atómicos y preservan lote o serie cuando existe trazabilidad.'}
-          </p>
-        </div>
-        {surface === 'ITEMS' ? (
-          <div className="action-row">
-            <Button
-              aria-describedby="inventory-export-help"
-              className="button-secondary"
-              data-action-id="INVENTORY-ITEM-EXPORT"
-              disabled
-              type="button"
-            >
-              Excel
-            </Button>
-            <Button
-              aria-describedby="inventory-transfer-help"
-              data-action-id="INVENTORY-TRANSFERS"
-              disabled={
-                !can('inventory:write') ||
-                !operations.connected ||
-                operations.busy ||
-                operations.warehouses.filter((warehouse) => warehouse.status === 'ACTIVE').length <
-                  2
-              }
-              onClick={() => setTransferOpen(true)}
-              type="button"
-            >
-              Traslados
-            </Button>
-          </div>
-        ) : surface === 'SUPPLIERS' ? (
-          <div className="action-row">
-            <Button
-              aria-describedby="inventory-suppliers-create-help"
-              data-action-id="INVENTORY-SUPPLIERS-CREATE"
-              disabled
-              type="button"
-            >
-              Nuevo
-            </Button>
-          </div>
-        ) : surface === 'KITS' ? (
-          <div className="action-row">
-            <Button
-              aria-describedby="inventory-kits-export-help"
-              className="button-secondary"
-              data-action-id="INVENTORY-KITS-EXPORT"
-              disabled
-              type="button"
-            >
-              Excel
-            </Button>
-            <Button
-              aria-describedby="inventory-kits-create-help"
-              data-action-id="INVENTORY-KITS-CREATE"
-              disabled
-              type="button"
-            >
-              Nuevo
-            </Button>
-          </div>
-        ) : null}
+    <div className="page-stack stock-workspace">
+      <header className="page-header">
+        <p className="eyebrow">Inventario y compras</p>
+        <h1>Existencias</h1>
       </header>
-      <nav aria-label="Secciones de gestión de inventario" className="tabs">
+      <nav aria-label="Secciones de existencias" className="tabs">
         <Button
           aria-current={surface === 'ITEMS' ? 'page' : undefined}
           className={surface === 'ITEMS' ? 'tab active' : 'tab'}
           data-action-id="INVENTORY-ITEMS-OPEN"
           onClick={() => setSurface('ITEMS')}
-          type="button"
         >
-          Items
+          Ítems
         </Button>
-        <Button
-          aria-current={surface === 'ACKNOWLEDGEMENTS' ? 'page' : undefined}
-          className={surface === 'ACKNOWLEDGEMENTS' ? 'tab active' : 'tab'}
-          data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"
-          onClick={openAcknowledgements}
-          type="button"
-        >
-          Acuses
-        </Button>
-        <Button
-          aria-current={surface === 'CLOSURES' ? 'page' : undefined}
-          className={surface === 'CLOSURES' ? 'tab active' : 'tab'}
-          data-action-id="INVENTORY-CLOSURES-OPEN"
-          onClick={openClosures}
-          type="button"
-        >
-          Cierres
-        </Button>
-        <Button
-          aria-current={surface === 'SUPPLIERS' ? 'page' : undefined}
-          className={surface === 'SUPPLIERS' ? 'tab active' : 'tab'}
-          data-action-id="INVENTORY-SUPPLIERS-OPEN"
-          onClick={openSuppliers}
-          type="button"
-        >
+        <Link className="tab" data-action-id="INVENTORY-SUPPLIERS-OPEN" href="/inventory/suppliers">
           Proveedores
-        </Button>
+        </Link>
         <Button
           aria-current={surface === 'WAREHOUSES' ? 'page' : undefined}
           className={surface === 'WAREHOUSES' ? 'tab active' : 'tab'}
           data-action-id="INVENTORY-WAREHOUSES-OPEN"
-          onClick={openWarehouses}
-          type="button"
+          onClick={() => setSurface('WAREHOUSES')}
         >
           Bodegas
         </Button>
-        <Button
-          aria-current={surface === 'KITS' ? 'page' : undefined}
-          className={surface === 'KITS' ? 'tab active' : 'tab'}
-          data-action-id="INVENTORY-KITS-OPEN"
-          onClick={openKits}
-          type="button"
-        >
-          Kit de insumos
-        </Button>
-        <Link className="tab" href="/inventory/kardex">
-          Movimientos
-        </Link>
-        <button
-          aria-describedby="inventory-commitments-help"
-          className="tab"
-          disabled
-          type="button"
-        >
-          Comprometido
-        </button>
-        <button
-          aria-current={surface === 'LOTS' ? 'page' : undefined}
-          className={surface === 'LOTS' ? 'tab active' : 'tab'}
-          data-action-id="INVENTORY-LOTS-OPEN"
-          onClick={() => setSurface('LOTS')}
-          type="button"
-        >
-          Lotes
-        </button>
       </nav>
       {surface === 'ITEMS' ? (
         <Panel>
@@ -422,37 +183,20 @@ export default function InventoryPage() {
               <h2>Todas las bodegas</h2>
               <p className="field-help">
                 Disponible es el saldo liberado y vigente. Retenido y vencido muestran recepciones
-                físicas que no pueden entregarse; abra Lotes para consultar su estado.
+                físicas que aún no pueden entregarse.
               </p>
             </div>
             <StatusTag>{rows.length} visibles</StatusTag>
           </div>
-          <p className="field-help" id="inventory-export-help">
-            La exportación requiere columnas, minimización y autorización aprobadas (CH14-Q015).
-          </p>
-          <p className="field-help" id="inventory-transfer-help">
-            Un traslado autorizado registra salida y entrada en una sola transacción, sin permitir
-            saldo negativo.
-          </p>
-          <p className="field-help" id="inventory-commitments-help">
-            La regla de inventario comprometido requiere definición aprobada (CH14-Q001).
-          </p>
-          <p className="field-help" id="inventory-lots-help">
-            Las existencias vencidas se excluyen del disponible. Recepciones y salidas trazadas se
-            administran en Lotes.
-          </p>
           <div className="filter-grid">
-            <label>
-              Registros
-              <select aria-label="Registros por página" disabled value="50">
-                <option value="50">50</option>
-              </select>
-            </label>
             <label>
               Buscar inventario
               <input
                 data-action-id="INVENTORY-ITEM-SEARCH"
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setPage(0);
+                  setQuery(event.target.value);
+                }}
                 placeholder="Buscar tipo, código, nombre o bodega"
                 type="search"
                 value={query}
@@ -460,7 +204,7 @@ export default function InventoryPage() {
             </label>
           </div>
           <div className="table-wrap">
-            <table>
+            <table className="stock-cards">
               <thead>
                 <tr>
                   <th>Acciones</th>
@@ -468,51 +212,59 @@ export default function InventoryPage() {
                   <th>Código</th>
                   <th>Nombre</th>
                   <th>Bodega</th>
-                  <th>Disp</th>
+                  <th>Disponible</th>
                   <th>Retenido</th>
                   <th>Vencido</th>
-                  <th>Comp</th>
-                  <th>Total</th>
+                  <th>Total físico</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={row.rowId}>
-                    <td>
+                {rows.slice(currentPage * 50, (currentPage + 1) * 50).map((row) => (
+                  <tr key={JSON.stringify([row.itemId, row.warehouseId])}>
+                    <td data-stock-label="Acciones">
                       <Button
                         className="button-secondary"
                         data-action-id="INVENTORY-ITEM-HISTORY-OPEN"
                         onClick={() => openHistory(row.itemId)}
                         type="button"
                       >
-                        Movimientos de item
+                        Movimientos del ítem
                       </Button>
-                      {(row.held > 0 || row.expired > 0) && (
+                      {can('inventory:write') && (
                         <Button
                           className="button-secondary"
-                          onClick={() => setSurface('LOTS')}
+                          data-action-id="INVENTORY-TRANSFERS"
+                          disabled={
+                            !operations.connected ||
+                            operations.busy ||
+                            row.available <= 0 ||
+                            activeWarehouses.size < 2 ||
+                            !activeWarehouses.has(row.warehouseId)
+                          }
+                          onClick={() => setTransferRow(row)}
                           type="button"
                         >
-                          Ver lotes
+                          Generar traslado
                         </Button>
                       )}
                     </td>
-                    <td>{row.type}</td>
-                    <td>
+                    <td data-stock-label="Tipo">{row.type}</td>
+                    <td data-stock-label="Código">
                       <code>{row.code}</code>
                     </td>
-                    <td>{row.name}</td>
-                    <td>{row.warehouse}</td>
-                    <td>{row.available}</td>
-                    <td>{row.held}</td>
-                    <td>{row.expired}</td>
-                    <td>No definido</td>
-                    <td>No calculable</td>
+                    <td data-stock-label="Nombre">{row.name}</td>
+                    <td data-stock-label="Bodega">{row.warehouse}</td>
+                    <td data-stock-label="Disponible">{row.available}</td>
+                    <td data-stock-label="Retenido">{row.held}</td>
+                    <td data-stock-label="Vencido">{row.expired}</td>
+                    <td data-stock-label="Total físico">
+                      {row.available + row.held + row.expired}
+                    </td>
                   </tr>
                 ))}
                 {!rows.length ? (
                   <tr>
-                    <td colSpan={10}>
+                    <td colSpan={9}>
                       <EmptyState
                         detail={
                           query
@@ -527,165 +279,29 @@ export default function InventoryPage() {
               </tbody>
             </table>
           </div>
-          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
-        </Panel>
-      ) : surface === 'ACKNOWLEDGEMENTS' ? (
-        <Panel>
-          <div className="filter-grid">
-            <label>
-              Tipo Área
-              <select
-                aria-describedby="inventory-ack-area-help"
-                data-action-id="INVENTORY-ACK-AREA"
-                disabled
-                value=""
-              >
-                <option value="">No documentado</option>
-              </select>
-            </label>
-          </div>
-          <p className="field-help" id="inventory-ack-area-help">
-            El catálogo y efecto de Tipo Área no están documentados; el control permanece visible y
-            no modifica datos.
-          </p>
-          <div aria-label="Pestañas de acuses" className="tabs" role="tablist">
-            {acknowledgementTabs.map((tab) => (
+          {lastPage > 0 && (
+            <nav className="action-row" aria-label="Páginas de existencias">
               <Button
-                aria-selected={acknowledgementTab === tab.id}
-                className={acknowledgementTab === tab.id ? 'tab active' : 'tab'}
-                data-action-id={tab.actionId}
-                key={tab.id}
-                onClick={() => setAcknowledgementTab(tab.id)}
-                role="tab"
-                type="button"
+                className="button-secondary"
+                disabled={!currentPage}
+                onClick={() => setPage(currentPage - 1)}
               >
-                {tab.label}
-              </Button>
-            ))}
-          </div>
-          {acknowledgementTab === 'PATIENTS' ? (
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Acciones</th>
-                    <th>Identificación</th>
-                    <th>Paciente</th>
-                    <th>Empresa</th>
-                    <th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colSpan={6}>
-                      <EmptyState
-                        detail="Esta superficie no consulta fuentes de pacientes ni casos; no hay registros de acuse documentados."
-                        title="Sin pacientes documentados"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <EmptyState
-              detail={emptyAcknowledgementCopy[acknowledgementTab].detail}
-              title={emptyAcknowledgementCopy[acknowledgementTab].title}
-            />
-          )}
-          <p className="field-help">
-            Los estados, acciones, solicitudes y tareas de acuse requieren la política de permisos,
-            idempotencia y auditoría aprobada (CH14-Q002).
-          </p>
-        </Panel>
-      ) : surface === 'SUPPLIERS' ? (
-        <Panel>
-          <div className="table-heading">
-            <div>
-              <h2>Proveedores</h2>
-              <p className="field-help" id="inventory-suppliers-create-help">
-                Nuevo, edición, desactivación, identidades, unicidad y auditoría de proveedores
-                requieren definición aprobada (CH14-Q008).
-              </p>
-            </div>
-          </div>
-          <div className="filter-grid">
-            <label>
-              Registros
-              <select
-                aria-label="Registros de proveedores por página"
-                data-action-id="INVENTORY-SUPPLIERS-PAGE-SIZE"
-                disabled
-                value="50"
-              >
-                <option value="50">50</option>
-              </select>
-            </label>
-            <div aria-label="Paginación de proveedores" className="action-row">
-              <Button data-action-id="INVENTORY-SUPPLIERS-PAGE-PREV" disabled type="button">
                 Anterior
               </Button>
-              <Button data-action-id="INVENTORY-SUPPLIERS-PAGE-NEXT" disabled type="button">
+              <span>
+                Página {currentPage + 1} de {lastPage + 1}
+              </span>
+              <Button
+                className="button-secondary"
+                disabled={currentPage >= lastPage}
+                onClick={() => setPage(currentPage + 1)}
+              >
                 Siguiente
               </Button>
-            </div>
-            <label>
-              Buscar proveedores
-              <input
-                data-action-id="INVENTORY-SUPPLIERS-SEARCH"
-                onChange={(event) => setSupplierQuery(event.target.value)}
-                placeholder="Buscar código, empresa, contacto, teléfono, correo o dirección"
-                type="search"
-                value={supplierQuery}
-              />
-            </label>
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Empresa</th>
-                  <th>Contacto</th>
-                  <th>Teléfono</th>
-                  <th>Correo</th>
-                  <th>Dirección</th>
-                </tr>
-              </thead>
-              <tbody>
-                {supplierRows.map((supplier) => (
-                  <tr key={supplier.id}>
-                    <td>
-                      <code>{supplier.sku}</code>
-                    </td>
-                    <td>{supplier.name}</td>
-                    <td>{supplier.contactName || 'No documentado'}</td>
-                    <td>{supplier.mobilePhone || supplier.landlinePhone || 'No documentado'}</td>
-                    <td>{supplier.email || 'No documentado'}</td>
-                    <td>No documentada</td>
-                  </tr>
-                ))}
-                {!supplierRows.length ? (
-                  <tr>
-                    <td colSpan={6}>
-                      <EmptyState
-                        detail={
-                          supplierQuery
-                            ? `No hay proveedores documentados que coincidan con “${supplierQuery}”.`
-                            : 'No existe una fuente autorizada de proveedores en el modelo actual.'
-                        }
-                        title="Sin proveedores documentados"
-                      />
-                    </td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
-          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
+            </nav>
+          )}
         </Panel>
-      ) : surface === 'WAREHOUSES' ? (
+      ) : (
         <WarehouseManagement
           busy={operations.busy}
           canWrite={can('inventory:write')}
@@ -696,146 +312,6 @@ export default function InventoryPage() {
           setQuery={setWarehouseQuery}
           warehouses={visibleWarehouses}
         />
-      ) : surface === 'LOTS' ? (
-        <InventoryTraceability
-          busy={operations.busy}
-          canWrite={can('inventory:write')}
-          connected={operations.connected}
-          error={operations.error}
-          execute={operations.execute}
-          items={catalogItems}
-          records={operations.traceRecords}
-          refreshWorkspace={refreshWorkspace}
-          warehouses={visibleWarehouses}
-        />
-      ) : surface === 'KITS' ? (
-        <Panel>
-          <div className="table-heading">
-            <div>
-              <h2>Listado</h2>
-              <p className="field-help" id="inventory-kits-create-help">
-                Nuevo, Editar, Duplicar y Eliminar requieren versión, permisos, efectos y
-                preservación de usos históricos aprobados (CH14-Q012).
-              </p>
-            </div>
-          </div>
-          <p className="field-help" id="inventory-kits-export-help">
-            Excel requiere columnas, minimización y autorización aprobadas (CH14-Q015).
-          </p>
-          <div className="filter-grid">
-            <label>
-              Registros
-              <select
-                aria-label="Registros de kits por página"
-                data-action-id="INVENTORY-KITS-PAGE-SIZE"
-                disabled
-                value="50"
-              >
-                <option value="50">50</option>
-              </select>
-            </label>
-            <div aria-label="Paginación de kits" className="action-row">
-              <Button data-action-id="INVENTORY-KITS-PAGE-PREV" disabled type="button">
-                Anterior
-              </Button>
-              <Button data-action-id="INVENTORY-KITS-PAGE-NEXT" disabled type="button">
-                Siguiente
-              </Button>
-            </div>
-            <label>
-              Buscar kits
-              <input
-                data-action-id="INVENTORY-KITS-SEARCH"
-                onChange={(event) => setKitQuery(event.target.value)}
-                placeholder="Buscar nombre de kit"
-                type="search"
-                value={kitQuery}
-              />
-            </label>
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Acciones</th>
-                  <th>Nombre</th>
-                  <th>Actualizado por</th>
-                  <th>Fecha actualización</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={4}>
-                    <EmptyState
-                      detail={
-                        kitQuery
-                          ? `No hay kits documentados que coincidan con “${kitQuery}”.`
-                          : 'No existe una fuente autorizada de kits en el modelo actual.'
-                      }
-                      title="Sin kits documentados"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
-        </Panel>
-      ) : (
-        <Panel>
-          <div aria-label="Pestañas de cierres" className="tabs" role="tablist">
-            {closureTabs.map((tab) => (
-              <Button
-                aria-selected={closureTab === tab.id}
-                className={closureTab === tab.id ? 'tab active' : 'tab'}
-                data-action-id={tab.actionId}
-                key={tab.id}
-                onClick={() => setClosureTab(tab.id)}
-                role="tab"
-                type="button"
-              >
-                {tab.label}
-              </Button>
-            ))}
-          </div>
-          {closureTab === 'PENDING' ? (
-            <div className="table-wrap">
-              <h2>Pacientes activos</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Acciones</th>
-                    <th>DUI/NIT</th>
-                    <th>Paciente</th>
-                    <th>Empresa</th>
-                    <th>Estado</th>
-                    <th>Fecha de inicio</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colSpan={6}>
-                      <EmptyState
-                        detail="Esta superficie no consulta fuentes de pacientes ni casos; no hay cierres pendientes documentados."
-                        title="Sin cierres documentados"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <EmptyState
-              detail={emptyClosureCopy[closureTab].detail}
-              title={emptyClosureCopy[closureTab].title}
-            />
-          )}
-          <p className="field-help">
-            La fuente autorizada, roles, transiciones, aprobación, cancelación, conciliación y
-            reversión de cierres requieren definición aprobada (CH14-Q007). Las pestañas no mutan
-            datos.
-          </p>
-        </Panel>
       )}
       <Dialog
         description="Historial local de movimientos existentes. No crea, reclasifica ni modifica inventario."
@@ -851,7 +327,7 @@ export default function InventoryPage() {
         }
         onClose={closeHistory}
         open={Boolean(historyItem)}
-        title="Movimientos de item"
+        title="Movimientos del ítem"
       >
         {historyItem ? (
           <div className="page-stack">
@@ -948,18 +424,21 @@ export default function InventoryPage() {
           </div>
         ) : null}
       </Dialog>
-      <InventoryTransferDialog
-        busy={operations.busy}
-        error={operations.error}
-        execute={operations.execute}
-        items={catalogItems}
-        movements={inventoryMovements}
-        traceRecords={operations.traceRecords}
-        onClose={() => setTransferOpen(false)}
-        open={transferOpen}
-        refreshWorkspace={refreshWorkspace}
-        warehouses={visibleWarehouses}
-      />
+      {transferRow && (
+        <InventoryTransferDialog
+          selected={transferRow}
+          busy={operations.busy}
+          error={operations.error}
+          execute={operations.execute}
+          items={catalogItems}
+          movements={inventoryMovements}
+          traceRecords={operations.traceRecords}
+          onClose={() => setTransferRow(null)}
+          open
+          refreshWorkspace={refreshWorkspace}
+          warehouses={visibleWarehouses}
+        />
+      )}
     </div>
   );
 }

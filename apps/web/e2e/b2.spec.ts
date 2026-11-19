@@ -27,9 +27,11 @@ test('B2 keeps doctor and resource creation independent and persists the doctor 
   await dialog.getByLabel('Nombre completo').fill('Médica B2 QA');
   await dialog.getByLabel('JVPM').fill('JVPM-B2-001');
   await dialog.getByLabel('DUI').fill('DUI-B2-001');
+  await dialog.getByLabel('Relación del médico').selectOption('NEW');
   await dialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await dialog.getByRole('option', { name: 'Nutricionista' }).click();
-  await dialog.getByLabel('Teléfono').fill('7000-0200');
+  await dialog.getByLabel('Teléfono celular (opcional)').fill('7000-0200');
+  await dialog.getByLabel('Teléfono fijo (obligatorio)').fill('2222-0200');
   await dialog.getByLabel('Correo').fill('medica.b2@example.test');
   await dialog.getByLabel('Dirección').fill('Dirección sintética B2');
   await dialog.locator('input[type=file]').setInputFiles({
@@ -76,6 +78,37 @@ test('B2 keeps doctor and resource creation independent and persists the doctor 
   await resourceDialog.getByRole('button', { name: 'Guardar recurso' }).click();
   await page.reload();
   await expect(page.getByText('Recurso B2 QA', { exact: true })).toBeVisible();
+});
+
+// test-id: playwright:feedback-doctor-optional-profile
+test('a new doctor saves without DUI or address and keeps optional profile fields', async ({
+  page,
+}) => {
+  await login(page);
+  await page.getByRole('button', { name: 'Nuevo médico' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Nuevo médico' });
+  await dialog.getByLabel('Nombre completo').fill('Médica B2 Opcional');
+  await dialog.getByLabel('Especialidad o profesión').fill('Nutri');
+  await dialog.getByRole('option', { name: 'Nutricionista' }).click();
+  await dialog.getByLabel('Relación del médico').selectOption('NEW');
+  await dialog.getByRole('button', { name: 'Guardar médico' }).click();
+  await expect(dialog.getByText('Ingrese el teléfono fijo.')).toBeVisible();
+  await dialog.getByLabel('Teléfono fijo (obligatorio)').fill('2222-0300');
+  await dialog.getByLabel('Clínica (nombre, opcional)').fill('Clínica sintética B2');
+  await dialog.getByLabel('NIT (opcional)').fill('NIT-B2-SYN');
+  await dialog.getByLabel('Zona (opcional)').fill('Zona sintética B2');
+  await dialog.getByRole('button', { name: 'Guardar médico' }).click();
+  await expect(page.getByRole('status')).toContainText('Médica B2 Opcional registrado');
+  await page.reload();
+  await expect(page.getByRole('cell', { name: '2222-0300' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'No registrado' }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Editar médico' }).click();
+  const edited = page.getByRole('dialog', { name: 'Editar médico' });
+  await expect(edited.getByLabel('DUI (opcional)')).toHaveValue('');
+  await expect(edited.getByLabel('Dirección (opcional)')).toHaveValue('');
+  await expect(edited.getByLabel('Clínica (nombre, opcional)')).toHaveValue('Clínica sintética B2');
+  await expect(edited.getByLabel('NIT (opcional)')).toHaveValue('NIT-B2-SYN');
+  await expect(edited.getByLabel('Zona (opcional)')).toHaveValue('Zona sintética B2');
 });
 
 for (const role of [

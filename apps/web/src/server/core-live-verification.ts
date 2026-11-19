@@ -278,14 +278,16 @@ try {
   await secondPage.goto(`${base}/doctors`);
   await secondPage.locator('[data-action-id="DOCTOR-CREATE"]').click();
   const doctorDialog = secondPage.getByRole('dialog', { name: 'Nuevo médico' });
-  await doctorDialog.getByLabel('Nombre completo').fill(`Médico ficticio ${run}`);
+  await doctorDialog.getByLabel('Nombre completo (obligatorio)').fill(`Médico ficticio ${run}`);
   await doctorDialog.getByLabel('JVPM', { exact: true }).fill(`QA-${run}`);
-  await doctorDialog.getByLabel('DUI', { exact: true }).fill('00000000-0');
+  await doctorDialog.getByLabel('DUI (opcional)').fill('00000000-0');
   await doctorDialog.getByLabel('Especialidad o profesión').fill(`SPECIALTY ficticio ${run}`);
   await doctorDialog
     .getByRole('option', { name: `SPECIALTY ficticio ${run}`, exact: true })
     .click();
-  await doctorDialog.getByLabel('Dirección', { exact: true }).fill('Dirección ficticia');
+  await doctorDialog.getByLabel('Dirección (opcional)').fill('Dirección ficticia');
+  await doctorDialog.getByLabel('Teléfono fijo (obligatorio)').fill('2222-0000');
+  await doctorDialog.locator('[data-action-id="DOCTOR-REFERRAL-CATEGORY"]').selectOption('NEW');
   await doctorDialog.locator('[data-action-id="DOCTOR-SAVE"]').click();
   await doctorDialog.waitFor({ state: 'hidden' });
   const doctor = await database

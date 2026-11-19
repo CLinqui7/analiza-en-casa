@@ -2,7 +2,7 @@
 import { isServerDataMode, configuredServerDataMode } from '@/lib/data-mode';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase';
-import { can, isRole, type Role } from '@/lib/permissions';
+import { can, isRole, roleAllowsPath, type Role } from '@/lib/permissions';
 import { isCoreRelease } from '@/lib/release-profile';
 import type { RegistrationInput } from '@/lib/registration';
 
@@ -231,6 +231,10 @@ export function canOpenDashboard(session: AuthSession | null): boolean {
 }
 
 export function landingPath(session: AuthSession, next: string | null = null): string {
+  if (session.role === 'DOCTOR') {
+    const requested = safeNextPath(next, '/clinical/hospitalizations');
+    return roleAllowsPath(session.role, requested) ? requested : '/clinical/hospitalizations';
+  }
   if (session.role === 'ANALYTICS') return '/analytics/logins';
   const fallback = canOpenDashboard(session) ? '/dashboard' : '/patients';
   const requested = safeNextPath(next, fallback);

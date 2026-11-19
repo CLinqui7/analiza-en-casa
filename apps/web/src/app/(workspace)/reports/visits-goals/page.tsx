@@ -207,7 +207,7 @@ export default function CommercialVisitsGoalsPage() {
           {operations.error}
         </p>
       ) : null}
-      <Panel className="studio-toolbar">
+      <Panel className="studio-toolbar commercial-period-toolbar">
         <label>
           Período{' '}
           <select

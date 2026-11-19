@@ -22,6 +22,24 @@ export const nationalityOptions: SearchableOption[] = [
   'Otra (demo)',
 ].map((label) => ({ value: label, label }));
 
+export const productionNationalityOptions: SearchableOption[] = [
+  'Salvadoreña',
+  'Guatemalteca',
+  'Hondureña',
+  'Nicaragüense',
+  'Costarricense',
+  'Panameña',
+  'Mexicana',
+  'Estadounidense',
+  'Canadiense',
+  'Colombiana',
+  'Venezolana',
+  'Peruana',
+  'Ecuatoriana',
+  'Española',
+  'Otra',
+].map((label) => ({ value: label, label }));
+
 export const companyOptions: SearchableOption[] = [
   'Empresa demo',
   'Organización sintética QA',

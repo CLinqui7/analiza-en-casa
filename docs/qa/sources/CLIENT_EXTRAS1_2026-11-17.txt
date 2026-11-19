@@ -1,0 +1,14 @@
+Fuente: extras1parte_.docx
+SHA256: 312251e0d04734dacee22dcb9891367aaa769f8818246297025e70cf7e6ac316
+Extracción literal de párrafos; documento original sin modificaciones.
+
+Analiza en Casa – Pendientes – 17 de noviembre de 2026
+Pendientes del documento Variaciones del sistema (Flujo nuevo)
+Acciones — General
+Clínico → Cotizaciones
+Responsable administrativo: al crear una nueva cotización, todavía no aparece por default el usuario. Las veces que llegó a aparecer, desaparecía al escribir en otro campo.
+Clínico → Precotización (nueva ventana)
+Al dar clic en "Asignar a una cotización", no aparecen las cotizaciones del cliente seleccionado (se probó con un paciente de ejemplo y no salió ninguna). Verificar.
+Recordatorio: al dar "Guardar" se debe actualizar la cotización original (no crear una nueva) y actualizar esa misma cotización en Financiero → Cuentas por cobrar.
+Inventario y compras → Existencias → Proveedores
+Mejorar la vista: los proveedores hoy se muestran como tarjetas; deben mostrarse en tabla, como estaba anteriormente.

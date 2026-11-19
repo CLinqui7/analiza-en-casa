@@ -10,17 +10,23 @@ const repository = await readFile(
   new URL('../apps/web/src/server/persistence/postgres.ts', import.meta.url),
   'utf8',
 );
+const receipt = await readFile(
+  new URL('../apps/web/src/server/persistence/postgres-purchase-receipt.ts', import.meta.url),
+  'utf8',
+);
 
 test('purchase destinations remain tenant scoped and historical drafts stay unassigned', () => {
   assert.match(migration, /ADD COLUMN warehouse_id text/);
   assert.match(migration, /FOREIGN KEY \(organization_id,warehouse_id\)/);
   assert.match(migration, /REFERENCES analiza\.warehouses\(organization_id,id\)/);
   assert.match(migration, /warehouse_id IS NULL AND NOT body \? 'warehouseId'/);
-  const create = repository.slice(
-    repository.indexOf("if (command.command === 'purchase.create' || command.command === 'purchase.update')"),
+  const update = repository.slice(
+    repository.indexOf("if (command.command === 'purchase.update')"),
     repository.indexOf("if (command.command === 'inventory.record')"),
   );
-  assert.match(create, /status='ACTIVE'/);
-  assert.match(create, /purchase\.warehouseId/);
-  assert.match(create, /INSERT INTO analiza\.purchases\(organization_id,id,warehouse_id,body\)/);
+  assert.match(update, /status='ACTIVE'/);
+  assert.match(update, /purchase\.warehouseId/);
+  assert.match(receipt, /SELECT id,status FROM analiza\.warehouses WHERE organization_id=\$1/);
+  assert.match(receipt, /status !== 'ACTIVE'/);
+  assert.match(receipt, /INSERT INTO analiza\.purchases\(organization_id,id,warehouse_id,body\)/);
 });

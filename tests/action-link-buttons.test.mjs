@@ -31,7 +31,7 @@ test('primary workspace actions render as buttons instead of bare text links', a
 
   assert.match(
     quotes,
-    /className="action-link-button action-link-button--compact"[\s\S]*?data-action-id="QUOTE-DETAIL-NAVIGATE"[\s\S]*?Consultar/,
+    /className="action-link-button action-link-button--compact"[\s\S]*?data-action-id="QUOTE-DETAIL-NAVIGATE"[\s\S]*?Editar/,
   );
   assert.match(dashboard, /className="action-link-button action-link-button--compact"/);
   assert.match(

@@ -109,7 +109,9 @@ export default function ServicesCatalogPage() {
               {services.map((item) => (
                 <tr key={item.id}>
                   <td>
-                    <Link href="/catalogs">Administrar</Link>
+                    <Link className="action-link-button" href="/catalogs">
+                      Administrar
+                    </Link>
                   </td>
                   <td>{item.sku}</td>
                   <td>{item.name}</td>

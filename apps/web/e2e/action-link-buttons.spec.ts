@@ -29,13 +29,13 @@ async function expectVisibleButton(link: Locator) {
   expect(appearance.textDecoration).toBe('none');
 }
 
-test('Consultar and the equivalent workspace actions are visible, functional buttons', async ({
+test('Editar and the equivalent workspace actions are visible, functional buttons', async ({
   page,
 }) => {
   await login(page);
 
   await page.goto('/quotes');
-  const quoteAction = page.getByRole('link', { name: 'Consultar', exact: true }).first();
+  const quoteAction = page.getByRole('link', { name: 'Editar', exact: true }).first();
   await expectVisibleButton(quoteAction);
   await quoteAction.click();
   await expect(page).toHaveURL(/\/quotes\/[^/?#]+$/);

@@ -75,7 +75,7 @@ export async function mongoPersistence(): Promise<Persistence> {
         can(session.role, 'patients:read')
           ? new MongoPatientRepository(database.collection('patients')).listWithVersions(session)
           : Promise.resolve([]),
-        can(session.role, 'settings:write')
+        can(session.role, 'doctors:read')
           ? new MongoDoctorRepository(database.collection('doctors')).listWithVersions(session)
           : Promise.resolve([]),
         can(session.role, 'cases:read')

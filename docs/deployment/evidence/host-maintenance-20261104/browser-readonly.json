@@ -1,0 +1,1054 @@
+{
+  "results": [
+    {
+      "path": "/agenda",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/audit",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/changes",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/dashboard",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/doctors",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/feedback",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/help",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/hospitalizations",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/import",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/insurance",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/insurers",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/inventory",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/nursing-team",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/onboarding",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/patients",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/payables",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/payments",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/profile",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/purchase-orders",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/purchases",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/quotes",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/receivables",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/sales",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/supply-requests",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/surveys",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/tutorial",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/analytics/logins",
+      "access": "restricted",
+      "widths": []
+    },
+    {
+      "path": "/catalogs/clinical",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs/discounts",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs/fees",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs/medical-visitors",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs/medications",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs/operational",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs/services",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs/studies",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/catalogs/supplies",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/administrations",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/balance",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/care-plans",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/document-versions",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/evolutions",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/hospitalizations",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/medication-cards",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/nursing",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/orders",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/clinical/reports",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/inventory/home-deliveries",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/inventory/kardex",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/inventory/movements",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/home-visits",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/nurse-hours",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/other",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/returns",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/visits-goals",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/patients/patient-synthetic-qa-mvqrf3fl",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/hospitalizations/case-synthetic-clinical-release",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    },
+    {
+      "path": "/quotes/billing-synthetic-release-1793779852509-v2",
+      "access": "available",
+      "widths": [
+        {
+          "width": 1440,
+          "overflow": 0
+        },
+        {
+          "width": 768,
+          "overflow": 0
+        },
+        {
+          "width": 390,
+          "overflow": 0
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

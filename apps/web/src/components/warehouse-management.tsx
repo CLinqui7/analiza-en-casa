@@ -245,6 +245,7 @@ export function WarehouseManagement({
 }
 
 export function InventoryTransferDialog({
+  selected,
   open,
   onClose,
   warehouses,
@@ -256,6 +257,7 @@ export function InventoryTransferDialog({
   execute,
   refreshWorkspace,
 }: {
+  selected: { itemId: string; warehouseId: string };
   open: boolean;
   onClose: () => void;
   warehouses: Warehouse[];
@@ -268,14 +270,13 @@ export function InventoryTransferDialog({
   refreshWorkspace: () => Promise<boolean>;
 }) {
   const activeWarehouses = warehouses.filter((warehouse) => warehouse.status === 'ACTIVE');
-  const inventoryItems = items.filter(
-    (item) =>
-      item.status === 'ACTIVE' &&
-      ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category ?? ''),
-  );
+  const { itemId, warehouseId: sourceWarehouseId } = selected;
+  const item = items.find((candidate) => candidate.id === itemId);
   const [formError, setFormError] = useState<string | null>(null);
-  const [sourceWarehouseId, setSourceWarehouseId] = useState('');
-  const [itemId, setItemId] = useState('');
+  const [request] = useState(() => ({
+    id: crypto.randomUUID(),
+    occurredAt: new Date().toISOString(),
+  }));
   const available = useMemo(
     () =>
       itemId && sourceWarehouseId
@@ -286,14 +287,12 @@ export function InventoryTransferDialog({
   );
 
   async function transfer(formData: FormData) {
-    const source = String(formData.get('sourceWarehouseId') ?? '');
+    const source = sourceWarehouseId;
     const destination = String(formData.get('destinationWarehouseId') ?? '');
-    const selectedItem = String(formData.get('itemId') ?? '');
+    const selectedItem = itemId;
     const quantity = Number(formData.get('quantity'));
-    const reason = String(formData.get('reason') ?? '').trim();
-    const reference = String(formData.get('reference') ?? '').trim();
-    if (!selectedItem || !source || !destination || source === destination || !reason) {
-      setFormError('Seleccione un ítem, dos bodegas distintas e indique el motivo.');
+    if (!selectedItem || !source || !destination || source === destination) {
+      setFormError('Seleccione una bodega de destino diferente del origen.');
       return;
     }
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > available) {
@@ -302,7 +301,7 @@ export function InventoryTransferDialog({
       );
       return;
     }
-    const id = crypto.randomUUID();
+    const { id, occurredAt } = request;
     const payload: WarehouseTransfer = {
       id,
       idempotencyKey: id,
@@ -310,15 +309,12 @@ export function InventoryTransferDialog({
       sourceWarehouseId: source,
       destinationWarehouseId: destination,
       quantity,
-      reason,
-      reference: reference || undefined,
-      occurredAt: new Date().toISOString(),
+      reason: 'Traslado entre bodegas',
+      occurredAt,
     };
     if (await execute({ command: 'inventory.transfer', transfer: payload })) {
       await refreshWorkspace();
       setFormError(null);
-      setSourceWarehouseId('');
-      setItemId('');
       onClose();
     }
   }
@@ -343,35 +339,14 @@ export function InventoryTransferDialog({
       <form action={transfer} className="form-grid" id="inventory-transfer-form">
         <label className="full-field">
           Ítem
-          <select
-            name="itemId"
-            onChange={(event) => setItemId(event.target.value)}
-            required
-            value={itemId}
-          >
-            <option value="">Seleccione…</option>
-            {inventoryItems.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.sku} · {item.name}
-              </option>
-            ))}
-          </select>
+          <input readOnly value={item ? `${item.sku} · ${item.name}` : itemId} />
         </label>
         <label>
           Bodega de origen
-          <select
-            name="sourceWarehouseId"
-            onChange={(event) => setSourceWarehouseId(event.target.value)}
-            required
-            value={sourceWarehouseId}
-          >
-            <option value="">Seleccione…</option>
-            {activeWarehouses.map((warehouse) => (
-              <option key={warehouse.id} value={warehouse.id}>
-                {warehouse.name}
-              </option>
-            ))}
-          </select>
+          <input
+            readOnly
+            value={warehouses.find((w) => w.id === sourceWarehouseId)?.name ?? sourceWarehouseId}
+          />
           <span className="field-help">Disponible: {available}</span>
         </label>
         <label>
@@ -390,14 +365,6 @@ export function InventoryTransferDialog({
         <label>
           Cantidad
           <input max={Math.max(available, 1)} min="1" name="quantity" required type="number" />
-        </label>
-        <label>
-          Referencia (opcional)
-          <input maxLength={200} name="reference" />
-        </label>
-        <label className="full-field">
-          Motivo
-          <input maxLength={500} name="reason" required />
         </label>
         {formError ? <p className="field-error full-field">{formError}</p> : null}
         {!formError && error ? <p className="field-error full-field">{error}</p> : null}

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { Quote } from '@analiza/contracts';
-import { quoteCatalogPriceError } from './quote-catalog-policy';
+import {
+  quoteCatalogPriceError,
+  quoteDoctorIds,
+  quoteDoctorSelectionError,
+} from './quote-catalog-policy';
 
 const base: Quote = {
   id: 'quote-policy',
@@ -28,7 +32,36 @@ const base: Quote = {
   createdAt: new Date(0).toISOString(),
 };
 
+it('keeps request provenance when revising an existing line and only accepts new additional lines via fulfillment', () => {
+  const additional = { ...base, items: [{ ...base.items[0], id: 'supply-request-synthetic' }] };
+  expect(quoteCatalogPriceError(additional, [], [], base)).toMatch(/Precotización/);
+  expect(quoteCatalogPriceError(additional, [], [], additional)).toBeNull();
+  const replaced = {
+    ...additional,
+    items: [{ ...additional.items[0], inventoryItemId: 'another-item' }],
+  };
+  expect(quoteCatalogPriceError(replaced, [], [], additional)).toMatch(/Precotización/);
+});
+
 describe('quote catalog price policy', () => {
+  it('requires both selected doctors in the scoped directory even without fee lines', () => {
+    const quote = {
+      ...base,
+      primaryDoctorId: 'primary',
+      secondaryDoctorId: 'secondary',
+      items: [],
+    };
+    expect(quoteDoctorIds(quote)).toEqual(['primary', 'secondary']);
+    expect(quoteDoctorSelectionError(quote, [{ id: 'primary' }])).toContain('organización');
+    expect(quoteCatalogPriceError(quote, [], [{ id: 'secondary' }])).toContain('organización');
+    expect(quoteCatalogPriceError(quote, [], [{ id: 'primary' }, { id: 'secondary' }])).toBeNull();
+    expect(
+      quoteDoctorSelectionError(
+        { ...quote, primaryDoctorId: undefined, secondaryDoctorId: undefined },
+        [],
+      ),
+    ).toBeNull();
+  });
   const catalog = [
     {
       id: 'catalog-1',

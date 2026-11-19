@@ -1,20 +1,22 @@
 'use client';
 
-import {
-  calculateQuoteBalance,
-  canEditQuote,
-  quoteCategories,
-  quoteDisplayCode,
-} from '@analiza/domain';
+import { canEditQuote, quoteCategories, quoteDisplayCode } from '@analiza/domain';
 import { Button, EmptyState, Panel } from '@analiza/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
+import { QuoteLineOrigin } from '@/components/quote-line-origin';
 import { usdAmountInSpanishWords } from '@/lib/money-in-words';
+import { balanceForQuote, receivableAccounts } from '@/lib/receivables';
+import {
+  quoteDecisionReasonLabels,
+  quoteDecisionSchema,
+  type QuoteDecision,
+} from '@/lib/quote-decision';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 type PortalShare = {
@@ -27,12 +29,38 @@ type PortalShare = {
 export default function QuoteDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { patients, payments, providerMode, quotes, sendQuote } = useWorkspace();
+  const { patients, payments, providerMode, quotes } = useWorkspace();
   const { can } = useAuth();
   const [message, setMessage] = useState<string | null>(null);
   const [portalShare, setPortalShare] = useState<PortalShare | null>(null);
   const [creatingPortal, setCreatingPortal] = useState(false);
+  const [decisions, setDecisions] = useState<QuoteDecision[]>([]);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [decisionFor, setDecisionFor] = useState<string | null>(null);
+  const decisionReady = providerMode !== 'postgresql' || decisionFor === id;
   const quote = quotes.find((candidate) => candidate.id === id);
+  const quoteExists = Boolean(quote);
+  useEffect(() => {
+    if (providerMode !== 'postgresql' || !quoteExists) return;
+    let active = true;
+    void fetch(`/api/quotes/${encodeURIComponent(id)}/decision`, { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        const payload = (await response.json()) as { decisions: unknown[] };
+        const checked = payload.decisions.map((entry) => quoteDecisionSchema.parse(entry));
+        if (active) {
+          setDecisions(checked);
+          setDecisionFor(id);
+          setDecisionError(null);
+        }
+      })
+      .catch(() => {
+        if (active) setDecisionError('No se pudo cargar el historial de decisiones.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [id, providerMode, quoteExists]);
   if (!quote)
     return (
       <main className="page-stack">
@@ -47,7 +75,7 @@ export default function QuoteDetailPage() {
     );
   const currentQuote = quote;
   const patient = patients.find((candidate) => candidate.id === currentQuote.patientId);
-  const balance = calculateQuoteBalance(currentQuote, payments);
+  const balance = balanceForQuote(currentQuote, receivableAccounts(quotes, payments), payments);
   const whatsappPhone = patient?.phone?.replace(/\D/g, '') ?? '';
   const whatsappAllowed = Boolean(
     whatsappPhone && patient?.notifications?.botmakerConsent === true,
@@ -60,13 +88,8 @@ export default function QuoteDetailPage() {
     )
     .slice()
     .sort((a, b) => a.version - b.version);
-  const editable = can('quotes:write') && canEditQuote(currentQuote);
-  async function send() {
-    const saved = await sendQuote(currentQuote.id);
-    if (saved) {
-      setMessage('La versión se marcó como enviada e inmutable.');
-    }
-  }
+  const openLatest = decisionReady && !decisions.length && history.at(-1)?.id === quote.id;
+  const editable = can('quotes:write') && canEditQuote(currentQuote) && openLatest;
   async function createPortalShare() {
     setCreatingPortal(true);
     setMessage(null);
@@ -139,7 +162,7 @@ export default function QuoteDetailPage() {
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Facturación</p>
-          <h1 title={quote.id}>{quoteDisplayCode(quote.id)}</h1>
+          <h1 title={historyRoot}>{quoteDisplayCode(historyRoot)}</h1>
           <p>
             Versión v{quote.version} ·{' '}
             {quote.immutable ? 'Enviada e inmutable' : 'Borrador editable'}
@@ -155,18 +178,13 @@ export default function QuoteDetailPage() {
               Editar borrador
             </Button>
           ) : null}
-          {quote.immutable && can('quotes:write') ? (
+          {quote.immutable && can('quotes:write') && openLatest ? (
             <Button
               data-action-id="QUOTE-REVISE"
               onClick={() => router.push(`/quotes?revise=${quote.id}`)}
               type="button"
             >
-              Revisar / nueva versión
-            </Button>
-          ) : null}
-          {editable ? (
-            <Button data-action-id="QUOTE-SEND" onClick={() => void send()} type="button">
-              Enviar versión
+              Editar cotización
             </Button>
           ) : null}
           <Button
@@ -199,10 +217,55 @@ export default function QuoteDetailPage() {
           ) : null}
         </div>
       </header>
+      {quote.immutable && can('quotes:write') && openLatest ? (
+        <p className="field-help no-print">
+          Use «Editar cotización» para añadir o quitar productos. Al guardar se actualizará la misma
+          cotización y su cuenta por cobrar; la versión anterior quedará en el historial.
+        </p>
+      ) : null}
       {message ? (
         <p className="notice" role="status">
           {message}
         </p>
+      ) : null}
+      {providerMode === 'postgresql' ? (
+        <Panel>
+          <h2>Aprobación del servicio</h2>
+          <p className="field-help">
+            La decisión se registra por versión; cada cambio conserva su historial. No altera el
+            total ni la versión enviada.
+          </p>
+          <p>
+            Estado actual:{' '}
+            <strong>
+              {decisions[0]
+                ? decisions[0].decision === 'APPROVED'
+                  ? 'Aprobado'
+                  : `No aprobado · ${quoteDecisionReasonLabels[decisions[0].reason!] ?? decisions[0].reason}`
+                : 'Sin decisión registrada'}
+            </strong>
+          </p>
+          {decisionError ? (
+            <p className="notice danger" role="alert">
+              {decisionError}
+            </p>
+          ) : null}
+          {decisions.length > 1 ? (
+            <details>
+              <summary>Historial de decisiones ({decisions.length})</summary>
+              <ul>
+                {decisions.map((entry) => (
+                  <li key={entry.id}>
+                    {new Date(entry.createdAt).toLocaleString('es-SV')} ·{' '}
+                    {entry.decision === 'APPROVED'
+                      ? 'Aprobado'
+                      : `No aprobado: ${quoteDecisionReasonLabels[entry.reason!] ?? entry.reason}`}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
+        </Panel>
       ) : null}
       <div className="two-column">
         <Panel>
@@ -272,6 +335,7 @@ export default function QuoteDetailPage() {
                       <th>Precio</th>
                       <th>Descuento</th>
                       <th>Subtotal</th>
+                      <th>Motivo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -304,6 +368,9 @@ export default function QuoteDetailPage() {
                         <td>{money(item.unitPrice)}</td>
                         <td>{money(item.discountAmount)}</td>
                         <td>{money(item.quantity * item.unitPrice - item.discountAmount)}</td>
+                        <td>
+                          <QuoteLineOrigin id={item.id} />
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -317,6 +384,12 @@ export default function QuoteDetailPage() {
       <div className="two-column">
         <Panel>
           <h2>Resumen financiero</h2>
+          {balance.version !== null ? (
+            <p className="field-help">
+              El total corresponde a esta versión. Los pagos y el saldo de la cuenta corresponden a
+              la última versión enviada (v{balance.version}) y se comparten entre sus revisiones.
+            </p>
+          ) : null}
           <dl className="definition-list">
             <div>
               <dt>Subtotal</dt>
@@ -343,11 +416,11 @@ export default function QuoteDetailPage() {
               <dd>{money(quote.patientAmount)}</dd>
             </div>
             <div>
-              <dt>Pagado</dt>
+              <dt>Pagado en la cuenta</dt>
               <dd>{money(balance.paid)}</dd>
             </div>
             <div>
-              <dt>Saldo</dt>
+              <dt>{balance.version === null ? 'Saldo estimado' : 'Saldo actual de cuenta'}</dt>
               <dd>{money(balance.balance)}</dd>
             </div>
           </dl>
@@ -369,7 +442,7 @@ export default function QuoteDetailPage() {
               <Button
                 className="button-secondary"
                 data-action-id="QUOTE-OPEN-PAYMENT"
-                onClick={() => router.push(`/payments?quote=${encodeURIComponent(quote.id)}`)}
+                onClick={() => router.push(`/receivables?quote=${encodeURIComponent(quote.id)}`)}
                 type="button"
               >
                 Abrir pagos

@@ -5,6 +5,8 @@ import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { buildShiftSeries, endForPreset, type ShiftPreset } from '@/lib/agenda-series';
+import { careSettingLabels, type CareSetting } from '@/lib/care-settings';
 
 function durationLabel(startDate: string, endDate?: string) {
   if (!endDate) return 'En curso';
@@ -83,10 +85,17 @@ function textMatches(value: string, query: string) {
 }
 
 export default function ClinicalHospitalizationsPage() {
-  const { hospitalizations, nursingResources, patients, quotes, updateHospitalization } =
-    useWorkspace();
-  const { can } = useAuth();
+  const {
+    addShiftSeries,
+    hospitalizations,
+    nursingResources,
+    patients,
+    shifts,
+    updateHospitalization,
+  } = useWorkspace();
+  const { can, session } = useAuth();
   const [query, setQuery] = useState('');
+  const [careSetting, setCareSetting] = useState<CareSetting | ''>('');
   const [columnFilters, setColumnFilters] =
     useState<Record<ClinicalColumn, string>>(emptyColumnFilters);
   const [careCaseId, setCareCaseId] = useState<string | null>(null);
@@ -94,32 +103,105 @@ export default function ClinicalHospitalizationsPage() {
   const [careNurseIds, setCareNurseIds] = useState<string[]>([]);
   const [careMessage, setCareMessage] = useState<string | null>(null);
   const [careSaving, setCareSaving] = useState(false);
+  const [scheduleResourceId, setScheduleResourceId] = useState('');
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleExtraDates, setScheduleExtraDates] = useState<string[]>([]);
+  const [scheduleNote, setScheduleNote] = useState('');
+  const [scheduleStart, setScheduleStart] = useState('08:00');
+  const [scheduleEnd, setScheduleEnd] = useState('16:00');
+  const [scheduleEndDayOffset, setScheduleEndDayOffset] = useState<0 | 1>(0);
+  const [scheduleShiftId, setScheduleShiftId] = useState(() => crypto.randomUUID());
+  const [scheduleRequestId, setScheduleRequestId] = useState(() => crypto.randomUUID());
   const careCase = hospitalizations.find((item) => item.id === careCaseId);
 
   function openCare(caseId: string) {
     const hospitalization = hospitalizations.find((item) => item.id === caseId);
     if (!hospitalization) return;
     setCareCaseId(caseId);
-    setCareDevices(hospitalization.devices?.join(', ') ?? '');
+    setCareDevices(hospitalization.patientHas ?? hospitalization.devices?.join(', ') ?? '');
     setCareNurseIds(hospitalization.assignedNursingResourceIds ?? []);
+    setScheduleResourceId('');
+    setScheduleDate(
+      new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/El_Salvador',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date()),
+    );
+    setScheduleStart('08:00');
+    setScheduleExtraDates([]);
+    setScheduleNote('');
+    setScheduleEnd('16:00');
+    setScheduleEndDayOffset(0);
+    setScheduleShiftId(crypto.randomUUID());
+    setScheduleRequestId(crypto.randomUUID());
     setCareMessage(null);
   }
 
   async function saveCare() {
     if (!careCase) return;
     setCareSaving(true);
+    setCareMessage(null);
+    let series: ReturnType<typeof buildShiftSeries> | null = null;
+    if (scheduleResourceId) {
+      try {
+        series = buildShiftSeries({
+          resourceId: scheduleResourceId,
+          patientId: careCase.patientId,
+          dates: [scheduleDate, ...scheduleExtraDates],
+          startTime: scheduleStart,
+          endTime: scheduleEnd,
+          endDayOffset: scheduleEndDayOffset,
+          status: 'SCHEDULED',
+          note: scheduleNote.trim() || `Ingreso clínico ${careCase.id}`,
+          existing: shifts,
+          idFor: (date) => `${scheduleShiftId}-${date}`,
+        });
+      } catch (error) {
+        setCareMessage(
+          error instanceof Error ? error.message : 'Revise la fecha y el horario del turno.',
+        );
+        setCareSaving(false);
+        return;
+      }
+    }
     const saved = await updateHospitalization({
       ...careCase,
-      devices: careDevices
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-      assignedNursingResourceIds: careNurseIds,
+      patientHas: careDevices.trim() || undefined,
+      assignedNursingResourceIds: scheduleResourceId
+        ? [...new Set([...careNurseIds, scheduleResourceId])]
+        : careNurseIds,
     });
+    if (saved && series) {
+      try {
+        if (!(await addShiftSeries(series, scheduleRequestId))) {
+          setCareMessage(
+            'La atención se guardó, pero el servidor no confirmó el turno. Revise Agenda antes de reintentar.',
+          );
+          setCareSaving(false);
+          return;
+        }
+      } catch (error) {
+        setCareMessage(
+          error instanceof Error
+            ? `La atención se guardó, pero el turno falló: ${error.message}. Revise Agenda antes de reintentar.`
+            : 'La atención se guardó, pero el turno falló. Revise Agenda antes de reintentar.',
+        );
+        setCareSaving(false);
+        return;
+      }
+    }
     setCareSaving(false);
     if (saved) {
-      setCareMessage('Atención clínica actualizada correctamente.');
+      setCareMessage(
+        series
+          ? 'Atención y turno guardados en Agenda.'
+          : 'Atención clínica actualizada correctamente.',
+      );
       setCareCaseId(null);
+    } else {
+      setCareMessage('No se pudo guardar la atención clínica.');
     }
   }
 
@@ -153,6 +235,7 @@ export default function ClinicalHospitalizationsPage() {
 
   const entries = hospitalizations.filter(
     (hospitalization) =>
+      (!careSetting || (hospitalization.careSetting ?? 'HOSPITALIZATION') === careSetting) &&
       (!query.trim() ||
         patientIds.has(hospitalization.patientId) ||
         hospitalization.id
@@ -165,7 +248,8 @@ export default function ClinicalHospitalizationsPage() {
   const activeCount = hospitalizations.filter((item) => !item.endDate).length;
   const completedCount = hospitalizations.length - activeCount;
   const filtersActive =
-    Boolean(query.trim()) || Object.values(columnFilters).some((value) => Boolean(value.trim()));
+    Boolean(careSetting || query.trim()) ||
+    Object.values(columnFilters).some((value) => Boolean(value.trim()));
 
   return (
     <div className="page-stack clinical-hospitalizations-page">
@@ -176,7 +260,7 @@ export default function ClinicalHospitalizationsPage() {
           </div>
           <div>
             <p className="eyebrow">Atención clínica</p>
-            <h1>Hospitalizaciones clínicas</h1>
+            <h1>Ingresos clínicos</h1>
             <p>
               Consulta cada caso, abre el expediente y administra la atención del equipo desde una
               sola vista.
@@ -201,6 +285,21 @@ export default function ClinicalHospitalizationsPage() {
 
       <Panel className="clinical-search-panel">
         <div className="clinical-search-row">
+          <label>
+            Tipo de ingreso
+            <select
+              data-action-id="CLINICAL-CARE-SETTING-FILTER"
+              value={careSetting}
+              onChange={(event) => setCareSetting(event.target.value as CareSetting | '')}
+            >
+              <option value="">Todos</option>
+              {Object.entries(careSettingLabels).map(([value, label]) => (
+                <option value={value} key={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="clinical-primary-search" htmlFor="clinical-case-search">
             <span aria-hidden="true">⌕</span>
             <span className="sr-only">Buscar hospitalización o paciente</span>
@@ -218,6 +317,7 @@ export default function ClinicalHospitalizationsPage() {
               className="button-secondary clinical-clear-filters"
               onClick={() => {
                 setQuery('');
+                setCareSetting('');
                 setColumnFilters(emptyColumnFilters);
               }}
               type="button"
@@ -292,7 +392,7 @@ export default function ClinicalHospitalizationsPage() {
         <div className="clinical-directory-heading">
           <div>
             <p className="eyebrow">Directorio clínico</p>
-            <h2>Casos hospitalizados</h2>
+            <h2>Ingresos registrados</h2>
             <p>Selecciona un caso para consultar su expediente o actualizar la atención.</p>
           </div>
           <StatusTag tone={activeCount ? 'warning' : 'neutral'}>
@@ -322,11 +422,6 @@ export default function ClinicalHospitalizationsPage() {
                   const patient = patients.find(
                     (candidate) => candidate.id === hospitalization.patientId,
                   );
-                  const quote = quotes.find(
-                    (candidate) =>
-                      candidate.caseId === hospitalization.id &&
-                      candidate.patientId === hospitalization.patientId,
-                  );
                   const isActive = !hospitalization.endDate;
                   return (
                     <tr key={hospitalization.id}>
@@ -344,6 +439,9 @@ export default function ClinicalHospitalizationsPage() {
                       <td>{patient?.documentId ?? 'No documentado'}</td>
                       <td>
                         <code className="clinical-case-code">{hospitalization.id}</code>
+                        <small className="care-setting-label">
+                          {careSettingLabels[hospitalization.careSetting ?? 'HOSPITALIZATION']}
+                        </small>
                       </td>
                       <td>
                         <StatusTag tone={patient?.triageStatus ? 'warning' : 'neutral'}>
@@ -368,7 +466,11 @@ export default function ClinicalHospitalizationsPage() {
                           <Link
                             className="clinical-table-action clinical-table-action-primary"
                             data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"
-                            href={`/hospitalizations/${hospitalization.id}`}
+                            href={
+                              session?.role === 'DOCTOR'
+                                ? `/clinical?case=${encodeURIComponent(hospitalization.id)}`
+                                : `/hospitalizations/${hospitalization.id}`
+                            }
                           >
                             Abrir
                           </Link>
@@ -381,17 +483,6 @@ export default function ClinicalHospitalizationsPage() {
                             >
                               Atención
                             </button>
-                          ) : null}
-                          {quote && can('quotes:read') ? (
-                            <Link
-                              className="clinical-table-action clinical-table-action-icon"
-                              data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"
-                              href={`/quotes/${quote.id}`}
-                              title="Ver cotización"
-                              aria-label="Ver cotización"
-                            >
-                              <span aria-hidden="true">$</span>
-                            </Link>
                           ) : null}
                         </div>
                       </td>
@@ -416,14 +507,14 @@ export default function ClinicalHospitalizationsPage() {
       ) : null}
 
       <Dialog
-        description="Registra los accesos del paciente y asigna las cuentas de enfermería responsables de la atención."
+        description="Documente la atención y, si corresponde, programe aquí el turno que aparecerá en Agenda."
         footer={
           <>
             <Button className="button-secondary" onClick={() => setCareCaseId(null)} type="button">
               Cancelar
             </Button>
             <Button disabled={careSaving} onClick={() => void saveCare()} type="button">
-              {careSaving ? 'Guardando…' : 'Guardar atención'}
+              {careSaving ? 'Guardando…' : 'Guardar'}
             </Button>
           </>
         }
@@ -431,17 +522,22 @@ export default function ClinicalHospitalizationsPage() {
         open={Boolean(careCase)}
         title={`Atención clínica${careCase ? ` · ${careCase.id}` : ''}`}
       >
-        <div className="form-grid" id="clinical-attention">
-          <label className="full">
-            Dispositivos / accesos
-            <input
+        {careMessage ? (
+          <p className="notice" role="status">
+            {careMessage}
+          </p>
+        ) : null}
+        <div className="form-grid clinical-attention-form" id="clinical-attention">
+          <label className="full-field">
+            Paciente ya cuenta con:
+            <textarea
+              data-action-id="CLINICAL-PATIENT-HAS"
               onChange={(event) => setCareDevices(event.target.value)}
-              placeholder="Ej.: catéter, sonda, acceso venoso"
+              rows={3}
               value={careDevices}
             />
-            <span className="field-help">Separe varios elementos con comas.</span>
           </label>
-          <fieldset className="full assignment-fieldset">
+          <fieldset className="full-field assignment-fieldset">
             <legend>Enfermeras asignadas para la atención</legend>
             <div className="assignment-option-grid">
               {nursingResources.map((resource) => (
@@ -449,13 +545,17 @@ export default function ClinicalHospitalizationsPage() {
                   <input
                     checked={careNurseIds.includes(resource.id)}
                     disabled={!resource.userId}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      if (event.target.checked && resource.userId)
+                        setScheduleResourceId(resource.id);
+                      if (!event.target.checked && scheduleResourceId === resource.id)
+                        setScheduleResourceId('');
                       setCareNurseIds((current) =>
                         event.target.checked
                           ? [...new Set([...current, resource.id])]
                           : current.filter((id) => id !== resource.id),
-                      )
-                    }
+                      );
+                    }}
                     type="checkbox"
                   />
                   <span>
@@ -467,6 +567,143 @@ export default function ClinicalHospitalizationsPage() {
             </div>
             {!nursingResources.length ? (
               <p className="field-help">Primero registre recursos en Equipo de enfermería.</p>
+            ) : null}
+          </fieldset>
+          <fieldset className="full-field assignment-fieldset">
+            <legend>Programar turno en Agenda</legend>
+            <label>
+              Enfermera
+              <select
+                data-action-id="CLINICAL-SCHEDULE-NURSE"
+                onChange={(event) => {
+                  const resourceId = event.target.value;
+                  setScheduleResourceId(resourceId);
+                  if (resourceId)
+                    setCareNurseIds((current) => [...new Set([...current, resourceId])]);
+                }}
+                value={scheduleResourceId}
+              >
+                <option value="">Sólo guardar atención, sin nuevo turno</option>
+                {nursingResources
+                  .filter((resource) => Boolean(resource.userId))
+                  .map((resource) => (
+                    <option key={resource.id} value={resource.id}>
+                      {resource.displayName}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            {scheduleResourceId ? (
+              <div className="form-grid form-grid-compact schedule-fields">
+                <div className="schedule-dates full-field">
+                  <label>
+                    Fecha 1
+                    <input
+                      data-action-id="CLINICAL-SCHEDULE-DATE"
+                      onChange={(event) => setScheduleDate(event.target.value)}
+                      type="date"
+                      value={scheduleDate}
+                    />
+                  </label>
+                  {scheduleExtraDates.map((date, index) => (
+                    <div className="schedule-date" key={index}>
+                      <label>
+                        Fecha {index + 2}
+                        <input
+                          aria-label={`Fecha ${index + 2}`}
+                          onChange={(event) =>
+                            setScheduleExtraDates((current) =>
+                              current.map((value, position) =>
+                                position === index ? event.target.value : value,
+                              ),
+                            )
+                          }
+                          type="date"
+                          value={date}
+                        />
+                      </label>
+                      <Button
+                        className="button-secondary"
+                        aria-label={`Quitar fecha ${index + 2}`}
+                        onClick={() =>
+                          setScheduleExtraDates((current) =>
+                            current.filter((_, position) => position !== index),
+                          )
+                        }
+                        type="button"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="full-field">
+                  <Button
+                    className="button-secondary"
+                    onClick={() => setScheduleExtraDates((current) => [...current, ''])}
+                    type="button"
+                  >
+                    Agregar fecha
+                  </Button>
+                </div>
+                <label>
+                  Turno
+                  <select
+                    data-action-id="CLINICAL-SCHEDULE-PRESET"
+                    defaultValue=""
+                    onChange={(event) => {
+                      if (!event.target.value) return;
+                      const end = endForPreset(
+                        scheduleDate,
+                        scheduleStart,
+                        event.target.value as ShiftPreset,
+                      );
+                      setScheduleEnd(end.endTime);
+                      setScheduleEndDayOffset(end.endDayOffset);
+                    }}
+                  >
+                    <option value="">Horario manual</option>
+                    <option value="SIX_HOURS">Turno 6 horas</option>
+                    <option value="EIGHT_HOURS">Turno 8 horas</option>
+                    <option value="TWELVE_HOURS">Turno 12 horas</option>
+                    <option value="TWENTY_FOUR_HOURS">Turno 24 horas</option>
+                  </select>
+                </label>
+                <label>
+                  Inicio
+                  <input
+                    data-action-id="CLINICAL-SCHEDULE-START"
+                    onChange={(event) => setScheduleStart(event.target.value)}
+                    type="time"
+                    value={scheduleStart}
+                  />
+                </label>
+                <label>
+                  Fin
+                  <input
+                    data-action-id="CLINICAL-SCHEDULE-END"
+                    onChange={(event) => setScheduleEnd(event.target.value)}
+                    type="time"
+                    value={scheduleEnd}
+                  />
+                </label>
+                <label className="checkbox-option">
+                  <input
+                    checked={scheduleEndDayOffset === 1}
+                    onChange={(event) => setScheduleEndDayOffset(event.target.checked ? 1 : 0)}
+                    type="checkbox"
+                  />{' '}
+                  Termina al día siguiente
+                </label>
+                <label className="full-field">
+                  Notas del turno
+                  <textarea
+                    onChange={(event) => setScheduleNote(event.target.value)}
+                    rows={2}
+                    value={scheduleNote}
+                  />
+                </label>
+              </div>
             ) : null}
           </fieldset>
         </div>

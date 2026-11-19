@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "sha": "2629daaa362d665080de9c52f5ba666d2bd6e7bd",
+  "checks": [
+    "Synthetic dependent and both private documents persist and download exact bytes",
+    "New inboxes, quote decisions and admissions respond through public authenticated APIs",
+    "Seven affected public pages render at desktop, tablet and mobile widths",
+    "Owner default, four admission filters, supplier relocation and no JavaScript errors"
+  ],
+  "syntheticOnly": true,
+  "patientId": "patient-synthetic-nov17-2629daaa",
+  "productionFinancialWrites": false
+}

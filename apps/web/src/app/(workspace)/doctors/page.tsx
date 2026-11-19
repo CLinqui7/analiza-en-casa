@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Doctor } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel } from '@analiza/ui';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { searchDoctors } from '@/lib/doctor-search';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
@@ -30,25 +31,49 @@ const optionalEmailSchema = z
 
 const doctorFormSchema = z.object({
   fullName: z.string().trim().min(1, 'Ingrese el nombre del médico.'),
+  medicalVisitorId: z.string().trim(),
   jvpm: z.string().trim(),
   conadem: z.string().trim(),
-  documentId: z.string().trim().min(1, 'Ingrese el DUI.'),
+  documentId: z.string().trim(),
+  birthDate: z.string().trim(),
   specialty: z.string().trim().min(1, 'Seleccione una especialidad o profesión.'),
+  referralCategory: z.enum(['NEW', 'RECURRENT'], {
+    error: 'Seleccione si el médico es nuevo o recurrente.',
+  }),
   phone: z.string().trim(),
+  landlinePhone: z.string().trim().min(1, 'Ingrese el teléfono fijo.'),
   email: optionalEmailSchema,
-  address: z.string().trim().min(1, 'Ingrese la dirección.'),
+  address: z.string().trim(),
+  clinicName: z.string().trim(),
+  nit: z.string().trim(),
+  consultationHours: z.string().trim(),
+  medicalVisitHours: z.string().trim(),
+  zone: z.string().trim(),
+  secretaryName: z.string().trim(),
+  secretaryBirthday: z.string().trim(),
 });
 type DoctorForm = z.infer<typeof doctorFormSchema>;
 
-const emptyDoctor: DoctorForm = {
+const emptyDoctor = {
   fullName: '',
+  medicalVisitorId: '',
   jvpm: '',
   conadem: '',
   documentId: '',
+  birthDate: '',
   specialty: '',
+  referralCategory: undefined,
   phone: '',
+  landlinePhone: '',
   email: '',
   address: '',
+  clinicName: '',
+  nit: '',
+  consultationHours: '',
+  medicalVisitHours: '',
+  zone: '',
+  secretaryName: '',
+  secretaryBirthday: '',
 };
 
 export default function DoctorsPage() {
@@ -68,11 +93,7 @@ export default function DoctorsPage() {
     defaultValues: emptyDoctor,
   });
   const mongoMode = isServerDataMode(providerMode);
-  const visibleDoctors = doctors.filter((doctor) =>
-    `${doctor.fullName} ${doctor.documentId} ${doctor.jvpm ?? ''} ${doctor.conadem ?? ''}`
-      .toLocaleLowerCase('es')
-      .includes(doctorQuery.trim().toLocaleLowerCase('es')),
-  );
+  const visibleDoctors = useMemo(() => searchDoctors(doctors, doctorQuery), [doctors, doctorQuery]);
 
   function closeDialog() {
     form.reset(emptyDoctor);
@@ -94,13 +115,24 @@ export default function DoctorsPage() {
     setActionError(null);
     form.reset({
       fullName: doctor.fullName,
+      medicalVisitorId: doctor.medicalVisitorId ?? '',
       jvpm: doctor.jvpm ?? '',
       conadem: doctor.conadem ?? '',
-      documentId: doctor.documentId,
+      documentId: doctor.documentId ?? '',
+      birthDate: doctor.birthDate ?? '',
       specialty: doctor.specialty,
+      referralCategory: doctor.referralCategory,
       phone: doctor.phone ?? '',
+      landlinePhone: doctor.landlinePhone ?? '',
       email: doctor.email ?? '',
-      address: doctor.address,
+      address: doctor.address ?? '',
+      clinicName: doctor.clinicName ?? '',
+      nit: doctor.nit ?? '',
+      consultationHours: doctor.consultationHours ?? '',
+      medicalVisitHours: doctor.medicalVisitHours ?? '',
+      zone: doctor.zone ?? '',
+      secretaryName: doctor.secretaryName ?? '',
+      secretaryBirthday: doctor.secretaryBirthday ?? '',
     });
     setAttachments(doctor.attachments);
     setEditingDoctor(doctor);
@@ -110,10 +142,22 @@ export default function DoctorsPage() {
     const doctor: Doctor = {
       id: editingDoctor?.id ?? crypto.randomUUID(),
       ...values,
+      medicalVisitorId: values.medicalVisitorId || undefined,
       jvpm: values.jvpm || undefined,
       conadem: values.conadem || undefined,
+      documentId: values.documentId || undefined,
+      birthDate: values.birthDate || undefined,
       phone: values.phone || undefined,
       email: values.email || undefined,
+      address: values.address || undefined,
+      clinicName: values.clinicName || undefined,
+      nit: values.nit || undefined,
+      consultationHours: values.consultationHours || undefined,
+      medicalVisitHours: values.medicalVisitHours || undefined,
+      zone: values.zone || undefined,
+      secretaryName: values.secretaryName || undefined,
+      secretaryBirthday: values.secretaryBirthday || undefined,
+      practiceLocations: editingDoctor?.practiceLocations,
       attachments: mongoMode ? [] : attachments,
     };
     const saved = editingDoctor ? await updateDoctor(doctor) : await addDoctor(doctor);
@@ -169,11 +213,6 @@ export default function DoctorsPage() {
           Los médicos y archivos en este modo son datos demo locales. No se presentan como
           integración compartida ni como almacenamiento privado.
         </p>
-      ) : mongoMode ? (
-        <p className="notice warning">
-          En Mongo, guarde primero el médico. Los adjuntos privados se cargan por bytes mediante la
-          ruta autorizada y no se registran sólo por nombre.
-        </p>
       ) : null}
       {result ? (
         <p className="notice success" role="status">
@@ -186,13 +225,16 @@ export default function DoctorsPage() {
         </p>
       ) : null}
       <label>
-        Buscar médico por nombre, DUI, JVPM o CONADEM
+        Buscar médico por nombre, DUI, JVPM, CONADEM, especialidad o clínica
         <input
           onChange={(event) => setDoctorQuery(event.target.value)}
           type="search"
           value={doctorQuery}
         />
       </label>
+      <p className="field-help" aria-live="polite">
+        {visibleDoctors.length} de {doctors.length} médicos
+      </p>
       {visibleDoctors.length ? (
         <Panel>
           <div className="table-wrap">
@@ -204,6 +246,9 @@ export default function DoctorsPage() {
                   <th>CONADEM</th>
                   <th>DUI</th>
                   <th>Especialidad / profesión</th>
+                  <th>Visitador médico</th>
+                  <th>Contacto</th>
+                  <th>Relación</th>
                   <th>Archivos</th>
                   <th>Acción</th>
                 </tr>
@@ -214,8 +259,25 @@ export default function DoctorsPage() {
                     <td>{doctor.fullName}</td>
                     <td>{doctor.jvpm || 'No registrado'}</td>
                     <td>{doctor.conadem || 'No registrado'}</td>
-                    <td>{doctor.documentId}</td>
+                    <td>{doctor.documentId || 'No registrado'}</td>
                     <td>{doctor.specialty}</td>
+                    <td>
+                      {operations.configuration.find(
+                        (entry) => entry.id === doctor.medicalVisitorId,
+                      )?.label ?? 'Sin asignar'}
+                    </td>
+                    <td>
+                      {doctor.landlinePhone ? <div>Fijo: {doctor.landlinePhone}</div> : null}
+                      {doctor.phone ? <div>Celular: {doctor.phone}</div> : null}
+                      {!doctor.landlinePhone && !doctor.phone ? 'Pendiente' : null}
+                    </td>
+                    <td>
+                      {doctor.referralCategory === 'RECURRENT'
+                        ? 'Recurrente'
+                        : doctor.referralCategory === 'NEW'
+                          ? 'Nuevo'
+                          : 'Sin clasificar'}
+                    </td>
                     <td>
                       {mongoMode && privateFiles[doctor.id]?.length
                         ? privateFiles[doctor.id].map((file) => (
@@ -262,7 +324,7 @@ export default function DoctorsPage() {
       <Dialog
         description={
           mongoMode
-            ? 'Guarde el médico antes de cargar archivos privados. Un nombre de archivo no acredita una carga.'
+            ? 'Complete los datos y seleccione los documentos que desea adjuntar al médico.'
             : 'Los archivos demo conservan únicamente nombre, tipo y tamaño; su contenido no se carga a un almacenamiento privado.'
         }
         footer={
@@ -283,6 +345,37 @@ export default function DoctorsPage() {
         open={isOpen}
         title={editingDoctor ? 'Editar médico' : 'Nuevo médico'}
       >
+        {editingDoctor?.practiceLocations?.length ? (
+          <details className="panel" style={{ marginBottom: '1rem' }}>
+            <summary>
+              Clínicas y contactos del directorio ({editingDoctor.practiceLocations.length})
+            </summary>
+            <p className="muted">
+              Estas ubicaciones se conservan al actualizar la ficha principal.
+            </p>
+            <div className="form-grid">
+              {editingDoctor.practiceLocations.map((location, index) => (
+                <section className="panel" key={location.id}>
+                  <h3>{location.clinicName || `Consulta ${index + 1}`}</h3>
+                  {location.specialty ? <p>{location.specialty}</p> : null}
+                  {location.address ? (
+                    <p style={{ whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>
+                      {location.address}
+                    </p>
+                  ) : null}
+                  {location.city || location.department ? (
+                    <p>{[location.city, location.department].filter(Boolean).join(' · ')}</p>
+                  ) : null}
+                  {location.landlinePhone ? <p>Teléfono fijo: {location.landlinePhone}</p> : null}
+                  {location.phone ? <p>Celular: {location.phone}</p> : null}
+                  {location.email ? (
+                    <p style={{ overflowWrap: 'anywhere' }}>Correo: {location.email}</p>
+                  ) : null}
+                </section>
+              ))}
+            </div>
+          </details>
+        ) : null}
         <form
           className="form-grid"
           id="doctor-form"
@@ -290,13 +383,32 @@ export default function DoctorsPage() {
           onSubmit={form.handleSubmit(submit)}
         >
           <label>
-            Nombre completo
+            Nombre completo (obligatorio)
             <input {...form.register('fullName')} />
             {form.formState.errors.fullName ? (
               <span className="field-error" role="alert">
                 {form.formState.errors.fullName.message}
               </span>
             ) : null}
+          </label>
+          <label>
+            Visitador médico a cargo
+            <select {...form.register('medicalVisitorId')} data-action-id="DOCTOR-MEDICAL-VISITOR">
+              <option value="">Sin asignar</option>
+              {operations.configuration
+                .filter((entry) => entry.category === 'MEDICAL_VISITOR' && entry.active)
+                .map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.label}
+                  </option>
+                ))}
+            </select>
+            <Link
+              className="action-link-button action-link-button--inline"
+              href="/catalogs/operational?category=MEDICAL_VISITOR"
+            >
+              Gestionar visitadores
+            </Link>
           </label>
           <label>
             JVPM (opcional)
@@ -312,13 +424,17 @@ export default function DoctorsPage() {
             <input {...form.register('conadem')} />
           </label>
           <label>
-            DUI
+            DUI (opcional)
             <input {...form.register('documentId')} />
             {form.formState.errors.documentId ? (
               <span className="field-error" role="alert">
                 {form.formState.errors.documentId.message}
               </span>
             ) : null}
+          </label>
+          <label>
+            Fecha de nacimiento (opcional)
+            <input {...form.register('birthDate')} type="date" />
           </label>
           <Controller
             control={form.control}
@@ -351,11 +467,39 @@ export default function DoctorsPage() {
             </span>
           ) : null}
           <label>
-            Teléfono
+            Relación del médico{' '}
+            <span className="required-marker" aria-label="obligatorio">
+              *
+            </span>
+            <select
+              {...form.register('referralCategory')}
+              data-action-id="DOCTOR-REFERRAL-CATEGORY"
+            >
+              <option value="">Seleccione</option>
+              <option value="NEW">Médico nuevo</option>
+              <option value="RECURRENT">Médico recurrente</option>
+            </select>
+            {form.formState.errors.referralCategory ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.referralCategory.message}
+              </span>
+            ) : null}
+          </label>
+          <label>
+            Teléfono celular (opcional)
             <input {...form.register('phone')} type="tel" />
           </label>
           <label>
-            Correo
+            Teléfono fijo (obligatorio)
+            <input {...form.register('landlinePhone')} type="tel" />
+            {form.formState.errors.landlinePhone ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.landlinePhone.message}
+              </span>
+            ) : null}
+          </label>
+          <label>
+            Correo (opcional)
             <input {...form.register('email')} type="email" />
             {form.formState.errors.email ? (
               <span className="field-error" role="alert">
@@ -364,13 +508,41 @@ export default function DoctorsPage() {
             ) : null}
           </label>
           <label>
-            Dirección
+            Dirección (opcional)
             <textarea {...form.register('address')} rows={3} />
             {form.formState.errors.address ? (
               <span className="field-error" role="alert">
                 {form.formState.errors.address.message}
               </span>
             ) : null}
+          </label>
+          <label>
+            Clínica (nombre, opcional)
+            <input {...form.register('clinicName')} />
+          </label>
+          <label>
+            NIT (opcional)
+            <input {...form.register('nit')} />
+          </label>
+          <label>
+            Horarios de consulta (opcional)
+            <textarea {...form.register('consultationHours')} rows={2} />
+          </label>
+          <label>
+            Horario de visita médica (opcional)
+            <textarea {...form.register('medicalVisitHours')} rows={2} />
+          </label>
+          <label>
+            Zona (opcional)
+            <input {...form.register('zone')} />
+          </label>
+          <label>
+            Nombre de la secretaria (opcional)
+            <input {...form.register('secretaryName')} />
+          </label>
+          <label>
+            Cumpleaños de la secretaria (opcional)
+            <input {...form.register('secretaryBirthday')} type="date" />
           </label>
           {!mongoMode ? (
             <label>

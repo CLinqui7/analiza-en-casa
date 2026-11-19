@@ -39,6 +39,7 @@ type FileAuditCollection = { insertOne(document: Record<string, unknown>): Promi
 
 export type FileOwnerLookup = {
   exists(actor: ServerActor, ownerType: FileOwnerType, ownerId: string): Promise<boolean>;
+  dependentExists?(actor: ServerActor, patientId: string, dependentId: string): Promise<boolean>;
 };
 
 const ownerPermissions: Record<FileOwnerType, { read: Permission; write: Permission }> = {
@@ -61,6 +62,8 @@ function publicMetadata(file: StoredFileMetadata): FileMetadata {
     mimeType: file.mimeType,
     size: file.size,
     sha256: file.sha256,
+    dependentId: file.dependentId,
+    documentKind: file.documentKind,
   });
 }
 
@@ -110,6 +113,11 @@ export class MongoFileRepository {
     if (!(await this.owners.exists(actor, upload.ownerType, upload.ownerId))) {
       throw new MongoInputError('El registro asociado no está disponible.');
     }
+    if (
+      upload.dependentId &&
+      !(await this.owners.dependentExists?.(actor, upload.ownerId, upload.dependentId))
+    )
+      throw new MongoInputError('El dependiente no pertenece a este paciente.');
     const id = randomUUID();
     const metadata: StoredFileMetadata = {
       id,
@@ -123,6 +131,8 @@ export class MongoFileRepository {
       storageKey: `private/${actor.organizationId}/${id}`,
       createdBy: actor.userId,
       createdAt: now,
+      dependentId: upload.dependentId,
+      documentKind: upload.documentKind,
     };
     await this.storage.putObject({ storageKey: metadata.storageKey, bytes: upload.bytes });
     await this.files.insertOne(metadata);
@@ -172,6 +182,15 @@ export function mongoFileOwnerLookup(database: {
   ): OwnerCollection;
 }): FileOwnerLookup {
   return {
+    async dependentExists(actor, patientId, dependentId) {
+      return Boolean(
+        await database.collection('patients').findOne({
+          id: patientId,
+          organizationId: actor.organizationId,
+          'dependents.id': dependentId,
+        }),
+      );
+    },
     async exists(actor, ownerType, ownerId) {
       const collection = database.collection(
         ownerType === 'patient'

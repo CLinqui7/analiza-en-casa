@@ -10,6 +10,7 @@ import {
 } from './mongo-auth';
 import { authorizationStatus, resourceStatus } from './http-auth';
 import { can } from '@/lib/permissions';
+import { createHash } from 'node:crypto';
 
 const syntheticPassword = ['synthetic', 'password'].join('-');
 const rejectedPassword = ['wrong', 'password'].join('-');
@@ -151,6 +152,48 @@ describe('Mongo authentication and authorization', () => {
     await expect(auth.requireCsrf(result.sessionToken, result.csrfToken)).resolves.toBeUndefined();
     await auth.logout(result.sessionToken);
     await expect(auth.requireSession(result.sessionToken)).rejects.toBeInstanceOf(SessionError);
+  });
+
+  // test-id: vitest:csrf-multitab-stability
+  it('keeps concurrent tab CSRF reads stable and rejects tokens belonging to another session', async () => {
+    const { auth, password } = await fixture();
+    const first = await auth.login({ email: 'user-a@example.test', password });
+    const tokens = await Promise.all(
+      Array.from({ length: 5 }, () => auth.getCsrf(first.sessionToken)),
+    );
+    expect(new Set(tokens)).toEqual(new Set([first.csrfToken]));
+    expect(first.csrfToken).not.toBe(first.sessionToken);
+    const second = await auth.login({ email: 'user-a@example.test', password });
+    expect(second.csrfToken).not.toBe(first.csrfToken);
+    await expect(auth.requireCsrf(second.sessionToken, first.csrfToken)).rejects.toBeInstanceOf(
+      CsrfError,
+    );
+    for (const invalid of [undefined, '', 'invalid', first.csrfToken.slice(1)]) {
+      await expect(auth.requireCsrf(first.sessionToken, invalid)).rejects.toBeInstanceOf(CsrfError);
+    }
+    await expect(auth.requireCsrf(first.sessionToken, tokens[0])).resolves.toBeUndefined();
+    await auth.logout(first.sessionToken);
+    await expect(auth.getCsrf(first.sessionToken)).rejects.toBeInstanceOf(SessionError);
+    await expect(auth.requireCsrf(first.sessionToken, tokens[0])).rejects.toBeInstanceOf(CsrfError);
+  });
+
+  it('preserves a pre-upgrade form token without rotating its stored hash or bypassing expiry', async () => {
+    const { auth, password, store } = await fixture();
+    const first = await auth.login({ email: 'user-a@example.test', password });
+    const legacyToken = 'synthetic-legacy-csrf';
+    const hash = createHash('sha256').update(legacyToken).digest('hex');
+    await store.updateSessionCsrf(first.session.id, hash);
+    const current = await auth.getCsrf(first.sessionToken);
+    expect((await store.findSession(first.session.id))?.csrfHash).toBe(hash);
+    await expect(auth.requireCsrf(first.sessionToken, legacyToken)).resolves.toBeUndefined();
+    await expect(auth.requireCsrf(first.sessionToken, current)).resolves.toBeUndefined();
+    const stored = (await store.findSession(first.session.id))!;
+    await store.createSession({ ...stored, expiresAt: new Date(0) });
+    await expect(auth.getCsrf(first.sessionToken)).rejects.toBeInstanceOf(SessionError);
+    await expect(auth.requireCsrf(first.sessionToken, legacyToken)).rejects.toBeInstanceOf(
+      CsrfError,
+    );
+    await expect(auth.requireCsrf(first.sessionToken, current)).rejects.toBeInstanceOf(CsrfError);
   });
 
   // test-id: vitest:m01-server-rate-and-generic-login

@@ -1,1 +1,5 @@
-export { default } from '../kardex/page';
+import { redirect } from 'next/navigation';
+
+export default function MovementsPage() {
+  redirect('/inventory/home-deliveries');
+}

@@ -2,7 +2,7 @@
 import { isServerDataMode } from '@/lib/data-mode';
 
 import { useCallback, useEffect, useState } from 'react';
-import { emptyOperations, type OperationsSnapshot } from '@analiza/contracts';
+import { emptyOperations, initialDiagnoses, type OperationsSnapshot } from '@analiza/contracts';
 import { useAuth } from '@/components/providers';
 import { mongoMutationHeaders } from './auth';
 import { demoOperationsConfiguration } from './demo-data';
@@ -71,8 +71,20 @@ export function useOperations() {
       setBusy(false);
     }
   };
-  const visibleData = connected
+  const visibleData: OperationsSnapshot = connected
     ? data
-    : { ...emptyOperations(), configuration: demoOperationsConfiguration };
+    : {
+        ...emptyOperations(),
+        configuration: [
+          ...demoOperationsConfiguration,
+          ...initialDiagnoses.map((label, index) => ({
+            id: `diagnosis-initial-${index + 1}`,
+            category: 'DIAGNOSIS' as const,
+            label,
+            active: true,
+            scaleIds: [],
+          })),
+        ],
+      };
   return { ...visibleData, error, busy, connected, loading, execute, reload };
 }

@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import type { Patient, Payment, Quote } from '@analiza/contracts';
 import { quoteCategories, quoteDisplayCode } from '@analiza/domain';
 import { usdAmountInSpanishWords } from './money-in-words';
+import { quoteLineOrigin } from './quote-line-origin';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 const safe = (value: string) =>
@@ -137,6 +138,7 @@ async function documentWithWriter(title: string, logoBytes?: Uint8Array) {
       } else line = next;
     }
     lines.push(line);
+    lines.push(`Motivo: ${quoteLineOrigin(item.id)}`);
     const height = Math.max(28, lines.length * 12 + 12);
     if (ensureSpace(height)) quoteTableHeader();
     if (index % 2 === 1)
@@ -232,7 +234,9 @@ export async function buildQuotePdf(
     logoBytes,
   );
   write('No es factura ni documento fiscal.', { bold: true, gap: 22 });
-  write(`Referencia: ${quoteDisplayCode(quote.id)} · versión ${quote.version}`);
+  write(
+    `Referencia: ${quoteDisplayCode(quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id)} · versión ${quote.version}`,
+  );
   write(`Paciente: ${patient?.fullName ?? 'No disponible'}`);
   write(`Fecha de envío: ${presentation.sentDate}`);
   write(`Condición de pago: ${presentation.paymentCondition}`);
@@ -270,7 +274,9 @@ export async function buildPaymentReceiptPdf(
   const { document, write, finish } = await documentWithWriter('Comprobante interno de pago');
   write('No es factura ni documento fiscal.', { bold: true, gap: 22 });
   write(`Pago: ${payment.id}`);
-  write(`Cotización: ${quoteDisplayCode(quote.id)} · versión ${quote.version}`);
+  write(
+    `Cotización: ${quoteDisplayCode(quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id)} · versión ${quote.version}`,
+  );
   write(`Paciente: ${patient?.fullName ?? 'No disponible'}`);
   write(`Fecha: ${new Date(payment.createdAt).toLocaleString('es-SV')}`);
   write(`Monto: ${money(payment.amount)}`, { bold: true });
@@ -321,7 +327,7 @@ export async function buildPatientStatementPdf(
   const roots = new Set(accounts.map((account) => quoteRoot(account.quote)));
   for (const account of accounts) {
     write(
-      `${new Date(account.quote.sentAt ?? account.quote.createdAt).toLocaleDateString('es-SV')} · ${quoteDisplayCode(account.quote.id)} v${account.quote.version} · cargo ${money(account.responsibility)}`,
+      `${new Date(account.quote.sentAt ?? account.quote.createdAt).toLocaleDateString('es-SV')} · ${quoteDisplayCode(account.quote.rootQuoteId ?? account.quote.originalQuoteId ?? account.quote.id)} v${account.quote.version} · cargo ${money(account.responsibility)}`,
       { bold: true },
     );
     const relatedPayments = payments.filter((payment) => {

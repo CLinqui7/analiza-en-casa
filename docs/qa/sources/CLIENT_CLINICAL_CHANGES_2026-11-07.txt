@@ -1,0 +1,25 @@
+Analiza en Casa – 7 de noviembre de 2026 
+Correcciones a la parte clínica 
+Correcciones 
+Clínico → Expediente clínico → Abrir expediente 
+1. Impresión: además de imprimir el expediente completo, se debe poder elegir qué imprimir: 
+a. Una sección (por ejemplo, solo Acciones de enfermería). 
+b. Varias secciones a la vez, seleccionando dos o tres (por ejemplo, Acciones médicas y Acciones de 
+enfermería). 
+Clínico → Órdenes médicas → Acciones de enfermería → Tarjeta de medicamentos 
+1. Al crear la tarjeta y seleccionar la hospitalización, aparecen por default los medicamentos de la 
+cotización. Para cada medicamento se debe agregar: 
+a. Horas de aplicación (a la par del medicamento): se seleccionan una o varias horas según la 
+indicación. Ejemplo: si la ranitidina se aplica 3 veces al día, se registran las 3 horas. 
+b. Dilución (debajo del medicamento): cuadro de texto. 
+2. Al final, después de todos los medicamentos, se mantiene el cuadro de texto "Crónicos". 
+3. Las horas de aplicación pasan automáticamente a Administración de medicamentos, donde la enfermera 
+registra cada aplicación de cada medicamento en su hora. 
+Clínico → Órdenes médicas → Acciones de enfermería → Administración de medicamentos 
+1. La ventana se mantiene como está, con estos ajustes: 
+a. En los medicamentos de la administración, a la par de cada medicamento deben aparecer las 
+horas de aplicación registradas en la Tarjeta de medicamentos. 
+b. Detalles de administración se mantiene igual. 
+c. Cuando el medicamento aparece como "Sin registrar en esta atención" y se selecciona "Se 
+aplicó", quitar la sección de salida de inventario que aparece abajo: el sistema ya sabe por 
+default de dónde sale el artículo. 

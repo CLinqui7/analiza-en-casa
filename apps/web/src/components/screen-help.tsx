@@ -11,46 +11,16 @@ const guides: Array<{ path: string; guide: Guide }> = [
   {
     path: '/inventory/home-deliveries',
     guide: {
-      title: 'Entregas a domicilio',
+      title: 'Ubicación de equipo e instrumentos por paciente',
       steps: [
         {
-          title: 'Qué muestra esta pantalla',
+          title: 'Registrar préstamo',
+          detail: 'Seleccione el equipo, la bodega de origen, el paciente y la cantidad entregada.',
+        },
+        {
+          title: 'Registrar devolución',
           detail:
-            'Cada despacho quita unidades de la bodega y crea una custodia por paciente y dirección.',
-          target: '.studio-metrics',
-        },
-        {
-          title: 'Enviar insumos o medicamentos',
-          detail:
-            'Pulse Registrar despacho, elija paciente, dirección, artículo, bodega y cantidad. Guarde una referencia de entrega.',
-          target: '[data-action-id="HOME-DISPATCH-CREATE"]',
-        },
-        {
-          title: 'Cierre y devolución',
-          detail:
-            'Al recibir sobrantes, pulse Cerrar y recibir. Lo devuelto queda en cuarentena; no aumenta el stock disponible.',
-          target: '[data-action-id="HOME-DISPATCH-CLOSE"]',
-        },
-      ],
-    },
-  },
-  {
-    path: '/inventory/movements',
-    guide: {
-      title: 'Movimientos entre bodegas',
-      steps: [
-        {
-          title: 'Ubicaciones',
-          detail: 'Revise el artículo y la bodega de origen antes de mover unidades.',
-        },
-        {
-          title: 'Registrar traslado',
-          detail:
-            'Indique origen, destino, cantidad y referencia. El traslado se registra como una operación atómica.',
-        },
-        {
-          title: 'Verificar',
-          detail: 'Compruebe el movimiento en el Kárdex y las existencias por ubicación.',
+            'Seleccione el préstamo y las unidades que regresaron. Puede registrar una devolución parcial hasta completar la cantidad prestada.',
         },
       ],
     },
@@ -62,13 +32,12 @@ const guides: Array<{ path: string; guide: Guide }> = [
       steps: [
         {
           title: 'Existencias',
-          detail:
-            'El balance disponible proviene de los movimientos confirmados, no de la cantidad enviada a casas.',
+          detail: 'El saldo disponible refleja los movimientos confirmados por bodega.',
         },
         {
           title: 'Acciones',
           detail:
-            'Use Movimientos para bodegas y Entregas a domicilio para pacientes; son flujos distintos.',
+            'En la fila del ítem puede consultar sus movimientos o trasladar unidades a otra bodega.',
         },
         {
           title: 'Revisión',
@@ -265,9 +234,9 @@ const guides: Array<{ path: string; guide: Guide }> = [
     },
   },
   {
-    path: '/payments',
+    path: '/receivables',
     guide: {
-      title: 'Pagos',
+      title: 'Cuentas por cobrar',
       steps: [
         {
           title: 'Identificar saldo',
@@ -275,11 +244,33 @@ const guides: Array<{ path: string; guide: Guide }> = [
         },
         {
           title: 'Aplicar pago',
-          detail: 'Seleccione medio y guarde. Las referencias evitan aplicar pagos duplicados.',
+          detail:
+            'Seleccione medio y guarde. El sistema controla el saldo y evita aplicar el mismo comando dos veces.',
         },
         {
           title: 'Distinguir métricas',
           detail: 'Un cobro aplicado no se suma automáticamente como venta confirmada.',
+        },
+      ],
+    },
+  },
+  {
+    path: '/payments',
+    guide: {
+      title: 'Reporte de pagos',
+      steps: [
+        {
+          title: 'Consultar',
+          detail: 'Revise todos los pagos reportados, incluidos los reversados.',
+        },
+        {
+          title: 'Filtrar',
+          detail: 'Busque por paciente, cotización o referencia y acote por fecha o estado.',
+        },
+        {
+          title: 'Exportar',
+          detail:
+            'Descargue los registros visibles en CSV. Aplique o reverse pagos desde Cuentas por cobrar.',
         },
       ],
     },

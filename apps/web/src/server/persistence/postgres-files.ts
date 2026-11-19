@@ -60,6 +60,8 @@ type FileRow = {
   size: string;
   sha256: string;
   storage_key: string;
+  dependent_id: string | null;
+  document_kind: 'BIRTH_CERTIFICATE' | 'CONSENT' | null;
 };
 const metadata = (r: FileRow): FileMetadata => ({
   id: r.id,
@@ -69,6 +71,7 @@ const metadata = (r: FileRow): FileMetadata => ({
   mimeType: r.mime_type,
   size: Number(r.size),
   sha256: r.sha256,
+  ...(r.dependent_id ? { dependentId: r.dependent_id, documentKind: r.document_kind! } : {}),
 });
 const digest = (b: Uint8Array) => createHash('sha256').update(b).digest('hex');
 async function fileAudit(c: PoolClient, a: ServerActor, action: string, id: string) {
@@ -95,9 +98,22 @@ export function postgresFiles(
     },
     async upload(actor, rawInput) {
       const input = parseUpload(rawInput);
+      async function requireDependent(c: PoolClient) {
+        if (!input.dependentId) return;
+        const found = await c.query(
+          `SELECT 1 FROM analiza.patients WHERE organization_id=$1 AND id=$2
+           AND body->'dependents' @> $3::jsonb FOR SHARE`,
+          [actor.organizationId, input.ownerId, JSON.stringify([{ id: input.dependentId }])],
+        );
+        if (!found.rowCount)
+          throw new MongoInputError(
+            'El dependiente no pertenece a este paciente. Guarde sus datos antes de cargar documentos.',
+          );
+      }
       await transaction(pool, actor, async (c) => {
         if (!(await ownerAccess(c, actor, input.ownerType, input.ownerId, 'write')))
           throw new MongoInputError('El registro asociado no está disponible.');
+        await requireDependent(c);
       });
       // Never hold a SQL connection during a remote upload. Re-authorize before committing metadata.
       const id = randomUUID(),
@@ -107,9 +123,10 @@ export function postgresFiles(
       return transaction(pool, actor, async (c) => {
         if (!(await ownerAccess(c, actor, input.ownerType, input.ownerId, 'write')))
           throw new MongoInputError('El registro asociado no está disponible.');
+        await requireDependent(c);
         const row = (
           await c.query<FileRow>(
-            'INSERT INTO analiza.file_metadata(organization_id,id,owner_type,owner_id,storage_key,name,mime_type,size,sha256,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *',
+            'INSERT INTO analiza.file_metadata(organization_id,id,owner_type,owner_id,storage_key,name,mime_type,size,sha256,created_by,dependent_id,document_kind) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *',
             [
               actor.organizationId,
               id,
@@ -121,6 +138,8 @@ export function postgresFiles(
               input.bytes.length,
               sha,
               actor.userId,
+              input.dependentId ?? null,
+              input.documentKind ?? null,
             ],
           )
         ).rows[0];

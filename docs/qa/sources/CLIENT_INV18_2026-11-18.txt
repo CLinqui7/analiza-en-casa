@@ -1,0 +1,110 @@
+Página 1
+Acciones — 3. Inventario y compras
+1. Reordenar las ventanas de Inventario y compras
+A. Órdenes de compra (antes "Órdenes a proveedores")
+B. Compras
+C. Kárdex
+D. Existencias
+E. Ubicación de equipo e instrumentos por paciente (antes "Entregas a domicilio")
+F. Movimientos (se integra en una sola con Ubicación de equipo e instrumentos por paciente)
+G. Solicitudes de insumos (pasa a la parte Clínica)
+H. Pedidos recibidos (nueva ventana)
+2. Cambios por ventana
+A. Órdenes de compra
+1. Cambiar el nombre de la ventana "Órdenes a proveedores" por "Órdenes de compra".
+2. Al crear una nueva orden se mantienen los campos actuales (proveedor, producto, cantidad entera,
+etc.), con un cambio: el precio de referencia se carga por default desde el catálogo de productos.
+3. En la tabla (Número, Fecha, Proveedor, Producto, Total, PDF), la columna "PDF" se renombra a
+"Acciones", con estas opciones:
+a. Descargar PDF
+b. Editar orden de compra (agregar o quitar productos)
+c. Aprobada: al aprobarla, la orden pasa automáticamente a la ventana Compras
+B. Compras
+1. Quitar el botón "Nueva compra": las compras ya no se crean aquí, llegan desde las Órdenes de
+compra aprobadas.
+2. Modificar la columna "Acciones":
+a. Recibir líneas: abre la compra y permite editarla (por ejemplo, si en la orden se pidieron 5
+y llegaron 4, se corrige la cantidad). Al recibir, deben aparecer estos campos:
+• Cantidades: editables.
+• Bodega destino (selector): solo Bodega general Analiza en Casa y Botiquín
+Analiza.
+• Tipo de documento (selector): Factura, Nota de crédito o Crédito fiscal. Según el
+que se elija, se abre el campo para ingresar su número.
+• Vida útil del artículo: campo de texto.
+• Fecha de vencimiento: selector de fecha.
+• Lote: campo de texto.
+• Activo fijo: casilla/botón para marcar si el artículo es activo fijo.
+b. PDF: para descargar o imprimir la compra.
+c. Anular: anula la orden de compra; es obligatorio escribir el motivo.
+3. Al guardar la recepción (Recibir líneas):
+• Se registra automáticamente la entrada al inventario, que debe verse en el Kárdex.
+• La compra pasa automáticamente a Financiero → Cuentas por pagar.
+C. Kárdex
+1. Debe registrar todas las entradas y salidas que se hagan en el sistema.
+2. Verificar que todas las compras se estén guardando como entradas.
+3. En "Detalle del Kárdex":
+a. Agregar la columna "Paciente", con el nombre del paciente.
+
+Página 2
+b. En la columna "Responsable", cuando el movimiento venga de una compra, mostrar el
+número del documento (factura, nota de crédito o crédito fiscal).
+c. Quitar la columna "Referencia".
+4. Al registrar un nuevo movimiento:
+a. Quitar los campos "Referencia" y "Motivo".
+b. En "Tipo de movimiento" solo deben aparecer: Entrada, Salida y Devolución (quitar
+"Ajuste").
+D. Existencias
+1. Muestra el inventario actual.
+2. Quitar estas pestañas (mini ventanas): Acuses, Cierres, Kit de insumos, Movimientos,
+Comprometidos y Lotes.
+3. Se mantienen: Ítems, Proveedores y Bodegas.
+4. Ítems → columna "Acciones":
+a. Movimientos del ítem: se mantiene tal como está.
+b. Generar traslado (nueva): el cuadro de traslado que hoy está arriba se pasa a esta acción,
+con estos campos:
+• Ítem: se mantiene.
+• Bodega origen: aparece por default (la bodega donde está el ítem).
+• Bodega destino: selector, como está.
+• Cantidad: se mantiene.
+• Quitar los campos "Referencia" y "Motivo".
+5. Proveedores: al agregar un nuevo proveedor, debe pedir:
+a. Nombre de la empresa
+b. Contacto
+c. Teléfono
+d. Correo
+e. Dirección
+6. Bodegas: se mantiene tal como está.
+E. Ubicación de equipo e instrumentos por paciente (antes "Entregas a domicilio")
+1. Como se integra con Movimientos, esta ventana debe verse igual que la ventana actual de
+Movimientos.
+2. Columnas de la tabla:
+a. Se mantienen: Fecha, Ítem, Tipo, Cantidad y Bodega.
+b. Quitar Referencia / Motivo y Responsable.
+c. Agregar la columna "Paciente".
+3. En Ítem solo deben aparecer los productos del catálogo Equipo.
+4. El botón "Registrar movimiento" cambia a "Registrar nueva ubicación", con estos campos:
+a. Paciente (selector).
+b. Ítem (solo equipos).
+c. Bodega.
+d. Cantidad.
+e. Tipo de movimiento: solo aparece Devolución, porque el equipo se presta al paciente y
+siempre se devuelve.
+f. Quitar los campos "Referencia" y "Motivo".
+G. Solicitudes de insumos (pasa a la parte Clínica)
+1. Pasa a Clínico porque es lo que la enfermera solicita para el paciente.
+2. Al dar clic en "Nueva solicitud":
+a. Paciente (selector).
+
+Página 3
+b. Productos: se pueden agregar varios en una sola solicitud (medicamentos, insumos y/o
+equipos), para no generar muchas solicitudes por paciente.
+c. Cantidad por producto: a la par de cada producto (ej.: Abrilar → 1; Mesa mayo → 1).
+d. Prioridad: se mantiene.
+e. Nota logística (opcional): se mantiene.
+3. Al dar clic en "Enviar solicitud interna", la solicitud pasa a una nueva ventana en Clínico llamada
+"Precotización".
+
+Corrección de la captura del 18 de noviembre. Los conceptos de Precotización deben sumarse a la cotización aprobada, en las ocho categorías. Alternativa elegida: columna Motivo después de Acción. Original para los conceptos que ya estaban y Adicional para los añadidos desde Precotización.
+
+Solicitud del cliente: «cuando ellas pongan el precio en el catálogo, necesito que también se actualicen los insumos que quedaron en 0 en las cotizaciones y cuentas por cobrar, sin duplicar nada ni perder los pagos».
+Decisiones del cliente: «Registrar primero el préstamo y permitir “Devolución” solo contra unidades que ese paciente tiene». «Mantener aprobación financiera separada; recibir solo registra el inventario». «las 2» (solicitud clínica y revisión en Precotización).

@@ -88,13 +88,14 @@ export interface Persistence {
   };
   auth: Pick<
     AuthService,
-    'login' | 'register' | 'requireSession' | 'requireCsrf' | 'rotateCsrf' | 'logout'
+    'login' | 'register' | 'requireSession' | 'requireCsrf' | 'getCsrf' | 'logout'
   >;
   patients: EntityRepository<Patient, 'patient'>;
   doctors: EntityRepository<Doctor, 'doctor'>;
   hospitalizations: EntityRepository<Hospitalization, 'hospitalization'>;
   quotes: EntityRepository<Quote, 'quote'> & {
     send(actor: ServerActor, id: string, expectedVersion: number): Promise<Quote>;
+    reviseSent?(actor: ServerActor, id: string, input: unknown): Promise<Quote>;
   };
   shifts: {
     list(actor: ServerActor): Promise<Shift[]>;

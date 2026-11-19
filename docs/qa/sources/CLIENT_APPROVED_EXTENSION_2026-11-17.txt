@@ -1,0 +1,7 @@
+Confirmación del usuario · 17 de noviembre de 2026, El Salvador
+
+Pregunta: El documento prohíbe editar cotizaciones aprobadas, pero los insumos de enfermería pueden llegar después de aprobarlas. En Precotización, ¿permitimos añadir esos insumos a una cotización aprobada mediante una ampliación auditada, o sólo a cotizaciones en Borrador/Enviada?
+
+Respuesta literal: Permitir ampliación auditada de una aprobada
+
+Esta confirmación amplía NOV17-04 de parte1ana_.docx. Se conserva la prohibición de edición general y de ampliación de rechazadas. No autoriza borrar versiones, pagos, entregas ni modificar la decisión original.
